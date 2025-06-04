@@ -1,38 +1,34 @@
 import requests
 
-def test_chatbot():
-    """Tests the chatbot by sending sample queries."""
-    url = "http://localhost:8000/chat"
-    payloads = [
-        {
-            "query": "Tell me about Dagi's AI skills",
-            "session_id": "test123",
-            "user_name": "Alice"
-        },
-        {
-            "query": "Who is Dagi?",
-            "session_id": "test123",
-            "user_name": "Bob"
-        }
-    ]
-    for payload in payloads:
-        try:
-            response = requests.post(url, json=payload, timeout=10)
-            response.raise_for_status()  # Raise an error for bad status codes
-            data = response.json()
-            print(f"Query: {payload['query']}")
-            print(f"Status Code: {response.status_code}")
-            print(f"Response Data: {data}")
-            print(f"Response: {data.get('response', 'No response key in data')}\n")
-        except requests.exceptions.HTTPError as e:
-            print(f"Query: {payload['query']}")
-            print(f"HTTP Error: {e.response.status_code} - {e.response.text}\n")
-        except requests.exceptions.RequestException as e:
-            print(f"Query: {payload['query']}")
-            print(f"Request Error: {str(e)}\n")
-        except Exception as e:
-            print(f"Query: {payload['query']}")
-            print(f"General Error: {str(e)}\n")
+BASE_URL = "http://127.0.0.1:8000/chat"
 
-if __name__ == "__main__":
-    test_chatbot()
+# Test conversations for multiple users
+conversations = [
+    {
+        "session_id": "alice123",
+        "user_name": "Alice",
+        "queries": ["HI", "how are you", "Tell me about Dagi", "What projects?"]
+    },
+    {
+        "session_id": "bob456",
+        "user_name": "Bob",
+        "queries": ["I’m hiring", "What experience?"]
+    }
+]
+
+for convo in conversations:
+    print(f"\nTesting conversation for {convo['user_name']} (Session ID: {convo['session_id']})")
+    for query in convo["queries"]:
+        payload = {
+            "query": query,
+            "session_id": convo["session_id"],
+            "user_name": convo["user_name"]
+        }
+        print(f"\nQuery: {payload['query']}")
+        response = requests.post(BASE_URL, json=payload)
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Data: {response.json()}")
+        if response.status_code == 200:
+            print(f"Response: {response.json()['response']}")
+        else:
+            print("Response: Failed - See Response Data for details")
