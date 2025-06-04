@@ -1,5 +1,4 @@
 from langgraph.graph import StateGraph, END
-from .state import ChatState
 from .nodes import (
     receive_user_input,
     infer_user_role,
@@ -21,7 +20,7 @@ def create_chatbot_graph():
     Returns:
         Compiled graph ready for execution.
     """
-    graph = StateGraph(ChatState)
+    graph = StateGraph(dict)  # Use dict as the state type
 
     # Add nodes
     graph.add_node("receive_user_input", receive_user_input)
@@ -40,7 +39,7 @@ def create_chatbot_graph():
     graph.add_edge("receive_user_input", "infer_user_role")
     graph.add_conditional_edges(
         "infer_user_role",
-        lambda state: "set_professional_context" if state.is_recruiter else "set_visitor_context",
+        lambda state: "set_professional_context" if state["is_recruiter"] else "set_visitor_context",
         {
             "set_professional_context": "set_professional_context",
             "set_visitor_context": "set_visitor_context"
@@ -55,7 +54,7 @@ def create_chatbot_graph():
     graph.add_edge("return_response", "check_continue")
     graph.add_conditional_edges(
         "check_continue",
-        lambda state: "receive_user_input" if state.continue_conversation else "end_session",
+        lambda state: "receive_user_input" if state["continue_conversation"] else "end_session",
         {
             "receive_user_input": "receive_user_input",
             "end_session": "end_session"

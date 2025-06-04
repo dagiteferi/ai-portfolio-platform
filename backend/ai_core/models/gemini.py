@@ -10,7 +10,7 @@ class GeminiClient:
         self.api_key = os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
-        self.model = GenerativeModel("gemini-1.5-pro")
+        self.model = GenerativeModel("gemini-1.5-flash")
 
     def generate_response(self, messages):
         """
