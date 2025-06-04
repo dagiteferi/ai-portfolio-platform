@@ -1,1 +1,51 @@
 venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Virtual environments
+
+venv/
+
+
+# Environment variables and secrets
+.env
+
+# Logs and databases
+*.log
+logs/
+*.sqlite3
+*.db
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker files
+docker-compose.override.yml
+*.pid
+*.seed
+
+# Static assets from build
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# Sensitive configuration or keys not meant for VCS
+# (Add any additional project-specific files to ignore)
+# For example: custom_keys.json, private_config.yaml
+
+# GitHub Action secrets and files
+.github/workflows/**/secret-*.yml
