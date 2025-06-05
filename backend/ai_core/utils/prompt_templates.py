@@ -1,11 +1,8 @@
-
-from backend.vector_db.faiss_manager import faiss_manager  
-
-
+from backend.ai_core.knowledge.static_loader import load_static_content
 
 def get_system_prompt(role: str, user_name: str = None, retrieved_docs: list[str] = None) -> str:
     """
-    Generates a prompt using a knowledge base retrieved from FAISS.
+    Generates a prompt using a dynamically loaded knowledge base.
     """
     role_definition = {
         "recruiter": (
@@ -20,16 +17,15 @@ def get_system_prompt(role: str, user_name: str = None, retrieved_docs: list[str
         )
     }
 
-    # Retrieve the knowledge base from FAISS
+    # Load the knowledge base dynamically
     try:
-        query = "STATIC KNOWLEDGE BASE"
-        results = faiss_manager.search(query, k=1)
-        if not results:
-            raise ValueError("No knowledge base found in FAISS.")
-        knowledge_base = results[0].page_content
+        knowledge_base_docs = load_static_content(source="knowledge_base")
+        if not knowledge_base_docs:
+            raise ValueError("No knowledge base content loaded.")
+        knowledge_base = knowledge_base_docs[0].page_content
     except Exception as e:
-        print(f"Error retrieving knowledge base from FAISS: {str(e)}")
-        knowledge_base = "STATIC KNOWLEDGE BASE: Error retrieving content. Use minimal details."
+        print(f"Error loading knowledge base: {str(e)}")
+        knowledge_base = "STATIC KNOWLEDGE BASE: Error loading content. Use minimal details."
 
     dynamic_context = "\nRETRIEVED DOCS: None (DO NOT USE UNLESS INSTRUCTED)"
 
