@@ -52,8 +52,9 @@ def set_professional_context(state: Dict) -> Dict:
     if not state or "user_name" not in state:
         state = state or {}
         state["user_name"] = "user"
-    state["system_prompt"] = get_system_prompt("recruiter", state.get("user_name"))
-    state["minimal_prompt"] = f"Respond as a professional recruiter guide for {state.get('user_name', 'user')}, be concise."
+    retrieved_docs = state.get("retrieved_docs", [])
+    state["system_prompt"] = get_system_prompt("recruiter", state.get("user_name"), retrieved_docs)
+    state["minimal_prompt"] = f"Respond as a professional recruiter guide for Dagmawi Teferi, be concise."
     print(f"set_professional_context - State after: {state}")
     return state
 
@@ -62,8 +63,9 @@ def set_visitor_context(state: Dict) -> Dict:
     if not state or "user_name" not in state:
         state = state or {}
         state["user_name"] = "user"
-    state["system_prompt"] = get_system_prompt("visitor", state.get("user_name"))
-    state["minimal_prompt"] = f"Respond as a friendly visitor guide for {state.get('user_name', 'user')}, use a storytelling tone, be concise."
+    retrieved_docs = state.get("retrieved_docs", [])
+    state["system_prompt"] = get_system_prompt("visitor", state.get("user_name"), retrieved_docs)
+    state["minimal_prompt"] = f"Respond as a friendly visitor guide for Dagmawi Teferi, use a storytelling tone, be concise."
     print(f"set_visitor_context - State after: {state}")
     return state
 
@@ -80,72 +82,78 @@ def retrieve_rag_context(state: Dict) -> Dict:
     return state
 
 def generate_response(state: Dict) -> Dict:
-    print(f"generate_response - State: {state or 'None'}")
-    if not state:
-        state = {}
-    user_input = state.get("input", "").lower()
-    user_name = state.get("user_name", "user")
+      print(f"generate_response - State: {state or 'None'}")
+      if not state:
+          state = {}
+      user_input = state.get("input", "").lower()
+      user_name = state.get("user_name", "user")
 
-    if "tokens_used_in_session" not in state:
-        state["tokens_used_in_session"] = 0
-    tokens_used = state["tokens_used_in_session"]
-    token_budget = 2000
+      if "tokens_used_in_session" not in state:
+          state["tokens_used_in_session"] = 0
+      tokens_used = state["tokens_used_in_session"]
+      token_budget = 2000
 
-    if tokens_used >= token_budget:
-        state["raw_response"] = f"Hi {user_name}! It seems I've handled a lot today. Let’s take a break and chat again soon!"
-        state["tokens_used_in_session"] = tokens_used
-        return state
+      if tokens_used >= token_budget:
+          state["raw_response"] = f"Hi {user_name}! It seems I've handled a lot today. Let’s take a break and chat again soon!"
+          state["tokens_used_in_session"] = tokens_used
+          return state
 
-    if user_input in ["hi", "hello", "hey"]:
-        state["raw_response"] = f"Hi {user_name}! I’d love to help—can you tell me more?"
-        state["tokens_used_in_session"] = tokens_used
-        return state
+      if user_input in ["hi", "hello", "hey"]:
+          state["raw_response"] = f"Hi {user_name}! I’d love to help—can you tell me more?"
+          state["tokens_used_in_session"] = tokens_used
+          return state
 
-    if not user_input:
-        state["raw_response"] = f"I'm sorry {user_name}, I didn't receive a valid input to respond to."
-        state["tokens_used_in_session"] = tokens_used
-        return state
+      if not user_input:
+          state["raw_response"] = f"I'm sorry {user_name}, I didn't receive a valid input to respond to."
+          state["tokens_used_in_session"] = tokens_used
+          return state
 
-    try:
-        gemini = GeminiClient()
-        history = state.get("history", [])
-        if len(history) > 3:
-            history_summary = "User started with a greeting and asked about previous topics."
-            history_str = f"Summary: {history_summary}"
-        else:
-            history_str = "\n".join([f"User: {msg['user']}\nAssistant: {msg['assistant']}" for msg in history]) if history else ""
+      try:
+          gemini = GeminiClient()
+          history = state.get("history", [])
+          if len(history) > 3:
+              history_summary = f"User {user_name} started with a greeting and asked about previous topics related to Dagmawi Teferi."
+              history_str = f"Summary: {history_summary}"
+          else:
+              history_str = "\n".join([f"User: {msg['user']}\nAssistant: {msg['assistant']}" for msg in history]) if history else ""
 
-        retrieved_docs = state.get("retrieved_docs", [])
-        docs_str = "\n".join(retrieved_docs) if retrieved_docs else "No relevant documents found."
+          retrieved_docs = state.get("retrieved_docs", [])
+          docs_str = "\n".join(retrieved_docs) if retrieved_docs else "No relevant documents found."
 
-        prompt = state.get("minimal_prompt", "") if state.get("role_identified", False) else state.get("system_prompt", "")
-        if not prompt:
-            prompt = f"Respond as a friendly assistant to {user_name}, be concise."
-        full_prompt = f"{prompt}\n\nRelevant Information:\n{docs_str}\n\nConversation History:\n{history_str}"
+          # Pass retrieved_docs to get_system_prompt
+          prompt = state.get("minimal_prompt", "") if state.get("role_identified", False) else state.get("system_prompt", "")
+          if not prompt:
+              prompt = get_system_prompt(
+                  "visitor" if not state.get("is_recruiter", False) else "recruiter",
+                  user_name=user_name,
+                  retrieved_docs=retrieved_docs
+              )
+          full_prompt = f"{prompt}\n\nRelevant Information:\n{docs_str}\n\nConversation History:\n{history_str}"
 
-        messages = [
-            {"role": "system", "content": full_prompt},
-            {"role": "user", "content": user_input}
-        ]
+          messages = [
+              {"role": "system", "content": full_prompt},
+              {"role": "user", "content": user_input}
+          ]
 
-        response = gemini.generate_response(messages)
-        if response is None:
-            state["raw_response"] = f"Oops, {user_name}, no response from the model. Please ensure your Gemini API key is valid."
-            state["tokens_used_in_session"] = tokens_used
-            return state
+          response = gemini.generate_response(messages)
+          if response is None:
+              state["raw_response"] = f"Oops, {user_name}, no response from the model. Please ensure your Gemini API key is valid."
+              state["tokens_used_in_session"] = tokens_used
+              return state
 
-        state["raw_response"] = response
-        output_tokens = len(response.split())
-        total_tokens = len(full_prompt.split()) + len(user_input.split()) + len(history_str.split()) + output_tokens
-        state["tokens_used_in_session"] = tokens_used + total_tokens
+          state["raw_response"] = response
+          output_tokens = len(response.split())
+          total_tokens = len(full_prompt.split()) + len(user_input.split()) + len(history_str.split()) + output_tokens
+          state["tokens_used_in_session"] = tokens_used + total_tokens
 
-        if state["tokens_used_in_session"] > token_budget * 0.8:
-            state["raw_response"] += f"\nHi {user_name}, I’m nearing my limit today—let’s wrap up soon!"
+          if state["tokens_used_in_session"] > token_budget * 0.8:
+              state["raw_response"] += f"\nHi {user_name}, I’m nearing my limit today—let’s wrap up soon!"
 
-    except Exception as e:
-        state["raw_response"] = f"Oops, {user_name}, something went wrong. Let’s try that again later! (Error: {str(e)})"
-        state["tokens_used_in_session"] = tokens_used
-    return state
+      except Exception as e:
+          state["raw_response"] = f"Oops, {user_name}, something went wrong. Let’s try that again later! (Error: {str(e)})"
+          state["tokens_used_in_session"] = tokens_used
+      return state
+
 
 def trim_format_response(state: Dict) -> Dict:
     print(f"trim_format_response - State: {state or 'None'}")
