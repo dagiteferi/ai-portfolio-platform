@@ -4,6 +4,8 @@ from backend.ai_core.models.role_inference import infer_role
 from backend.ai_core.utils.prompt_templates import get_system_prompt
 from backend.ai_core.utils.logger import log_interaction
 from backend.vector_db.faiss_manager import faiss_manager
+import random
+
 
 def receive_user_input(state: Dict) -> Dict:
     print(f"receive_user_input - State: {state or 'None'}")

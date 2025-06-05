@@ -1,5 +1,6 @@
 
-from vector_db.faiss_manager import faiss_manager
+from backend.vector_db.faiss_manager import faiss_manager  
+
 
 
 def get_system_prompt(role: str, user_name: str = None, retrieved_docs: list[str] = None) -> str:

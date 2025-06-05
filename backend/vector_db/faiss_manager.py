@@ -25,5 +25,12 @@ class FAISSManager:
 
       def search(self, query, k=2):
           return self.vector_store.similarity_search(query, k=k) if self.vector_store else []
+      
+results = faiss_manager.search(query, k=2)
+print(f"Retrieved {len(results)} docs from FAISS:")
+for i, doc in enumerate(results):
+    print(f"Doc {i+1} content preview: {doc.page_content[:200]}")
+    print(f"Doc {i+1} metadata/source: {doc.metadata.get('source', 'unknown')}")
+
 
 faiss_manager = FAISSManager()

@@ -6,9 +6,9 @@ def test_chatbot():
         {"user_name": "Alice", "session_id": "alice123", "message": "HI"},
         {"user_name": "Alice", "session_id": "alice123", "message": "how are you"},
         {"user_name": "Alice", "session_id": "alice123", "message": "Tell me about Dagi"},
-        {"user_name": "Alice", "session_id": "alice123", "message": "What projects?"},
+        {"user_name": "Alice", "session_id": "alice123", "message": "What is Dagi’s most recent project??"},
         {"user_name": "Bob", "session_id": "bob456", "message": "I’m hiring"},
-        {"user_name": "Bob", "session_id": "bob456", "message": "What experience?"},
+        {"user_name": "Bob", "session_id": "bob456", "message": "Where did Dagi intern?"},
     ]
 
     for case in test_cases:
