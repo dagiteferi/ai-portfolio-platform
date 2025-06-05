@@ -2,32 +2,28 @@ import schedule
 import time
 from backend.vector_db.faiss_manager import faiss_manager
 from backend.ai_core.utils.logger import log_interaction
-import os
 
-def check_resume_update():
-      resume_path = os.path.join(os.path.dirname(__file__), "../../ai_core/knowledge/resume.pdf")
-      if os.path.exists(resume_path):
-          mtime = os.path.getmtime(resume_path)
-          last_mtime_path = os.path.join(os.path.dirname(__file__), "last_resume_mtime.txt")
-          last_mtime = 0
-          if os.path.exists(last_mtime_path):
-              with open(last_mtime_path, "r") as f:
-                  last_mtime = float(f.read() or 0)
+def update_knowledge_base():
+    """
+    Updates the dynamic knowledge base by refreshing GitHub data.
+    """
+    try:
+        faiss_manager.update_dynamic_vector_store()
+        log_interaction("Scheduled update completed", "Dynamic knowledge base refreshed")
+    except Exception as e:
+        log_interaction("Scheduled update failed", str(e))
 
-          if mtime > last_mtime:
-              faiss_manager.update_vector_store()
-              log_interaction("Resume PDF updated", f"Updated vector store at {time.ctime()}")
-              with open(last_mtime_path, "w") as f:
-                  f.write(str(mtime))
+def main():
+    # Schedule daily updates at midnight
+    schedule.every().day.at("00:00").do(update_knowledge_base)
+    log_interaction("Scheduler started", "Running daily updates at 00:00")
 
-def run_update_scheduler():
-      check_resume_update()
-      schedule.every(1).minutes.do(check_resume_update)
+    # Initial update on startup
+    update_knowledge_base()
 
-      log_interaction("Scheduler started", "Content update scheduler running every minute on resume changes.")
-      while True:
-          schedule.run_pending()
-          time.sleep(60)
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
 
 if __name__ == "__main__":
-      run_update_scheduler()
+    main()
