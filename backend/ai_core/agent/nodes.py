@@ -81,7 +81,7 @@ def retrieve_rag_context(state: Dict) -> Dict:
         state["retrieved_docs"] = []
     else:
         user_input = state["input"]
-        docs = faiss_manager.search_combined(user_input, k=2) if user_input else []  # Confirmed update
+        docs = faiss_manager.search_combined(user_input, k=2) if user_input else []
         state["retrieved_docs"] = [doc.page_content for doc in docs] if docs else []
         print(f"Retrieved documents for input '{user_input}': {state['retrieved_docs']}")
     print(f"retrieve_rag_context - Retrieved docs: {state.get('retrieved_docs', [])}")
@@ -101,7 +101,7 @@ def generate_response(state: Dict) -> Dict:
     tokens_used = state["tokens_used_in_session"]
     token_budget = 2000
 
-    if tokens_used is not None and tokens_used >= token_budget:  # Add check for None
+    if tokens_used is not None and tokens_used >= token_budget:
         state["raw_response"] = f"Hey {user_name}, we’ve been chatting a lot! Let’s take a break. What’s your favorite topic?"
         state["tokens_used_in_session"] = tokens_used
         return state
@@ -121,6 +121,7 @@ def generate_response(state: Dict) -> Dict:
         history = state.get("history", [])
         history_str = "\n".join([f"{user_name}: {msg['user']}\nMe: {msg['assistant']}" for msg in history]) if history else ""
         prompt = get_system_prompt("visitor" if not state.get("is_recruiter", False) else "recruiter", user_name, retrieved_docs=retrieved_docs, query=user_input)
+        print(f"Generated Prompt: {prompt}")  # Add logging for prompt
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
 
         prompt_tokens = len(full_prompt.split())
@@ -130,21 +131,18 @@ def generate_response(state: Dict) -> Dict:
 
         messages = [{"role": "system", "content": full_prompt}, {"role": "user", "content": f"{user_name} says: {user_input}"}]
         response = gemini.generate_response(messages)
-        print(f"Gemini Response:\n{response}")
+        print(f"Gemini Response: {response}")  # Add logging for response
 
+        # Relaxed validation to allow more responses
         allowed_projects = ["AI Portfolio Platform", "Fraud Detection @ Black ET"]
         allowed_techs = ["Gemini", "LangGraph", "React", "PyTorch", "XGBoost"]
         allowed_metrics = ["30% faster deployment", "20% reduction in false positives"]
         allowed_experiences = ["AI/ML Engineer at Black ET", "AI Engineer intern at Kifiya", "4th-year CS student at Unity University"]
         if "intern" in user_input or "experience" in user_input:
             if not any(exp in response for exp in allowed_experiences):
-                response = f"Hey {user_name}, I’m Dagi! Something went wrong—let’s try another question!"
-        elif not response or not any(proj in response for proj in allowed_projects) or not any(tech in response for tech in allowed_techs) or not any(metric in response for metric in allowed_metrics):
-            dynamic_results = faiss_manager.search_dynamic(user_input, k=2)
-            if dynamic_results and any(user_input.lower() in doc.page_content.lower() for doc in dynamic_results):
-                response = gemini.generate_response(messages)
-            else:
-                response = f"Hey {user_name}, I’m Dagi! Something went wrong—let’s try another question!"
+                response = f"Hey {user_name}, I’m Dagi! I interned as an AI Engineer at Kifiya. What kind of tech experience are you curious about, {user_name}?"
+        elif not response or not any(proj in response for proj in allowed_projects) and not any(tech in response for tech in allowed_techs) and not any(metric in response for metric in allowed_metrics):
+            response = f"Hey {user_name}, I’m Dagi! I’m working on the AI Portfolio Platform with React and Gemini. What would you like to know more about?"
 
         response_tokens = len(response.split())
         total_tokens = prompt_tokens + len(user_input.split()) + response_tokens
@@ -155,8 +153,9 @@ def generate_response(state: Dict) -> Dict:
         state["tokens_used_in_session"] = total_tokens
 
     except Exception as e:
+        print(f"Exception in generate_response: {str(e)}")  # Add detailed logging
         state["raw_response"] = f"Hey {user_name}, I’m Dagi! Something broke—try again later. What’s your favorite tech?"
-        print(f"Error: {str(e)}")
+        state["tokens_used_in_session"] = tokens_used
     return state
 
 def trim_format_response(state: Dict) -> Dict:
@@ -175,7 +174,6 @@ def update_memory(state: Dict) -> Dict:
     formatted_response = state.get("formatted_response", "")
     if input_val and formatted_response:
         state["history"].append({"user": input_val, "assistant": formatted_response})
-    # Ensure tokens_used_in_session is maintained
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     return state
