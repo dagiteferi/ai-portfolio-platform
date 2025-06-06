@@ -95,7 +95,6 @@ def generate_response(state: Dict) -> Dict:
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
 
-    # Initialize tokens_used_in_session if not present
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     tokens_used = state["tokens_used_in_session"]
@@ -121,7 +120,7 @@ def generate_response(state: Dict) -> Dict:
         history = state.get("history", [])
         history_str = "\n".join([f"{user_name}: {msg['user']}\nMe: {msg['assistant']}" for msg in history]) if history else ""
         prompt = get_system_prompt("visitor" if not state.get("is_recruiter", False) else "recruiter", user_name, retrieved_docs=retrieved_docs, query=user_input)
-        print(f"Generated Prompt: {prompt}")  # Add logging for prompt
+        print(f"Generated Prompt: {prompt}")
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
 
         prompt_tokens = len(full_prompt.split())
@@ -131,18 +130,22 @@ def generate_response(state: Dict) -> Dict:
 
         messages = [{"role": "system", "content": full_prompt}, {"role": "user", "content": f"{user_name} says: {user_input}"}]
         response = gemini.generate_response(messages)
-        print(f"Gemini Response: {response}")  # Add logging for response
+        print(f"Gemini Response: {response}")
 
-        # Relaxed validation to allow more responses
+        # Relaxed validation with fallback responses
         allowed_projects = ["AI Portfolio Platform", "Fraud Detection @ Black ET"]
         allowed_techs = ["Gemini", "LangGraph", "React", "PyTorch", "XGBoost"]
         allowed_metrics = ["30% faster deployment", "20% reduction in false positives"]
         allowed_experiences = ["AI/ML Engineer at Black ET", "AI Engineer intern at Kifiya", "4th-year CS student at Unity University"]
         if "intern" in user_input or "experience" in user_input:
-            if not any(exp in response for exp in allowed_experiences):
-                response = f"Hey {user_name}, I’m Dagi! I interned as an AI Engineer at Kifiya. What kind of tech experience are you curious about, {user_name}?"
-        elif not response or not any(proj in response for proj in allowed_projects) and not any(tech in response for tech in allowed_techs) and not any(metric in response for metric in allowed_metrics):
-            response = f"Hey {user_name}, I’m Dagi! I’m working on the AI Portfolio Platform with React and Gemini. What would you like to know more about?"
+            if not any(exp in response.lower() for exp in [exp.lower() for exp in allowed_experiences]):
+                response = f"Hey {user_name}, I’m Dagi! I interned as an AI Engineer at Kifiya and worked as an AI/ML Engineer at Black ET. What kind of experience are you looking for, {user_name}?"
+        elif not response or (not any(proj.lower() in response.lower() for proj in allowed_projects) and not any(tech.lower() in response.lower() for tech in allowed_techs) and not any(metric.lower() in response.lower() for metric in allowed_metrics)):
+            # Fallback using retrieved docs if available, otherwise default
+            if retrieved_docs:
+                response = f"Hey {user_name}, I’m Dagi! Here’s a bit about me: {retrieved_docs[0]}. What would you like to explore next?"
+            else:
+                response = f"Hey {user_name}, I’m Dagi! I’m working on the AI Portfolio Platform with React and Gemini to showcase my AI projects. What would you like to know more about, {user_name}?"
 
         response_tokens = len(response.split())
         total_tokens = prompt_tokens + len(user_input.split()) + response_tokens
@@ -153,8 +156,12 @@ def generate_response(state: Dict) -> Dict:
         state["tokens_used_in_session"] = total_tokens
 
     except Exception as e:
-        print(f"Exception in generate_response: {str(e)}")  # Add detailed logging
-        state["raw_response"] = f"Hey {user_name}, I’m Dagi! Something broke—try again later. What’s your favorite tech?"
+        print(f"Exception in generate_response: {str(e)}")
+        # Fallback with knowledge base content
+        if retrieved_docs:
+            state["raw_response"] = f"Hey {user_name}, I’m Dagi! Something went wrong, but here’s something about me: {retrieved_docs[0]}. What else can I share with you?"
+        else:
+            state["raw_response"] = f"Hey {user_name}, I’m Dagi! Something went wrong—I’m a 4th-year CS student at Unity University and interned at Kifiya. What’s your favorite tech topic?"
         state["tokens_used_in_session"] = tokens_used
     return state
 
