@@ -25,7 +25,7 @@ async def chat_endpoint(request: ChatRequest):
             "input": request.message,
             "user_name": request.user_name or "user",
             "history": request.history or [],
-            "retrieved_docs": retrieved_docs  # Pass search results to state
+            "retrieved_docs": retrieved_docs
         }
         response = await graph.ainvoke(state)
         return {"response": response.get("raw_response", "No response")}

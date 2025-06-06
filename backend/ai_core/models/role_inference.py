@@ -1,13 +1,7 @@
-def infer_role(query: str) -> bool:
-    """
-    Infers the user's role based on query keywords.
-    
-    Args:
-        query (str): The user's input query.
-    
-    Returns:
-        bool: True if recruiter, False if visitor.
-    """
-    query = query.lower()
-    recruiter_keywords = ["hire", "job", "recruit", "position", "technical", "interview"]
-    return any(keyword in query for keyword in recruiter_keywords)
+from backend.vector_db.faiss_manager import faiss_manager
+
+def infer_role(user_input: str) -> str:
+    results = faiss_manager.search_combined(user_input, k=1)  # Updated to search_combined
+    if "hiring" in user_input.lower() or any("recruit" in doc.page_content.lower() for doc in results):
+        return "recruiter"
+    return "visitor"

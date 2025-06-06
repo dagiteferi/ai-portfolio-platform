@@ -63,9 +63,13 @@ class FAISSManager:
     def search_dynamic(self, query: str, k: int = 2) -> List:
         return self.dynamic_vector_store.similarity_search(query, k=k) if self.dynamic_vector_store else []
 
+    # def search_combined(self, query: str, k: int = 2) -> List:
+    #     static_results = self.search_static(query, k)
+    #     dynamic_results = self.search_dynamic(query, k)
+    #     return static_results + dynamic_results
     def search_combined(self, query: str, k: int = 2) -> List:
-        static_results = self.search_static(query, k)
-        dynamic_results = self.search_dynamic(query, k)
-        return static_results + dynamic_results
+     static_results = self.search_static(query, k)
+     dynamic_results = self.search_dynamic(query, k)
+     return static_results + dynamic_results
 
 faiss_manager = FAISSManager(source="knowledge_base")

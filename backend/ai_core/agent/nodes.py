@@ -11,7 +11,6 @@ from backend.ai_core.models.gemini import GeminiClient
 from backend.ai_core.utils.prompt_templates import get_system_prompt
 from backend.vector_db.faiss_manager import faiss_manager
 
-
 def receive_user_input(state: Dict) -> Dict:
     print(f"receive_user_input - State: {state or 'None'}")
     if not state:
@@ -26,7 +25,6 @@ def infer_user_role(state: Dict) -> Dict:
         state["role_confidence"] = {"visitor": 0.5, "recruiter": 0.0}
     else:
         user_input = state["input"].lower()
-        # Ensure role_confidence is a dictionary, even if it's None
         role_confidence = state.get("role_confidence") or {"visitor": 0.0, "recruiter": 0.0}
         if "hiring" in user_input or "recruit" in user_input:
             role_confidence["recruiter"] += 0.6
@@ -83,13 +81,11 @@ def retrieve_rag_context(state: Dict) -> Dict:
         state["retrieved_docs"] = []
     else:
         user_input = state["input"]
-        docs = faiss_manager.search(user_input, k=2) if user_input else []
+        docs = faiss_manager.search_combined(user_input, k=2) if user_input else []  # Confirmed update
         state["retrieved_docs"] = [doc.page_content for doc in docs] if docs else []
         print(f"Retrieved documents for input '{user_input}': {state['retrieved_docs']}")
     print(f"retrieve_rag_context - Retrieved docs: {state.get('retrieved_docs', [])}")
     return state
-
-
 
 def generate_response(state: Dict) -> Dict:
     print(f"generate_response - State: {state or 'None'}")
@@ -97,14 +93,15 @@ def generate_response(state: Dict) -> Dict:
         state = {}
     user_input = state.get("input", "").lower()
     user_name = state.get("user_name", "user")
-    retrieved_docs = state.get("retrieved_docs", [])  # Use docs passed from chat.py
+    retrieved_docs = state.get("retrieved_docs", [])
 
+    # Initialize tokens_used_in_session if not present
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     tokens_used = state["tokens_used_in_session"]
     token_budget = 2000
 
-    if tokens_used >= token_budget:
+    if tokens_used is not None and tokens_used >= token_budget:  # Add check for None
         state["raw_response"] = f"Hey {user_name}, we’ve been chatting a lot! Let’s take a break. What’s your favorite topic?"
         state["tokens_used_in_session"] = tokens_used
         return state
@@ -135,7 +132,6 @@ def generate_response(state: Dict) -> Dict:
         response = gemini.generate_response(messages)
         print(f"Gemini Response:\n{response}")
 
-        # Validate response
         allowed_projects = ["AI Portfolio Platform", "Fraud Detection @ Black ET"]
         allowed_techs = ["Gemini", "LangGraph", "React", "PyTorch", "XGBoost"]
         allowed_metrics = ["30% faster deployment", "20% reduction in false positives"]
@@ -144,10 +140,9 @@ def generate_response(state: Dict) -> Dict:
             if not any(exp in response for exp in allowed_experiences):
                 response = f"Hey {user_name}, I’m Dagi! Something went wrong—let’s try another question!"
         elif not response or not any(proj in response for proj in allowed_projects) or not any(tech in response for tech in allowed_techs) or not any(metric in response for metric in allowed_metrics):
-            # Check if dynamic data might help
             dynamic_results = faiss_manager.search_dynamic(user_input, k=2)
             if dynamic_results and any(user_input.lower() in doc.page_content.lower() for doc in dynamic_results):
-                response = gemini.generate_response(messages)  # Retry with dynamic context
+                response = gemini.generate_response(messages)
             else:
                 response = f"Hey {user_name}, I’m Dagi! Something went wrong—let’s try another question!"
 
@@ -163,6 +158,7 @@ def generate_response(state: Dict) -> Dict:
         state["raw_response"] = f"Hey {user_name}, I’m Dagi! Something broke—try again later. What’s your favorite tech?"
         print(f"Error: {str(e)}")
     return state
+
 def trim_format_response(state: Dict) -> Dict:
     print(f"trim_format_response - State: {state or 'None'}")
     state = state or {}
@@ -179,6 +175,9 @@ def update_memory(state: Dict) -> Dict:
     formatted_response = state.get("formatted_response", "")
     if input_val and formatted_response:
         state["history"].append({"user": input_val, "assistant": formatted_response})
+    # Ensure tokens_used_in_session is maintained
+    if "tokens_used_in_session" not in state:
+        state["tokens_used_in_session"] = 0
     return state
 
 def return_response(state: Dict) -> Dict:
