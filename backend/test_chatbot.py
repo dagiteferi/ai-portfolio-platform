@@ -6,6 +6,7 @@ import logging
 import time
 import os
 import threading
+import socket
 
 # Configure logging
 logging.basicConfig(
@@ -15,7 +16,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BASE_URL = "http://127.0.0.1:8000/api/chat"
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('127.0.0.1', port)) == 0
+
+def find_free_port(start_port=8000):
+    port = start_port
+    while is_port_in_use(port):
+        port += 1
+    return port
 
 def test_conversation():
     users = [
@@ -26,9 +35,11 @@ def test_conversation():
     # Change to parent directory to treat 'backend' as a package
     original_dir = os.getcwd()
     os.chdir("..")
+    port = find_free_port(8000)
+    BASE_URL = f"http://127.0.0.1:{port}/api/chat"
     try:
         server_process = subprocess.Popen(
-            ["uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"],
+            ["uvicorn", f"backend.main:app", "--host", "127.0.0.1", "--port", str(port), "--reload"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -43,16 +54,16 @@ def test_conversation():
 
             threading.Thread(target=log_uvicorn_output, daemon=True).start()
 
-            time.sleep(10)
+            time.sleep(10)  # Wait for server to start
 
             try:
-                response = requests.get("http://127.0.0.1:8000")
+                response = requests.get(f"http://127.0.0.1:{port}")
                 if response.status_code == 200 or "/api/chat" in response.text:
-                    logger.info("Uvicorn server started successfully")
+                    logger.info(f"Uvicorn server started successfully on port {port}")
                 else:
                     raise Exception(f"Unexpected status code: {response.status_code}")
             except requests.ConnectionError:
-                logger.error("Failed to connect to Uvicorn server")
+                logger.error(f"Failed to connect to Uvicorn server on port {port}")
                 raise Exception("Uvicorn server failed to start")
 
             for user in users:
