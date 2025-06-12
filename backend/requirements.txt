@@ -8,3 +8,4 @@ fastapi
 uvicorn
 python-dotenv
 redis
+sentence-transformers

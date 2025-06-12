@@ -25,7 +25,8 @@ def load_resume():
     """
     Loads the resume content as a Document object.
     """
-    resume_path = os.path.join(os.path.dirname(__file__), "knowledge", "resume.pdf")
+    resume_path = os.path.join(os.path.dirname(__file__), "resume.pdf")  # Removed extra 'knowledge/' subdirectory
+    logger.info(f"Checking resume at: {resume_path}")
     if os.path.exists(resume_path):
         try:
             with pdfplumber.open(resume_path) as pdf:
@@ -50,7 +51,8 @@ def load_github_data():
     """
     Loads the GitHub knowledge base content as Document objects.
     """
-    github_path = os.path.join(os.path.dirname(__file__), "knowledge", "github_knowledge_base.json")
+    github_path = os.path.join(os.path.dirname(__file__), "github_knowledge_base.json")  # Removed extra 'knowledge/' subdirectory
+    logger.info(f"Checking GitHub knowledge base at: {github_path}")
     documents = []
     if os.path.exists(github_path):
         try:
