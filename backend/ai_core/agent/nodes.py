@@ -22,17 +22,24 @@ def receive_user_input(state: Dict) -> Dict:
     state = state or {}
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
+    if "role_confidence" not in state:
+        state["role_confidence"] = {"visitor": 0.0, "recruiter": 0.0}
     return state
 
 def infer_user_role(state: Dict) -> Dict:
     logger.debug(f"infer_user_role - State before: {state or 'None'}")
     state = state or {}
+    if "role_confidence" not in state or state["role_confidence"] is None:
+        logger.warning("role_confidence is None or missing; initializing")
+        state["role_confidence"] = {"visitor": 0.0, "recruiter": 0.0}
+
+    role_confidence = state["role_confidence"]
     if "input" not in state:
         state["is_recruiter"] = False
-        state["role_confidence"] = {"visitor": 0.5, "recruiter": 0.0}
+        role_confidence["visitor"] = 0.5
+        role_confidence["recruiter"] = 0.0
     else:
         user_input = state["input"].lower()
-        role_confidence = state.get("role_confidence", {"visitor": 0.0, "recruiter": 0.0})
         if any(word in user_input for word in ["hiring", "recruit", "job", "position"]):
             role_confidence["recruiter"] += 0.6
         elif any(word in user_input for word in ["tell me", "about", "curious", "learn"]):
@@ -45,10 +52,9 @@ def infer_user_role(state: Dict) -> Dict:
             role_confidence["visitor"] /= total
             role_confidence["recruiter"] /= total
 
-        state["role_confidence"] = role_confidence
-        state["is_recruiter"] = role_confidence["recruiter"] > role_confidence["visitor"]
-        state["role_identified"] = role_confidence["recruiter"] >= 0.9 or role_confidence["visitor"] >= 0.9
-
+    state["role_confidence"] = role_confidence
+    state["is_recruiter"] = role_confidence["recruiter"] > role_confidence["visitor"]
+    state["role_identified"] = role_confidence["recruiter"] >= 0.9 or role_confidence["visitor"] >= 0.9
     logger.debug(f"infer_user_role - State after: {state}")
     return state
 
@@ -129,7 +135,6 @@ def generate_response(state: Dict) -> Dict:
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
 
-    # Ensure tokens_used_in_session is initialized
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     tokens_used = state["tokens_used_in_session"]
@@ -160,8 +165,7 @@ def generate_response(state: Dict) -> Dict:
         logger.debug(f"Generated Prompt: {prompt}")
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
 
-        # Use a more accurate token counter if available
-        prompt_tokens = len(full_prompt.split())  # Placeholder; replace with Gemini tokenizer if available
+        prompt_tokens = len(full_prompt.split())
         input_tokens = len(user_input.split())
         logger.debug(f"Prompt Tokens: {prompt_tokens}, Input Tokens: {input_tokens}")
         if prompt_tokens > 4096:
