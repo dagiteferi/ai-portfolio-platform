@@ -4,6 +4,7 @@ from datetime import datetime
 from backend.ai_core.models.gemini import GeminiClient
 from backend.ai_core.utils.prompt_templates import get_system_prompt
 from backend.ai_core.utils.logger import log_interaction
+from backend.vector_db.faiss_manager import faiss_manager
 import logging
 
 logging.basicConfig(
@@ -11,28 +12,27 @@ logging.basicConfig(
     format='%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('debug.log')
+        logging.FileHandler('nodes.log')
     ]
 )
 logger = logging.getLogger(__name__)
 
-from backend.vector_db.faiss_manager import faiss_manager
-
 def receive_user_input(state: Dict) -> Dict:
     logger.debug(f"receive_user_input - State: {state or 'None'}")
-    if not state:
-        state = {}
+    state = state or {}
+    if "tokens_used_in_session" not in state:
+        state["tokens_used_in_session"] = 0
     return state
 
 def infer_user_role(state: Dict) -> Dict:
     logger.debug(f"infer_user_role - State before: {state or 'None'}")
-    if not state or "input" not in state:
-        state = state or {}
+    state = state or {}
+    if "input" not in state:
         state["is_recruiter"] = False
         state["role_confidence"] = {"visitor": 0.5, "recruiter": 0.0}
     else:
         user_input = state["input"].lower()
-        role_confidence = state.get("role_confidence") or {"visitor": 0.0, "recruiter": 0.0}
+        role_confidence = state.get("role_confidence", {"visitor": 0.0, "recruiter": 0.0})
         if any(word in user_input for word in ["hiring", "recruit", "job", "position"]):
             role_confidence["recruiter"] += 0.6
         elif any(word in user_input for word in ["tell me", "about", "curious", "learn"]):
@@ -54,30 +54,28 @@ def infer_user_role(state: Dict) -> Dict:
 
 def set_professional_context(state: Dict) -> Dict:
     logger.debug(f"set_professional_context - State before: {state or 'None'}")
-    if not state or "user_name" not in state:
-        state = state or {}
-        state["user_name"] = "user"
+    state = state or {}
+    state["user_name"] = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
-    state["system_prompt"] = get_system_prompt("recruiter", state.get("user_name"), retrieved_docs)
-    state["minimal_prompt"] = f"Hey {state.get('user_name')}, I’m Dagi! Ready to dive into my technical skills and project details for your hiring needs. What specific expertise are you looking for?"
+    state["system_prompt"] = get_system_prompt("recruiter", state["user_name"], retrieved_docs)
+    state["minimal_prompt"] = f"Hey {state['user_name']}, I’m Dagi! Ready to dive into my technical skills and project details for your hiring needs. What specific expertise are you looking for?"
     logger.debug(f"set_professional_context - State after: {state}")
     return state
 
 def set_visitor_context(state: Dict) -> Dict:
     logger.debug(f"set_visitor_context - State before: {state or 'None'}")
-    if not state or "user_name" not in state:
-        state = state or {}
-        state["user_name"] = "user"
+    state = state or {}
+    state["user_name"] = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
-    state["system_prompt"] = get_system_prompt("visitor", state.get("user_name"), retrieved_docs)
-    state["minimal_prompt"] = f"Hi {state.get('user_name')}, I’m Dagi! Excited to share my tech journey and projects with you. What’s sparking your interest today?"
+    state["system_prompt"] = get_system_prompt("visitor", state["user_name"], retrieved_docs)
+    state["minimal_prompt"] = f"Hi {state['user_name']}, I’m Dagi! Excited to share my tech journey and projects with you. What’s sparking your interest today?"
     logger.debug(f"set_visitor_context - State after: {state}")
     return state
 
 def retrieve_rag_context(state: Dict) -> Dict:
     logger.debug(f"retrieve_rag_context - State: {state or 'None'}")
-    if not state or "input" not in state:
-        state = state or {}
+    state = state or {}
+    if "input" not in state:
         state["retrieved_docs"] = []
     else:
         user_input = state["input"]
@@ -95,18 +93,15 @@ def extract_most_recent_project(docs: list[str]) -> str:
     logger.debug("Extracting most recent project")
     projects = []
     for doc in docs:
-        # Check if doc is from GitHub
         github_pattern = r"^(.*?)\n\nREADME:(.*?)$"
         github_match = re.match(github_pattern, doc, re.DOTALL)
         if github_match:
-            title = github_match.group(1).strip()  # Repository description as title
+            title = github_match.group(1).strip()
             readme = github_match.group(2).strip()
-            # Extract update date from metadata or content (if available)
             date_pattern = r"(?:Updated|Created): (\d{4}-\d{2}-\d{2})"
             date_match = re.search(date_pattern, readme)
             update_date = datetime.strptime(date_match.group(1), "%Y-%m-%d") if date_match else datetime.now()
             projects.append((title, update_date, doc))
-        # Check static knowledge base projects
         static_pattern = r"(\d+)\.\s*(.*?)\s*\((\d{4})\)"
         static_matches = re.findall(static_pattern, doc)
         for match in static_matches:
@@ -128,31 +123,33 @@ def extract_most_recent_project(docs: list[str]) -> str:
 
 def generate_response(state: Dict) -> Dict:
     logger.debug(f"generate_response - State: {state or 'None'}")
-    if not state:
-        state = {}
+    state = state or {}
     user_input = state.get("input", "").lower()
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
 
+    # Ensure tokens_used_in_session is initialized
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     tokens_used = state["tokens_used_in_session"]
+    if tokens_used is None:
+        logger.warning("tokens_used_in_session is None; setting to 0")
+        tokens_used = 0
+        state["tokens_used_in_session"] = 0
     token_budget = 2000
 
+    logger.debug(f"Tokens used: {tokens_used}, Token budget: {token_budget}")
     if tokens_used >= token_budget:
         state["raw_response"] = f"Hey {user_name}, we’ve been chatting a lot! Let’s take a break. What’s your favorite topic?"
-        state["tokens_used_in_session"] = tokens_used
         return state
 
     if user_input in ["hi", "hello", "hey"]:
         state["raw_response"] = f"Hey {user_name}! I’m Dagi—excited to chat! What brought you here today?"
-        state["tokens_used_in_session"] = tokens_used
         return state
 
     if user_input == "how are you":
         state["raw_response"] = f"Hey {user_name}, I’m Dagi! I built the Fraud Detection @ Black ET with PyTorch and XGBoost, leading to a 20% reduction in false positives. Had a 3AM breakthrough with Ethiopian coffee. How about you?"
-        state["tokens_used_in_session"] = tokens_used
         return state
 
     try:
@@ -163,8 +160,10 @@ def generate_response(state: Dict) -> Dict:
         logger.debug(f"Generated Prompt: {prompt}")
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
 
-        prompt_tokens = len(full_prompt.split())
-        logger.debug(f"Prompt Token Count: {prompt_tokens}")
+        # Use a more accurate token counter if available
+        prompt_tokens = len(full_prompt.split())  # Placeholder; replace with Gemini tokenizer if available
+        input_tokens = len(user_input.split())
+        logger.debug(f"Prompt Tokens: {prompt_tokens}, Input Tokens: {input_tokens}")
         if prompt_tokens > 4096:
             logger.warning("Prompt may be truncated due to token limit")
 
@@ -173,15 +172,18 @@ def generate_response(state: Dict) -> Dict:
         logger.debug(f"Gemini Response: {response}")
 
         response_tokens = len(response.split())
-        total_tokens = prompt_tokens + len(user_input.split()) + response_tokens
+        total_tokens = prompt_tokens + input_tokens + response_tokens
+        logger.debug(f"Total Tokens: {total_tokens}")
+
         if total_tokens > token_budget:
-            response = response[:token_budget - prompt_tokens - len(user_input.split())].rsplit(" ", 1)[0] + "..."
+            response = response[:token_budget - prompt_tokens - input_tokens].rsplit(" ", 1)[0] + "..."
+            logger.warning("Response truncated due to token budget")
 
         state["raw_response"] = response
         state["tokens_used_in_session"] = total_tokens
 
     except Exception as e:
-        logger.error(f"Exception in generate_response: {str(e)}")
+        logger.error(f"Exception in generate_response: {str(e)}", exc_info=True)
         if retrieved_docs:
             if "project" in user_input:
                 response = f"Hey {user_name}, I’m Dagi! {extract_most_recent_project(retrieved_docs)}"
