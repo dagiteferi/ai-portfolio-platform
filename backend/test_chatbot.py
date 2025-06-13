@@ -56,7 +56,7 @@ def test_conversation():
     sys.path.insert(0, str(project_root))
 
     port = find_free_port(8000)
-    base_url = f"http://127.0.0.1:{port}/api/chat"  # Changed to /api/chat
+    base_url = f"http://127.0.0.1:{port}/api/chat"
     health_url = f"http://127.0.0.1:{port}/health"
     fallback_port = 8000
     fallback_health_url = f"http://127.0.0.1:{fallback_port}/health"
@@ -107,7 +107,7 @@ def test_conversation():
                         logger.info(f"Uvicorn server found on fallback port {fallback_port}")
                         server_started = True
                         port = fallback_port
-                        base_url = f"http://127.0.0.1:{port}/api/chat"  # Changed to /api/chat
+                        base_url = f"http://127.0.0.1:{port}/api/chat"
                         break
                     logger.debug(f"Fallback health check attempt {attempt + 1} on port {fallback_port} returned status: {response.status_code}")
                 except requests.ConnectionError:
