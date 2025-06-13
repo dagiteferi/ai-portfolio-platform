@@ -210,3 +210,28 @@ def trim_format_response(state: Dict) -> Dict:
     logger.debug(f"trim_format_response - Final response: {final_response}")
     logger.debug(f"trim_format_response - Duration: {time.time() - start_time:.2f}s")
     return state
+
+def update_memory(state: Dict) -> Dict:
+    start_time = time.time()
+    logger.debug(f"update_memory - State before: {state or 'None'}")
+    state = state or {}
+    user_input = state.get("input", "")
+    raw_response = state.get("raw_response", "")
+    user_name = state.get("user_name", "user")
+
+    if "history" not in state:
+        state["history"] = []
+
+    if user_input and raw_response:
+        state["history"].append({
+            "user": user_input,
+            "assistant": raw_response,
+            "timestamp": datetime.now().isoformat(),
+            "user_name": user_name
+        })
+        # Limit history to last 10 interactions to manage memory
+        state["history"] = state["history"][-10:]
+
+    logger.debug(f"update_memory - State after: {state}")
+    logger.debug(f"update_memory - Duration: {time.time() - start_time:.2f}s")
+    return state
