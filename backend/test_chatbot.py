@@ -12,17 +12,17 @@ import pathlib
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler('test_chatbot_debug.log')]
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler('chatbot_test.log')]
 )
 logger = logging.getLogger(__name__)
 
-def is_port_in_use(port):
+def is_port(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
 def find_free_port(start_port=8000):
     port = start_port
-    while is_port_in_use(port):
+    while is_port(port):
         port += 1
     return port
 
@@ -44,31 +44,34 @@ def test_conversation():
             "session_id": "bob456",
             "queries": [
                 "I’m hiring",
-                "where did Dagi intern?",
+                "where did you intern?",
                 "Tell me about your GitHub repositories"
             ]
         }
     ]
 
-    project_root = pathlib.Path(__file__).parent.absolute()
+    project_root = pathlib.Path(__file__).parent.parent
     original_dir = os.getcwd()
     os.chdir(project_root)
     sys.path.insert(0, str(project_root))
 
     port = find_free_port(8000)
-    base_url = f"http://127.0.0.1:{port}/api/chatbot"
+    base_url = f"http://127.0.0.1:{port}/api/chat"  # Changed to /api/chat
     health_url = f"http://127.0.0.1:{port}/health"
-    fallback_port = 8000  # Fallback to default port if dynamic port fails
+    fallback_port = 8000
     fallback_health_url = f"http://127.0.0.1:{fallback_port}/health"
     server_process = None
     try:
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH', '')}"
         server_process = subprocess.Popen(
-            ["uvicorn", "main:app", "--host", "127.0.0.1", "--port", str(port), "--reload"],
+            ["uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", str(port), "--reload"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            cwd=str(project_root)
+            cwd=str(project_root),
+            env=env
         )
 
         def log_uvicorn_output():
@@ -77,12 +80,11 @@ def test_conversation():
 
         threading.Thread(target=log_uvicorn_output, daemon=True).start()
 
-        # Wait for server to start with retries
-        max_attempts = 10
+        max_attempts = 12
         attempt = 0
         server_started = False
         while attempt < max_attempts:
-            time.sleep(6)  # Increased wait time per attempt
+            time.sleep(8)
             try:
                 response = requests.get(health_url, timeout=5)
                 if response.status_code == 200:
@@ -94,19 +96,18 @@ def test_conversation():
                 logger.debug(f"Health check attempt {attempt + 1} on port {port} failed: Server not yet running")
             attempt += 1
 
-        # Try fallback port if primary port fails
         if not server_started:
             logger.warning(f"Failed to start server on port {port}, trying fallback port {fallback_port}")
             attempt = 0
             while attempt < max_attempts:
-                time.sleep(6)
+                time.sleep(8)
                 try:
                     response = requests.get(fallback_health_url, timeout=5)
                     if response.status_code == 200:
                         logger.info(f"Uvicorn server found on fallback port {fallback_port}")
                         server_started = True
                         port = fallback_port
-                        base_url = f"http://127.0.0.1:{port}/api/chatbot"
+                        base_url = f"http://127.0.0.1:{port}/api/chat"  # Changed to /api/chat
                         break
                     logger.debug(f"Fallback health check attempt {attempt + 1} on port {fallback_port} returned status: {response.status_code}")
                 except requests.ConnectionError:
@@ -116,10 +117,17 @@ def test_conversation():
         if not server_started:
             raise Exception(f"Uvicorn server failed to start after {max_attempts} attempts on ports {port} and {fallback_port}")
 
-        # Check if GitHub knowledge base is loaded
-        github_path = os.path.join(project_root, "ai_core", "knowledge", "github_knowledge_base.json")
+        github_path = os.path.join(project_root, "backend", "ai_core", "knowledge", "github_knowledge_base.json")
         if not os.path.exists(github_path):
             logger.warning(f"GitHub knowledge base not found at: {github_path}. GitHub queries may fall back to static data.")
+        else:
+            try:
+                with open(github_path, "r", encoding="utf-8") as f:
+                    github_data = json.load(f)
+                if not isinstance(github_data, list):
+                    logger.error(f"GitHub knowledge base is not a list: {type(github_data)}")
+            except Exception as e:
+                logger.error(f"Invalid GitHub knowledge base: {str(e)}")
 
         for user in users:
             history = []
@@ -133,9 +141,13 @@ def test_conversation():
                     logger.info(f"Response Data: {response_data}")
                     response_text = response_data.get("response", "")
                     logger.info(f"Response: {response_text}")
+
+                    if response.status_code != 200:
+                        logger.error(f"Request failed with status {response.status_code}: {response_data}")
+                        raise Exception(f"Request failed: {response_data}")
+
                     history.append({"user": query, "assistant": response_text})
 
-                    # Validate responses
                     if "github" in query.lower():
                         if os.path.exists(github_path):
                             assert any(word in response_text.lower() for word in ["github", "repository", "project"]), \

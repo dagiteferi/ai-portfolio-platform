@@ -25,7 +25,7 @@ logs/
 *.sqlite3
 *.db
 description.md
-git_knowledge_base.json
+github_knowledge_base.json
 
 # OS generated files
 .DS_Store
