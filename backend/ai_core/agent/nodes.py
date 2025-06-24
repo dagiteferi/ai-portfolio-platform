@@ -235,3 +235,9 @@ def update_memory(state: Dict) -> Dict:
     logger.debug(f"update_memory - State after: {state}")
     logger.debug(f"update_memory - Duration: {time.time() - start_time:.2f}s")
     return state
+
+def return_response(state: Dict) -> Dict:
+    # This extracts the final response and returns only the output needed by the API
+    return {
+        "raw_response": state.get("response", "No response generated.")
+    }

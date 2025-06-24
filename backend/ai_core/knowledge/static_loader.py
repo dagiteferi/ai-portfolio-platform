@@ -3,6 +3,7 @@ import os
 from typing import List
 from langchain_core.documents import Document
 import logging
+import time
 
 logging.basicConfig(
     level=logging.DEBUG,
