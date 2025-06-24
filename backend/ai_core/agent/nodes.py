@@ -206,7 +206,7 @@ def trim_format_response(state: Dict) -> Dict:
         final_response += "\n\nInterested in my skills? Let’s connect at dagiteferi2011@gmail.com!"
     
     state["response"] = final_response
-    log_interaction(user_name, state.get("input", ""), final_response)
+    log_interaction( state.get("input", ""), final_response)
     logger.debug(f"trim_format_response - Final response: {final_response}")
     logger.debug(f"trim_format_response - Duration: {time.time() - start_time:.2f}s")
     return state
