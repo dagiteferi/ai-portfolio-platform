@@ -19,15 +19,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def receive_user_input(state: Dict) -> Dict:
+    import time
     start_time = time.time()
     logger.debug(f"receive_user_input - State: {state or 'None'}")
+    
     state = state or {}
+
+    # Normalize: map "message" to "input" if "input" not already present
+    if "message" in state and "input" not in state:
+        state["input"] = state["message"]
+
+    # Ensure required defaults are set
     if "tokens_used_in_session" not in state:
         state["tokens_used_in_session"] = 0
     if "role_confidence" not in state:
         state["role_confidence"] = {"visitor": 0.0, "recruiter": 0.0}
+
     logger.debug(f"receive_user_input - Duration: {time.time() - start_time:.2f}s")
     return state
+
+
 
 def infer_user_role(state: Dict) -> Dict:
     start_time = time.time()
@@ -81,44 +92,55 @@ def retrieve_rag_context(state: Dict) -> Dict:
     logger.debug(f"retrieve_rag_context - Duration: {time.time() - start_time:.2f}s")
     return state
 
+
 def generate_response(state: Dict) -> Dict:
     start_time = time.time()
     logger.debug(f"generate_response - State: {state or 'None'}")
     state = state or {}
-    user_input = state.get("input", "").lower()
+
+    user_input = (state.get("input") or state.get("message") or "").strip()
+    user_input_lower = user_input.lower()
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
 
-    if "tokens_used_in_session" not in state:
+    if "tokens_used_in_session" not in state or state["tokens_used_in_session"] is None:
         state["tokens_used_in_session"] = 0
     tokens_used = state["tokens_used_in_session"] or 0
     token_budget = 2000
 
-    logger.debug(f"Tokens used: {tokens_used}, Token budget: {token_budget}")
+    # Check token budget limit
     if tokens_used >= token_budget:
         state["raw_response"] = f"Hey {user_name}, we’ve been chatting a lot! Let’s take a break. What’s your favorite topic?"
         logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
         return state
 
-    if user_input in ["hi", "hello", "hey"]:
+    # Handle simple greetings fast
+    if user_input_lower in ["hi", "hello", "hey"]:
         state["raw_response"] = f"Hey {user_name}! I’m Dagi—excited to chat! What brought you here today?"
+        state["tokens_used_in_session"] = tokens_used + len(user_input.split())
         logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
         return state
 
+    # Use Gemini LLM to generate response
     try:
         gemini = GeminiClient(temperature=0.3)
         history = state.get("history", [])
-        history_str = "\n".join([f"{user_name}: {msg['user']}\nMe: {msg['assistant']}" for msg in history]) if history else ""
+        history_str = "\n".join([f"{msg.get('user_name', user_name)}: {msg['user']}\nMe: {msg['assistant']}" for msg in history]) if history else ""
+
         prompt = get_system_prompt("recruiter" if is_recruiter else "visitor", user_name, retrieved_docs, user_input)
         logger.debug(f"Generated Prompt: {prompt}")
+
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
 
         prompt_tokens = len(full_prompt.split())
         input_tokens = len(user_input.split())
-        logger.debug(f"Prompt Tokens: {prompt_tokens}, Input Tokens: {input_tokens}")
 
-        messages = [{"role": "system", "content": full_prompt}, {"role": "user", "content": f"{user_name} says: {user_input}"}]
+        messages = [
+            {"role": "system", "content": full_prompt},
+            {"role": "user", "content": f"{user_name} says: {user_input}"}
+        ]
+
         gemini_start = time.time()
         response = gemini.generate_response(messages)
         logger.debug(f"Gemini Response Time: {time.time() - gemini_start:.2f}s")
@@ -129,23 +151,28 @@ def generate_response(state: Dict) -> Dict:
         logger.debug(f"Total Tokens: {total_tokens}")
 
         state["raw_response"] = response
-        state["tokens_used_in_session"] = total_tokens
+        state["tokens_used_in_session"] = tokens_used + total_tokens
 
     except Exception as e:
         logger.error(f"Exception in generate_response: {str(e)}", exc_info=True)
+        # Provide fallback response based on retrieved docs and user input
+        fallback_response = ""
         if retrieved_docs:
-            if "project" in user_input:
-                response = f"Hey {user_name}, I’m Dagi! {extract_most_recent_project(retrieved_docs)}"
-            elif "where did" in user_input and "intern" in user_input:
-                response = f"Hey {user_name}, I’m Dagi! I interned at Kifiya. Want to know more about my experience?"
+            if "project" in user_input_lower:
+                fallback_response = f"Hey {user_name}, I’m Dagi! {extract_most_recent_project(retrieved_docs)}"
+            elif "where did" in user_input_lower and "intern" in user_input_lower:
+                fallback_response = f"Hey {user_name}, I’m Dagi! I interned at Kifiya. Want to know more about my experience?"
             else:
-                response = f"Hey {user_name}, I’m Dagi! An error occurred, but here’s some info: {''.join(retrieved_docs)[:200]}... What else can I tell you?"
+                fallback_response = f"Hey {user_name}, I’m Dagi! An error occurred, but here’s some info: {''.join(retrieved_docs)[:200]}... What else can I tell you?"
         else:
-            response = f"Hey {user_name}, I’m Dagi! An error occurred—I’m a 4th-year CS student at Unity University and interned at Kifiya. What’s your favorite tech topic?"
-        state["raw_response"] = response
+            fallback_response = f"Hey {user_name}, I’m Dagi! An error occurred—I’m a 4th-year CS student at Unity University and interned at Kifiya. What’s your favorite tech topic?"
+
+        state["raw_response"] = fallback_response
         state["tokens_used_in_session"] = tokens_used
+
     logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
     return state
+
 
 def extract_most_recent_project(docs: list) -> str:
     start_time = time.time()
@@ -239,5 +266,5 @@ def update_memory(state: Dict) -> Dict:
 def return_response(state: Dict) -> Dict:
     # This extracts the final response and returns only the output needed by the API
     return {
-        "raw_response": state.get("response", "No response generated.")
+        "response": state.get("response", "No response generated.")
     }

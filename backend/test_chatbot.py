@@ -84,14 +84,16 @@ def make_chat_request(user):
             json={
                 "message": user["query"],
                 "user_name": user["name"],
+                "session_id": user["session_id"],  # ✅ Add this line
                 "history": []
             },
-            timeout=30  # Increased timeout
+            timeout=30
         )
         return response
     except requests.RequestException as e:
         logger.error(f"Request failed for {user['name']}: {str(e)}")
         raise
+
 
 def test_chatbot_conversation(server):
     users = [
