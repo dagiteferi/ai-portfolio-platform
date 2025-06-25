@@ -126,7 +126,14 @@ def generate_response(state: Dict) -> Dict:
     try:
         gemini = GeminiClient(temperature=0.3)
         history = state.get("history", [])
-        history_str = "\n".join([f"{msg.get('user_name', user_name)}: {msg['user']}\nMe: {msg['assistant']}" for msg in history]) if history else ""
+        
+        history_str = "\n".join([
+           f"{getattr(msg, 'user_name', user_name)}: {getattr(msg, 'user', '')}\nMe: {getattr(msg, 'assistant', '')}"
+           for msg in history
+]) if history else ""
+
+
+
 
         prompt = get_system_prompt("recruiter" if is_recruiter else "visitor", user_name, retrieved_docs, user_input)
         logger.debug(f"Generated Prompt: {prompt}")
