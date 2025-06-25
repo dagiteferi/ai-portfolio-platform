@@ -232,15 +232,17 @@ def trim_format_response(state: Dict) -> Dict:
     context = state.get("response_context", "")
     is_recruiter = state.get("is_recruiter", False)
 
-    if not raw_response:
-        raw_response = f"Hey {user_name}, I’m Dagi! Let’s chat about tech—any topic you like?"
+    # Only use greeting if the raw_response is a greeting
+    if raw_response.lower().startswith("hey") and ("excited to chat" in raw_response or "what brought you here" in raw_response):
+        final_response = raw_response
+    else:
+        # For all other answers, just use the LLM response and context (if needed)
+        final_response = f"{context}\n\n{raw_response}" if context else raw_response
+        if is_recruiter:
+            final_response += "\n\nInterested in my skills? Let’s connect at dagiteferi2011@gmail.com!"
 
-    final_response = f"{context}\n\n{raw_response}" if context else raw_response
-    if is_recruiter:
-        final_response += "\n\nInterested in my skills? Let’s connect at dagiteferi2011@gmail.com!"
-    
-    state["response"] = final_response
-    log_interaction( state.get("input", ""), final_response)
+    state["response"] = final_response.strip()
+    log_interaction(state.get("input", ""), final_response)
     logger.debug(f"trim_format_response - Final response: {final_response}")
     logger.debug(f"trim_format_response - Duration: {time.time() - start_time:.2f}s")
     return state
