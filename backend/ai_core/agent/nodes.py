@@ -271,7 +271,8 @@ def update_memory(state: Dict) -> Dict:
     return state
 
 def return_response(state: Dict) -> Dict:
-    # This extracts the final response and returns only the output needed by the API
+    # Always return at least one required field
     return {
+        "raw_response": state.get("raw_response", "No response generated."),
         "response": state.get("response", "No response generated.")
     }
