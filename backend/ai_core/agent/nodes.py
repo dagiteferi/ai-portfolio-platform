@@ -201,7 +201,7 @@ def set_professional_context(state: Dict) -> Dict:
     state = state or {}
     user_name = state.get("user_name", "user")
     state["response_context"] = (
-        f"Hey {user_name}, I’m Dagi, a 4th-year CS student at Unity University with a passion for AI and full-stack development. "
+        f" {user_name}, , a 4th-year CS student at Unity University with a passion for AI and full-stack development. "
         "I’ve interned at Kifiya, built a credit scoring model with 0.9998 ROC-AUC, and worked on fraud detection at Black ET, reducing false positives by 20%. "
         "I specialize in Python, React, FastAPI, and machine learning. Let’s dive into how I can contribute to your team!"
     )
@@ -215,7 +215,7 @@ def set_visitor_context(state: Dict) -> Dict:
     state = state or {}
     user_name = state.get("user_name", "user")
     state["response_context"] = (
-        f"Hey {user_name}, I’m Dagi! Welcome to my world of tech. I’m a 4th-year CS student at Unity University, "
+        f" {user_name},  Welcome to my world of tech. I’m a 4th-year CS student at Unity University, "
         "obsessed with building cool stuff like AI chatbots and credit scoring models. I’ve interned at Kifiya and tackled fraud detection with PyTorch. "
         "Fun fact: I once debugged code at 3AM with Ethiopian coffee! What tech topic are you curious about?"
     )
