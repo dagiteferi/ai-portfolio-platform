@@ -47,7 +47,8 @@ def run_server():
 def server():
     proc = Process(target=run_server, daemon=True)
     proc.start()
-    time.sleep(10)
+    time.sleep(10)  # give server time to start
+
     max_attempts = 5
     attempt = 1
     while attempt <= max_attempts:
@@ -57,13 +58,14 @@ def server():
                 logger.info(f"Uvicorn server started successfully on port {PORT}")
                 break
         except requests.RequestException as e:
-            logger.debug(f"Health check attempt {attempt} on port {PORT} failed: {str(e)}")
+            logger.debug(f"Health check attempt {attempt} failed: {str(e)}")
             time.sleep(2)
             attempt += 1
     if attempt > max_attempts:
-        logger.error(f"Failed to start Uvicorn server on port {PORT} after {max_attempts} attempts")
+        logger.error(f"Failed to start Uvicorn server after {max_attempts} attempts")
         proc.terminate()
         raise RuntimeError("Server failed to start")
+
     yield
     proc.terminate()
 
@@ -78,32 +80,22 @@ def test_health_check(client):
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def make_chat_request(user):
-    try:
-        response = requests.post(
-            f"{BASE_URL}/api/chat",
-            json={
-                "message": user["query"],
-                "user_name": user["name"],
-                "session_id": user["session_id"],  # ✅ Add this line
-                "history": []
-            },
-            timeout=30
-        )
-        return response
-    except requests.RequestException as e:
-        logger.error(f"Request failed for {user['name']}: {str(e)}")
-        raise
-
+    data = {
+        "user_name": user.get("user_name") or user.get("name"),
+        "session_id": user["session_id"],
+        "message": user.get("message") or user.get("query") or user.get("input")
+    }
+    return requests.post(f"{BASE_URL}/api/chat", json=data)
 
 def test_chatbot_conversation(server):
     users = [
-        {"name": "Alice", "session_id": "alice123", "query": "HI", "expected": "Hey Alice! I’m Dagi—excited to chat! What brought you here today?"},
-        {"name": "Bob", "session_id": "bob456", "query": "Tell me about Dagi’s projects", "expected_contains": "AI Portfolio Platform"},
-        {"name": "Charlie", "session_id": "charlie789", "query": "Where did Dagi intern?", "expected_contains": "Kifiya"}
+        {"name": "Alice", "session_id": "alice123", "message": "HI", "expected": "Hey Alice! I’m Dagi—excited to chat! What brought you here today?"},
+        {"name": "Bob", "session_id": "bob456", "message": "Tell me about Dagi’s projects", "expected_contains": "AI Portfolio Platform"},
+        {"name": "Charlie", "session_id": "charlie789", "message": "Where did Dagi intern?", "expected_contains": "Kifiya"}
     ]
 
     for user in users:
-        logger.info(f"Testing conversation for {user['name']} (Session ID: {user['session_id']}) - Query: {user['query']}")
+        logger.info(f"Testing conversation for {user['name']} (Session ID: {user['session_id']}) - Message: {user['message']}")
         try:
             response = make_chat_request(user)
             logger.info(f"Status Code: {response.status_code}")
