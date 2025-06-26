@@ -74,14 +74,42 @@ def infer_user_role(state: Dict) -> Dict:
     logger.debug(f"infer_user_role - Duration: {time.time() - start_time:.2f}s")
     return state
 
+# def retrieve_rag_context(state: Dict) -> Dict:
+#     start_time = time.time()
+#     logger.debug(f"retrieve_rag_context - State: {state or 'None'}")
+#     state = state or {}
+#     if "input" not in state:
+#         state["retrieved_docs"] = []
+#     else:
+#         user_input = state["input"]
+#         try:
+#             docs = faiss_manager.search_combined(user_input, k=2) if user_input else []
+#             state["retrieved_docs"] = [doc.page_content for doc in docs] if docs else []
+#             logger.debug(f"Retrieved documents for input '{user_input}': {state['retrieved_docs']}")
+#         except Exception as e:
+#             logger.error(f"FAISS search failed: {str(e)}")
+#             state["retrieved_docs"] = []
+#     logger.debug(f"retrieve_rag_context - Duration: {time.time() - start_time:.2f}s")
+#     return state
+
+
 def retrieve_rag_context(state: Dict) -> Dict:
+    import time
     start_time = time.time()
     logger.debug(f"retrieve_rag_context - State: {state or 'None'}")
     state = state or {}
-    if "input" not in state:
+    user_input = state.get("input", "")
+
+    # Keywords that require knowledge base search
+    search_keywords = [
+        "project", "repo", "repository", "experience", "education", "contact", "email", "about", "skill", "intern", "work", "background"
+    ]
+    greetings = ["hi", "hello", "hey", "how are you", "good morning", "good afternoon", "good evening"]
+
+    if any(greet in user_input.lower() for greet in greetings):
         state["retrieved_docs"] = []
-    else:
-        user_input = state["input"]
+        logger.debug("Skipped knowledge base search for greeting/small talk input.")
+    elif any(keyword in user_input.lower() for keyword in search_keywords):
         try:
             docs = faiss_manager.search_combined(user_input, k=2) if user_input else []
             state["retrieved_docs"] = [doc.page_content for doc in docs] if docs else []
@@ -89,6 +117,10 @@ def retrieve_rag_context(state: Dict) -> Dict:
         except Exception as e:
             logger.error(f"FAISS search failed: {str(e)}")
             state["retrieved_docs"] = []
+    else:
+        state["retrieved_docs"] = []
+        logger.debug("Skipped knowledge base search for non-factual input.")
+
     logger.debug(f"retrieve_rag_context - Duration: {time.time() - start_time:.2f}s")
     return state
 
@@ -100,6 +132,7 @@ def generate_response(state: Dict) -> Dict:
 
     user_input = (state.get("input") or state.get("message") or "").strip()
     user_input_lower = user_input.lower()
+    profile = state.get("profile", {}) 
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
@@ -122,6 +155,18 @@ def generate_response(state: Dict) -> Dict:
         logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
         return state
 
+    # Direct fallback for contact info
+    if any(word in user_input_lower for word in ["contact", "email", "phone", "linkedin"]):
+        email = profile.get("email", "dagiteferi2011@gmail.com")
+        phone = profile.get("phone", "+251-920-362-324")
+        linkedin = profile.get("linkedin", "https://linkedin.com/in/dagmawi-teferi")
+        state["raw_response"] = (
+            f"You can reach me at {email}, phone: {phone}, or LinkedIn: {linkedin}."
+        )
+        state["tokens_used_in_session"] = tokens_used + len(user_input.split())
+        logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
+        return state
+
     # Use Gemini LLM to generate response
     try:
         gemini = GeminiClient(temperature=0.3)
@@ -130,10 +175,7 @@ def generate_response(state: Dict) -> Dict:
         history_str = "\n".join([
            f"{getattr(msg, 'user_name', user_name)}: {getattr(msg, 'user', '')}\nMe: {getattr(msg, 'assistant', '')}"
            for msg in history
-]) if history else ""
-
-
-
+        ]) if history else ""
 
         prompt = get_system_prompt("recruiter" if is_recruiter else "visitor", user_name, retrieved_docs, user_input)
         logger.debug(f"Generated Prompt: {prompt}")
@@ -180,20 +222,6 @@ def generate_response(state: Dict) -> Dict:
     logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
     return state
 
-
-def extract_most_recent_project(docs: list) -> str:
-    start_time = time.time()
-    logger.debug(f"extract_most_recent_project - Docs: {docs}")
-    project_pattern = r"(?i)(?:project|repo|repository)\s*:\s*([^\n]+)"
-    projects = []
-    for doc in docs:
-        matches = re.findall(project_pattern, doc)
-        projects.extend(matches)
-    
-    result = projects[0] if projects else "I’ve worked on projects like the AI Portfolio Platform, but I don’t have details from recent docs."
-    logger.debug(f"Extracted project: {result}")
-    logger.debug(f"extract_most_recent_project - Duration: {time.time() - start_time:.2f}s")
-    return result
 
 def set_professional_context(state: Dict) -> Dict:
     start_time = time.time()
@@ -271,6 +299,12 @@ def update_memory(state: Dict) -> Dict:
     logger.debug(f"update_memory - State after: {state}")
     logger.debug(f"update_memory - Duration: {time.time() - start_time:.2f}s")
     return state
+def extract_most_recent_project(retrieved_docs):
+    # Simple logic: return the first project-related doc snippet
+    for doc in retrieved_docs:
+        if "project" in doc.lower() or "model" in doc.lower():
+            return doc[:200]  # Return a short snippet
+    return retrieved_docs[0][:200] if retrieved_docs else "No project info found."
 
 def return_response(state: Dict) -> Dict:
     # Always return at least one required field

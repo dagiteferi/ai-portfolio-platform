@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List
+from typing import List, Tuple, Dict
 from langchain_core.documents import Document
 import logging
 import time
@@ -15,13 +15,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def load_static_content(source: str = "all") -> List[Document]:
+def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
     """
-    Load static content from JSON files and return a list of Document objects.
-    Supports nested GitHub knowledge base structure with profile, repositories, and recent_activity.
+    Load static content from JSON files and return a tuple:
+    (list of Document objects, profile dictionary).
     """
     start_time = time.time()
     documents = []
+    profile_data = {}
     knowledge_base_path = "backend/ai_core/knowledge/github_knowledge_base.json"
 
     try:
@@ -32,20 +33,33 @@ def load_static_content(source: str = "all") -> List[Document]:
 
             # Process profile
             if "profile" in data:
+                profile_data = data["profile"]
+                education_str = ""
+                if "education" in profile_data and isinstance(profile_data["education"], list):
+                    education_str = "\n".join(
+                        [
+                            f"{edu.get('degree', edu.get('certificate', '') or '')} at {edu.get('institution', '')} ({edu.get('year', '')}), GPA: {edu.get('gpa', '')}"
+                            for edu in profile_data["education"]
+                        ]
+                    )
                 profile_content = (
                     f"# Dagmawi Teferi Profile\n"
-                    f"Name: {data['profile'].get('name', 'Unknown')}\n"
-                    f"Bio: {data['profile'].get('bio', '')}\n"
-                    f"Location: {data['profile'].get('location', '')}\n"
-                    f"Followers: {data['profile'].get('followers', 0)}\n"
-                    f"Following: {data['profile'].get('following', 0)}\n"
-                    f"Public Repos: {data['profile'].get('public_repos', 0)}\n"
-                    f"GitHub URL: {data['profile'].get('html_url', '')}\n"
-                    f"Created At: {data['profile'].get('created_at', '')}"
+                    f"Name: {profile_data.get('name', 'Unknown')}\n"
+                    f"Bio: {profile_data.get('bio', '')}\n"
+                    f"Location: {profile_data.get('location', '')}\n"
+                    f"Email: {profile_data.get('email', '')}\n"
+                    f"Phone: {profile_data.get('phone', '')}\n"
+                    f"LinkedIn: {profile_data.get('linkedin', '')}\n"
+                    f"Education:\n{education_str}\n"
+                    f"Experience: {profile_data.get('experience', '')}\n"
+                    f"Skills: {profile_data.get('skills', '')}\n"
+                    f"Certifications: {profile_data.get('certifications', '')}\n"
+                    f"Languages: {profile_data.get('languages', '')}\n"
+                    f"Awards: {profile_data.get('awards', '')}\n"
                 )
                 documents.append(Document(
                     page_content=profile_content,
-                    metadata={"title": "Dagmawi Teferi Profile", "url": data['profile'].get('html_url', '')}
+                    metadata={"title": "Dagmawi Teferi Profile", "url": profile_data.get('linkedin', '')}
                 ))
                 logger.debug("Added profile document")
 
@@ -75,14 +89,14 @@ def load_static_content(source: str = "all") -> List[Document]:
 
         else:
             logger.warning(f"No valid source or file not found: {knowledge_base_path}")
-            return []
+            return [], {}
 
     except json.JSONDecodeError as e:
         logger.error(f"Failed to parse JSON: {str(e)}")
-        return []
+        return [], {}
     except Exception as e:
         logger.error(f"Error loading static content: {str(e)}")
-        return []
+        return [], {}
 
     logger.debug(f"Loaded {len(documents)} documents in {time.time() - start_time:.2f}s")
-    return documents
+    return documents, profile_data

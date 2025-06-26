@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 from backend.ai_core.agent.graph import create_chatbot_graph
 from backend.vector_db.faiss_manager import faiss_manager
+# from backend.main import app
+from fastapi import APIRouter, HTTPException, Request
 import logging
 
 logging.basicConfig(
@@ -23,27 +25,33 @@ class ChatRequest(BaseModel):
     user_name: Optional[str] = None
     history: Optional[List[ChatMessage]] = None
 
+
+
 @router.post("/chat")
-async def chat_endpoint(request: ChatRequest):
-    logger.info(f"Received chat request from {request.user_name or 'user'}: {request.message}")
+async def chat_endpoint(request: Request, chat: ChatRequest):
+    logger.info(f"Received chat request from {chat.user_name or 'user'}: {chat.message}")
     try:
         graph = create_chatbot_graph()
         if graph is None:
             logger.error("Failed to create chatbot graph")
             raise ValueError("Chatbot graph initialization failed")
 
-        results = faiss_manager.search_combined(request.message, k=2)
+        results = faiss_manager.search_combined(chat.message, k=2)
         if results is None:
             logger.warning("FAISS search returned None; using empty retrieved docs")
             retrieved_docs = []
         else:
             retrieved_docs = [doc.page_content for doc in results]
 
+        # Access profile from app state via request
+        profile = request.app.state.profile
+
         state = {
-            "input": request.message,
-            "user_name": request.user_name or "user",
-            "history": request.history or [],
-            "retrieved_docs": retrieved_docs
+            "input": chat.message,
+            "user_name": chat.user_name or "user",
+            "history": chat.history or [],
+            "retrieved_docs": retrieved_docs,
+            "profile": profile
         }
         response = await graph.ainvoke(state)
         if response is None:

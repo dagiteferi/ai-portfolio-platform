@@ -26,8 +26,9 @@ app.add_middleware(
 
 # Initialize FAISS vector store
 try:
-    documents = load_static_content(source="all")
+    documents, profile = load_static_content(source="all")  
     faiss_manager.initialize(documents)
+    app.state.profile = profile 
     logger.info("FAISS vector store initialized at startup")
 except Exception as e:
     logger.error(f"Failed to initialize FAISS at startup: {str(e)}")
