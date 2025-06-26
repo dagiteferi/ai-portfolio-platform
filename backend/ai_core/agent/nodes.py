@@ -124,102 +124,81 @@ def retrieve_rag_context(state: Dict) -> Dict:
     logger.debug(f"retrieve_rag_context - Duration: {time.time() - start_time:.2f}s")
     return state
 
-
 def generate_response(state: Dict) -> Dict:
+    import time
     start_time = time.time()
-    logger.debug(f"generate_response - State: {state or 'None'}")
     state = state or {}
 
     user_input = (state.get("input") or state.get("message") or "").strip()
     user_input_lower = user_input.lower()
-    profile = state.get("profile", {}) 
+    profile = state.get("profile", {})
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
-
-    if "tokens_used_in_session" not in state or state["tokens_used_in_session"] is None:
-        state["tokens_used_in_session"] = 0
-    tokens_used = state["tokens_used_in_session"] or 0
+    tokens_used = state.get("tokens_used_in_session", 0)
     token_budget = 2000
 
-    # Check token budget limit
-    if tokens_used >= token_budget:
-        state["raw_response"] = f"Hey {user_name}, we’ve been chatting a lot! Let’s take a break. What’s your favorite topic?"
-        logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
-        return state
-
-    # Handle simple greetings fast
-    if user_input_lower in ["hi", "hello", "hey"]:
-        state["raw_response"] = f"Hey {user_name}! I’m Dagi—excited to chat! What brought you here today?"
-        state["tokens_used_in_session"] = tokens_used + len(user_input.split())
-        logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
-        return state
-
-    # Direct fallback for contact info
+    # Direct fallback for contact info (always from knowledge base)
     if any(word in user_input_lower for word in ["contact", "email", "phone", "linkedin"]):
-        email = profile.get("email", "dagiteferi2011@gmail.com")
-        phone = profile.get("phone", "+251-920-362-324")
-        linkedin = profile.get("linkedin", "https://linkedin.com/in/dagmawi-teferi")
-        state["raw_response"] = (
-            f"You can reach me at {email}, phone: {phone}, or LinkedIn: {linkedin}."
-        )
+        email = profile.get("email")
+        phone = profile.get("phone")
+        linkedin = profile.get("linkedin")
+        if linkedin and not linkedin.startswith("http"):
+            linkedin = "https://" + linkedin.lstrip("/")
+        parts = []
+        if "email" in user_input_lower and email:
+            parts.append(f"My email is {email}.")
+        if "phone" in user_input_lower and phone:
+            parts.append(f"My phone number is {phone}.")
+        if "linkedin" in user_input_lower and linkedin:
+            parts.append(f"My LinkedIn: {linkedin}")
+        if "contact" in user_input_lower or not parts:
+            if email:
+                parts.append(f"Email: {email}")
+            if phone:
+                parts.append(f"Phone: {phone}")
+            if linkedin:
+                parts.append(f"LinkedIn: {linkedin}")
+        if not parts:
+            state["raw_response"] = "Sorry, I don't have that information in my knowledge base."
+        else:
+            state["raw_response"] = " ".join(parts)
         state["tokens_used_in_session"] = tokens_used + len(user_input.split())
-        logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
         return state
 
-    # Use Gemini LLM to generate response
+    # Use LLM with retrieved context
     try:
+        prompt = get_system_prompt(
+            "recruiter" if is_recruiter else "visitor",
+            user_name,
+            retrieved_docs,
+            user_input
+        )
         gemini = GeminiClient(temperature=0.3)
         history = state.get("history", [])
-        
         history_str = "\n".join([
-           f"{getattr(msg, 'user_name', user_name)}: {getattr(msg, 'user', '')}\nMe: {getattr(msg, 'assistant', '')}"
-           for msg in history
+            f"{getattr(msg, 'user_name', user_name)}: {getattr(msg, 'user', '')}\nMe: {getattr(msg, 'assistant', '')}"
+            for msg in history
         ]) if history else ""
-
-        prompt = get_system_prompt("recruiter" if is_recruiter else "visitor", user_name, retrieved_docs, user_input)
-        logger.debug(f"Generated Prompt: {prompt}")
-
         full_prompt = f"{prompt}\n\nHistory:\n{history_str}\n\nInstruction: Use the template."
-
         prompt_tokens = len(full_prompt.split())
         input_tokens = len(user_input.split())
-
         messages = [
             {"role": "system", "content": full_prompt},
             {"role": "user", "content": f"{user_name} says: {user_input}"}
         ]
-
-        gemini_start = time.time()
         response = gemini.generate_response(messages)
-        logger.debug(f"Gemini Response Time: {time.time() - gemini_start:.2f}s")
-        logger.debug(f"Gemini Response: {response}")
-
         response_tokens = len(response.split())
         total_tokens = prompt_tokens + input_tokens + response_tokens
-        logger.debug(f"Total Tokens: {total_tokens}")
-
         state["raw_response"] = response
         state["tokens_used_in_session"] = tokens_used + total_tokens
-
     except Exception as e:
-        logger.error(f"Exception in generate_response: {str(e)}", exc_info=True)
-        # Provide fallback response based on retrieved docs and user input
-        fallback_response = ""
-        if retrieved_docs:
-            if "project" in user_input_lower:
-                fallback_response = f"Hey {user_name}, I’m Dagi! {extract_most_recent_project(retrieved_docs)}"
-            elif "where did" in user_input_lower and "intern" in user_input_lower:
-                fallback_response = f"Hey {user_name}, I’m Dagi! I interned at Kifiya. Want to know more about my experience?"
-            else:
-                fallback_response = f"Hey {user_name}, I’m Dagi! An error occurred, but here’s some info: {''.join(retrieved_docs)[:200]}... What else can I tell you?"
-        else:
-            fallback_response = f"Hey {user_name}, I’m Dagi! An error occurred—I’m a 4th-year CS student at Unity University and interned at Kifiya. What’s your favorite tech topic?"
+        summary = (
+            f"I'm Dagmawi Teferi, a Data Scientist & AI/ML Engineer with experience in "
+            f"{profile.get('skills', '')}. My background includes {profile.get('experience', '')}."
+        )
+        state["raw_response"] = summary
 
-        state["raw_response"] = fallback_response
-        state["tokens_used_in_session"] = tokens_used
-
-    logger.debug(f"generate_response - Duration: {time.time() - start_time:.2f}s")
     return state
 
 
