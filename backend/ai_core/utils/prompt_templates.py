@@ -83,15 +83,17 @@ def get_system_prompt(role: str, user_name: str = None, retrieved_docs: List[str
     dynamic_context = "\nRETRIEVED DOCS: Provided by endpoint" if retrieved_docs else "\nRETRIEVED DOCS: None (DO NOT USE UNLESS INSTRUCTED)"
 
     prompt = (
-        f"{role_definition[role]}\n\n"
-        f"{knowledge_base}\n"
-        f"{dynamic_context}\n\n"
-        "INSTRUCTIONS (MUST FOLLOW):\n"
-        "1. Use ONLY the provided profile and project information below.\n"
-        "2. Answer concisely and directly.\n"
-        "3. If the question is about contact info, answer directly from the profile.\n"
-        "4. If you don't know, say so politely.\n"
-    )
+    f"{role_definition[role]}\n\n"
+    f"{knowledge_base}\n"
+    f"{dynamic_context}\n\n"
+    "INSTRUCTIONS (MUST FOLLOW):\n"
+    "1. Use ONLY the provided profile and project information below to answer the user's question.\n"
+    "2. If the answer is present in the context, quote or summarize it directly.\n"
+    "3. If the answer is not explicit but can be inferred from the context, synthesize a helpful answer using only the context.\n"
+    "4. Do NOT use any outside knowledge or make up information.\n"
+    "5. If the answer is truly not present, reply: 'Sorry, I don't have that information in my knowledge base.'\n"
+    "6. Be concise, clear, and professional.\n"
+)
 
     if user_name:
         prompt = prompt.replace("{User_Name}", user_name)

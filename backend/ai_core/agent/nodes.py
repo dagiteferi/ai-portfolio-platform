@@ -132,6 +132,7 @@ def generate_response(state: Dict) -> Dict:
     user_input = (state.get("input") or state.get("message") or "").strip()
     user_input_lower = user_input.lower()
     profile = state.get("profile", {})
+    logger.debug(f"Profile in generate_response: {profile}")
     user_name = state.get("user_name", "user")
     retrieved_docs = state.get("retrieved_docs", [])
     is_recruiter = state.get("is_recruiter", False)
