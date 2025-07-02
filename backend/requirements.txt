@@ -1,6 +1,14 @@
-langgraph
+langgraph==0.1.19
+langchain-core==0.2.38
+langchain-community==0.2.16
+langchain-text-splitters==0.2.2
+langchain-huggingface==0.0.3
 google-generativeai 
 fastapi 
 uvicorn
 python-dotenv
 redis
+sentence-transformers
+pytest
+tenacity
+langchain-huggingface

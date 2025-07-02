@@ -1,64 +1,49 @@
+
 from langgraph.graph import StateGraph, END
-from .nodes import (
+from typing import TypedDict, List, Dict
+from backend.ai_core.agent.nodes import (
     receive_user_input,
     infer_user_role,
-    set_professional_context,
-    set_visitor_context,
-    retrieve_rag_context,
+    call_retrieve_rag_context,
     generate_response,
-    trim_format_response,
     update_memory,
     return_response,
-    check_continue,
-    end_session,
 )
-from typing import Dict
+
+class AgentState(TypedDict):
+    input: str
+    user_name: str
+    history: List[Dict[str, str]]
+    role_confidence: Dict[str, float]
+    is_recruiter: bool
+    retrieved_docs: List[str]
+    response: str
+    tokens_used_in_session: int
+    profile: Dict[str, str]
 
 def create_chatbot_graph():
-    graph = StateGraph(dict)
+    """
+    Creates and configures the chatbot's graph.
+    """
+    # Define the state machine
+    workflow = StateGraph(AgentState)
 
-    # Add nodes
-    graph.add_node("receive_user_input", receive_user_input)
-    graph.add_node("infer_user_role", infer_user_role)
-    graph.add_node("set_professional_context", set_professional_context)
-    graph.add_node("set_visitor_context", set_visitor_context)
-    graph.add_node("retrieve_rag_context", retrieve_rag_context)
-    graph.add_node("generate_response", generate_response)
-    graph.add_node("trim_format_response", trim_format_response)
-    graph.add_node("update_memory", update_memory)
-    graph.add_node("return_response", return_response)
-    graph.add_node("check_continue", check_continue)
-    graph.add_node("end_session", end_session)
+    # Add nodes to the graph
+    workflow.add_node("receive_user_input", receive_user_input)
+    workflow.add_node("infer_user_role", infer_user_role)
+    workflow.add_node("retrieve_rag_context", call_retrieve_rag_context)
+    workflow.add_node("generate_response", generate_response)
+    workflow.add_node("update_memory", update_memory)
+    workflow.add_node("return_response", return_response)
 
-    # Define edges
-    graph.add_edge("receive_user_input", "infer_user_role")
+    # Define the edges to connect the nodes
+    workflow.set_entry_point("receive_user_input")
+    workflow.add_edge("receive_user_input", "infer_user_role")
+    workflow.add_edge("infer_user_role", "retrieve_rag_context")
+    workflow.add_edge("retrieve_rag_context", "generate_response")
+    workflow.add_edge("generate_response", "update_memory")
+    workflow.add_edge("update_memory", "return_response")
+    workflow.add_edge("return_response", END)
 
-    # Conditional loop: if role is not identified yet, go back to infer
-    graph.add_conditional_edges(
-        "infer_user_role",
-        lambda state: (
-            "set_professional_context" if state["role_identified"] and state["is_recruiter"]
-            else "set_visitor_context" if state["role_identified"]
-            else "infer_user_role"  # loop back to role inference
-        ),
-        {
-            "set_professional_context": "set_professional_context",
-            "set_visitor_context": "set_visitor_context",
-            "infer_user_role": "infer_user_role"
-        }
-    )
-
-    graph.add_edge("set_professional_context", "retrieve_rag_context")
-    graph.add_edge("set_visitor_context", "retrieve_rag_context")
-    graph.add_edge("retrieve_rag_context", "generate_response")
-    graph.add_edge("generate_response", "trim_format_response")
-    graph.add_edge("trim_format_response", "update_memory")
-    graph.add_edge("update_memory", "return_response")
-    graph.add_edge("return_response", "check_continue")
-    graph.add_edge("check_continue", "end_session")
-    graph.add_edge("end_session", END)
-
-    # Entry point
-    graph.set_entry_point("receive_user_input")
-
-    return graph.compile()
+    # Compile the graph
+    return workflow.compile()

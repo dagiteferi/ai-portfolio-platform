@@ -1,34 +1,126 @@
+import pytest
+import uvicorn
 import requests
+import time
+import logging
+import os
+import sys
+from multiprocessing import Process
+from fastapi.testclient import TestClient
+from tenacity import retry, stop_after_attempt, wait_fixed
 
-BASE_URL = "http://127.0.0.1:8000/chat"
+# Add project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-# Test conversations for multiple users
-conversations = [
-    {
-        "session_id": "alice123",
-        "user_name": "Alice",
-        "queries": ["HI", "how are you", "Tell me about Dagi", "What projects?"]
-    },
-    {
-        "session_id": "bob456",
-        "user_name": "Bob",
-        "queries": ["I’m hiring", "What experience?"]
+try:
+    from backend.main import app
+except ImportError as e:
+    raise ImportError(f"Failed to import backend.main: {str(e)}")
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('chatbot_test.log')
+    ]
+)
+logger = logging.getLogger(__name__)
+
+HOST = "127.0.0.1"
+PORT = 8001
+BASE_URL = f"http://{HOST}:{PORT}"
+
+def run_server():
+    try:
+        uvicorn.run(
+            "backend.main:app",
+            host=HOST,
+            port=PORT,
+            log_level="info"
+        )
+    except Exception as e:
+        logger.error(f"Server failed to start: {str(e)}")
+        raise
+
+@pytest.fixture(scope="module")
+def server():
+    proc = Process(target=run_server, daemon=True)
+    proc.start()
+    time.sleep(10)  # give server time to start
+
+    max_attempts = 5
+    attempt = 1
+    while attempt <= max_attempts:
+        try:
+            response = requests.get(f"{BASE_URL}/health", timeout=5)
+            if response.status_code == 200:
+                logger.info(f"Uvicorn server started successfully on port {PORT}")
+                break
+        except requests.RequestException as e:
+            logger.debug(f"Health check attempt {attempt} failed: {str(e)}")
+            time.sleep(2)
+            attempt += 1
+    if attempt > max_attempts:
+        logger.error(f"Failed to start Uvicorn server after {max_attempts} attempts")
+        proc.terminate()
+        raise RuntimeError("Server failed to start")
+
+    yield
+    proc.terminate()
+
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+def test_health_check(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+def make_chat_request(user):
+    data = {
+        "user_name": user.get("user_name") or user.get("name"),
+        "session_id": user["session_id"],
+        "message": user.get("message") or user.get("query") or user.get("input")
     }
-]
+    return requests.post(f"{BASE_URL}/api/chat", json=data)
 
-for convo in conversations:
-    print(f"\nTesting conversation for {convo['user_name']} (Session ID: {convo['session_id']})")
-    for query in convo["queries"]:
-        payload = {
-            "query": query,
-            "session_id": convo["session_id"],
-            "user_name": convo["user_name"]
-        }
-        print(f"\nQuery: {payload['query']}")
-        response = requests.post(BASE_URL, json=payload)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response Data: {response.json()}")
-        if response.status_code == 200:
-            print(f"Response: {response.json()['response']}")
-        else:
-            print("Response: Failed - See Response Data for details")
+def test_chatbot_conversation(server):
+    users = [
+        {"name": "Alice", "session_id": "alice123", "message": "HI", "expected": "Hey Alice! I’m Dagi—excited to chat! What brought you here today?"},
+        {"name": "Bob", "session_id": "bob456", "message": "Tell me about Dagi’s projects", "expected_contains": "AI Portfolio Platform"},
+        {"name": "Charlie", "session_id": "charlie789", "message": "Where did Dagi intern?", "expected_contains": "Kifiya"}
+    ]
+
+    for user in users:
+        logger.info(f"Testing conversation for {user['name']} (Session ID: {user['session_id']}) - Message: {user['message']}")
+        try:
+            response = make_chat_request(user)
+            logger.info(f"Status Code: {response.status_code}")
+            logger.info(f"Response Data: {response.json()}")
+            logger.info(f"Response: {response.text}")
+
+            assert response.status_code == 200, f"Request failed with status {response.status_code}: {response.json()}"
+            response_data = response.json()
+            if "expected" in user:
+                assert response_data["response"] == user["expected"], f"Unexpected response for {user['name']}: {response_data['response']}"
+            elif "expected_contains" in user:
+                assert user["expected_contains"] in response_data["response"], f"Response for {user['name']} does not contain {user['expected_contains']}: {response_data['response']}"
+        except requests.RequestException as e:
+            logger.error(f"Error during request for {user['name']}: {str(e)}")
+            raise AssertionError(f"Request failed: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            raise AssertionError(f"Unexpected error: {str(e)}")
+
+if __name__ == "__main__":
+    try:
+        from backend.ai_core.knowledge.static_loader import load_static_content
+        documents = load_static_content(source="all")
+        if not isinstance(documents, list):
+            logger.error(f"GitHub knowledge base is not a list: {type(documents)}")
+    except Exception as e:
+        logger.error(f"Error loading knowledge base: {str(e)}")
+    pytest.main(["-v", __file__])

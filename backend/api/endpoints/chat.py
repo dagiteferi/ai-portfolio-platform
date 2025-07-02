@@ -1,65 +1,67 @@
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from ...ai_core.agent.graph import create_chatbot_graph
-from typing import Dict
-import redis
-import json
+from typing import List, Optional
+import logging
+from backend.ai_core.agent.graph import create_chatbot_graph
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Redis client for session storage
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+class ChatMessage(BaseModel):
+    user: str
+    assistant: str
 
 class ChatRequest(BaseModel):
-    query: str
-    session_id: str
-    user_name: str = None
+    message: str
+    user_name: Optional[str] = "there"
+    history: Optional[List[ChatMessage]] = []
 
 @router.post("/chat")
-async def chat(request: ChatRequest):
+async def chat_endpoint(request: Request, chat_request: ChatRequest):
+    """
+    Handles chat requests by invoking the chatbot graph.
+    """
+    logger.info(f"Received chat request from user: {chat_request.user_name}")
+    
     try:
+        # Create the chatbot graph
         graph = create_chatbot_graph()
-        # Retrieve existing state or create a new one
-        state_json = redis_client.get(request.session_id)
-        if state_json is None:
-            state_dict = {
-                "session_id": request.session_id,
-                "user_name": request.user_name,
-                "input": request.query,
-                "is_recruiter": False,
-                "role_confidence": {"visitor": 0.0, "recruiter": 0.0},
-                "role_identified": False,
-                "system_prompt": "",
-                "minimal_prompt": "",
-                "retrieved_docs": [],
-                "raw_response": "",
-                "formatted_response": "",
-                "history": [],
-                "continue_conversation": True,
-                "tokens_used_in_session": 0,
-                "token_budget": 500
-            }
-            print(f"New state created: {state_dict}")
-        else:
-            state_dict = json.loads(state_json)
-            print(f"State loaded from Redis: {state_dict}")
-            # Ensure new keys are present in existing states
-            state_dict.setdefault("tokens_used_in_session", 0)
-            state_dict.setdefault("token_budget", 500)
-            print(f"State after setdefault: {state_dict}")
-            state_dict["input"] = request.query
-            state_dict["continue_conversation"] = True
-            print(f"State after updating input: {state_dict}")
+        if graph is None:
+            logger.error("Failed to create chatbot graph.")
+            raise HTTPException(status_code=500, detail="Chatbot initialization failed.")
 
-        print(f"Before invoke - Initial state: {state_dict}")
-        # Pass the entire state_dict as input to avoid overwriting
-        updated_state_dict = graph.invoke(state_dict, state_dict)
-        print(f"After invoke - Updated state: {updated_state_dict}")
+        # Prepare the initial state for the graph
+        initial_state = {
+            "input": chat_request.message,
+            "user_name": chat_request.user_name,
+            "history": [hist.dict() for hist in chat_request.history], # Convert Pydantic models to dicts
+            "profile": request.app.state.profile, # Pass the profile from the app state
+        }
 
-        # Store the updated state in Redis
-        redis_client.set(request.session_id, json.dumps(updated_state_dict))
+        # Asynchronously invoke the graph with the initial state
+        response_state = await graph.ainvoke(initial_state)
 
-        return {"response": updated_state_dict.get("formatted_response", "No response generated")}
+        if response_state is None or "response" not in response_state:
+            logger.error("Graph invocation returned a null or invalid state.")
+            raise HTTPException(status_code=500, detail="Failed to get a valid response from the chatbot.")
+
+        # Extract the final response
+        final_response = response_state.get("response", "Sorry, I couldn't process your request.")
+        logger.info(f"Sending response to user {chat_request.user_name}: {final_response[:100]}...")
+        
+        return {"response": final_response}
+
     except Exception as e:
-        print(f"Exception caught: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+        logger.error(f"An unexpected error occurred in the chat endpoint: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+@router.get("/health")
+async def health_check():
+    """
+    A simple health check endpoint.
+    """
+    return {"status": "ok"}
