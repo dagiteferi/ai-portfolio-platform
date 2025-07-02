@@ -33,7 +33,7 @@ def get_system_prompt(role: str, user_name: str = "there", retrieved_docs: List[
     final_prompt = (
         f"{persona_and_knowledge}\n\n"
         f"{tone_guideline}\n\n"
-        f"Hello, {user_name}! How can I help you today?\n\n"
+        f"Greet the user, {user_name}, naturally in the first turn only. Then, answer their questions based on the knowledge base.\n\n"
         f"{knowledge_base_section}"
     )
 
