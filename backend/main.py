@@ -6,6 +6,7 @@ from backend.ai_core.knowledge.static_loader import load_static_content
 import uvicorn
 import os
 import logging
+from backend.config import API_PORT
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,7 +47,7 @@ async def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", API_PORT))
     logger.info(f"Starting Uvicorn server on port {port}")
     uvicorn.run(
         "backend.main:app",

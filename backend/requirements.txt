@@ -11,3 +11,4 @@ redis
 sentence-transformers
 pytest
 tenacity
+langchain-huggingface

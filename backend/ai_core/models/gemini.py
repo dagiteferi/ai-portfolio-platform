@@ -1,9 +1,9 @@
-
 import os
 import logging
 from dotenv import load_dotenv
 from google.generativeai import GenerativeModel, GenerationConfig
 from google.generativeai.types import content_types
+from backend.config import LLM_MODEL_NAME, LLM_TEMPERATURE
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -16,7 +16,7 @@ class GeminiClient:
     """
     A client for interacting with the Google Gemini API.
     """
-    def __init__(self, temperature: float = 0.7):
+    def __init__(self, temperature: float = LLM_TEMPERATURE):
         """
         Initializes the Gemini client.
 
@@ -45,7 +45,7 @@ class GeminiClient:
         try:
             # Initialize the model with the system prompt
             model = GenerativeModel(
-                model_name="gemini-1.5-flash",
+                model_name=LLM_MODEL_NAME,
                 system_instruction=system_prompt,
             )
 

@@ -1,6 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from backend.ai_core.knowledge.embeddings import get_embeddings
 import logging
+from backend.config import FAISS_DOCUMENT_COUNT, FAISS_SEARCH_K
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,7 +24,7 @@ class FAISSManager:
             logger.error(f"Failed to initialize FAISS: {str(e)}")
             self.vector_store = None
 
-    def search_combined(self, query, k=2):
+    def search_combined(self, query, k=FAISS_SEARCH_K):
         logger.info(f"Searching FAISS for query: {query[:50]}...")
         if self.vector_store is None:
             logger.warning("FAISS vector store not initialized")

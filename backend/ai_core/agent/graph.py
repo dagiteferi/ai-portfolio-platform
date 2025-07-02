@@ -4,7 +4,7 @@ from typing import TypedDict, List, Dict
 from backend.ai_core.agent.nodes import (
     receive_user_input,
     infer_user_role,
-    retrieve_rag_context,
+    call_retrieve_rag_context,
     generate_response,
     update_memory,
     return_response,
@@ -31,7 +31,7 @@ def create_chatbot_graph():
     # Add nodes to the graph
     workflow.add_node("receive_user_input", receive_user_input)
     workflow.add_node("infer_user_role", infer_user_role)
-    workflow.add_node("retrieve_rag_context", retrieve_rag_context)
+    workflow.add_node("retrieve_rag_context", call_retrieve_rag_context)
     workflow.add_node("generate_response", generate_response)
     workflow.add_node("update_memory", update_memory)
     workflow.add_node("return_response", return_response)
