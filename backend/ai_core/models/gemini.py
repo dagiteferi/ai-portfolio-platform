@@ -1,29 +1,81 @@
-import os
-from dotenv import load_dotenv
-from google.generativeai import GenerativeModel
-import logging as logger
 
+import os
+import logging
+from dotenv import load_dotenv
+from google.generativeai import GenerativeModel, GenerationConfig
+from google.generativeai.types import content_types
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Load environment variables from .env file
 load_dotenv()
 
 class GeminiClient:
+    """
+    A client for interacting with the Google Gemini API.
+    """
     def __init__(self, temperature: float = 0.7):
+        """
+        Initializes the Gemini client.
+
+        Args:
+            temperature (float): The temperature for the generation config.
+        """
         self.api_key = os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
+            logger.error("GOOGLE_API_KEY not found in environment variables.")
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
-        
-        self.model = GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config={"temperature": temperature}
-        )
 
-    def generate_response(self, messages):
+        self.generation_config = GenerationConfig(temperature=temperature)
+
         try:
-            prompt = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
-            response = self.model.generate_content(prompt)
-            if hasattr(response, "text") and response.text:
+            self.model = GenerativeModel(
+                model_name="gemini-1.5-flash"
+            )
+            logger.info("Gemini client initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize GenerativeModel: {e}", exc_info=True)
+            raise
+
+    def generate_response(self, system_prompt: str, history: list, user_input: str) -> str:
+        """
+        Generates a response from the Gemini model using the correct message format.
+
+        Args:
+            system_prompt (str): The system prompt to guide the model.
+            history (list): The conversation history.
+            user_input (str): The user's current input.
+
+        Returns:
+            str: The generated response text.
+        """
+        try:
+            # Format the history for the Google AI SDK
+            # The roles must be 'user' and 'model'
+            formatted_history = []
+            for turn in history:
+                formatted_history.append(content_types.to_content({"role": "user", "parts": [turn["user"]]}))
+                formatted_history.append(content_types.to_content({"role": "model", "parts": [turn["assistant"]]}))
+
+            # Add the current user input to the conversation
+            messages = formatted_history + [content_types.to_content({"role": "user", "parts": [user_input]})]
+
+            # Generate the response with the system prompt
+            response = self.model.generate_content(
+                contents=messages,
+                system_instruction=content_types.to_content(system_prompt),
+                generation_config=self.generation_config
+            )
+
+            if response and hasattr(response, "text") and response.text:
+                logger.info("Successfully generated response from Gemini.")
                 return response.text.strip()
             else:
-                return "No response generated."
+                logger.warning("Received an empty or invalid response from Gemini.")
+                return "I'm sorry, I couldn't generate a response at the moment. Please try again later."
+
         except Exception as e:
-         logger.error(f"Exception in generate_response: {str(e)}", exc_info=True)
-        # logger.debug(f"Prompt on error: {full_prompt}")
+            logger.error(f"Exception in generate_response: {e}", exc_info=True)
+            return "I'm facing a technical issue and can't respond right now. Please try again in a few moments."

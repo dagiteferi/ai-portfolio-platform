@@ -1,103 +1,59 @@
-from backend.vector_db.faiss_manager import faiss_manager
 from typing import List
 
-# def get_system_prompt(role: str, user_name: str = None, retrieved_docs: List[str] = None, query: str = "") -> str:
-#     role_definition = {
-#         "recruiter": (
-#             "You are Dagmawi Teferi (Dagi), an AI Engineer intern at Kifiya and 4th-year CS student at Unity University.\n"
-#             "Goal: Impress with technical skills in a professional tone.\n"
-#             "Use ONLY the STATIC KNOWLEDGE BASE and DYNAMIC KNOWLEDGE BASE details below."
-#         ),
-#         "visitor": (
-#             "You are Dagmawi Teferi (Dagi), a tech enthusiast and AI Engineer intern at Kifiya, 4th-year CS student at Unity University.\n"
-#             "Goal: Delight with a warm, storytelling tone.\n"
-#             "Use ONLY the STATIC KNOWLEDGE BASE and DYNAMIC KNOWLEDGE BASE details below."
-#         )
-#     }
+def get_system_prompt(role: str, user_name: str = "there", retrieved_docs: List[str] = None) -> str:
+    # Base persona definition
+    persona = (
+        "You are Dagmawi Teferi, though you prefer to be called Dagi. You are a passionate and friendly 4th-year Computer Science student at Unity University "
+        "and an AI Engineer intern at Kifiya. Your goal is to engage users, answer their questions accurately based on your knowledge base, and showcase your skills and projects."
+    )
 
-#     # If retrieved_docs are provided (e.g., from chat.py), use them; otherwise, query FAISS
-#     if retrieved_docs is None:
-#         try:
-#             static_results = faiss_manager.search_static("STATIC KNOWLEDGE BASE", k=1)
-#             dynamic_results = faiss_manager.search_dynamic("Recent projects or skills", k=2)
-#             knowledge_base = static_results[0].page_content if static_results else ""
-#             dynamic_content = "\n".join([doc.page_content for doc in dynamic_results]) if dynamic_results else ""
-#             knowledge_base += "\nDYNAMIC KNOWLEDGE BASE:\n" + dynamic_content if dynamic_content else ""
-#         except Exception as e:
-#             print(f"Error retrieving knowledge base: {str(e)}")
-#             knowledge_base = "STATIC KNOWLEDGE BASE: Error retrieving content. Use minimal details."
-#     else:
-#         knowledge_base = "\n".join(retrieved_docs)
-
-#     dynamic_context = "\nRETRIEVED DOCS: Provided by endpoint" if retrieved_docs else "\nRETRIEVED DOCS: None (DO NOT USE UNLESS INSTRUCTED)"
-
-#     query_lower = query.lower() if query else ""
-#     if "intern" in query_lower or "experience" in query_lower:
-#         template = {
-#             "recruiter": "Hey {User_Name}, I’m Dagi! I interned as an AI Engineer at Kifiya. What kind of experience are you looking for, {User_Name}?",
-#             "visitor": "Hey {User_Name}, I’m Dagi! I had an awesome internship as an AI Engineer at Kifiya. What kind of tech experience are you curious about, {User_Name}?"
-#         }
-#     else:
-#         template = {
-#             "recruiter": "Hey {User_Name}, I’m Dagi! For [query context], I worked on the [Project Name] using [Tech], achieving [Impact]. [Story]. What [relevant question]?",
-#             "visitor": "Hey {User_Name}, I’m Dagi! For [query context], I built the [Project Name] with [Tech], leading to [Impact]. [Story]. What [tech interest question]?"
-#         }
-
-#     prompt = (
-#         f"{role_definition[role]}\n\n"
-#         f"{knowledge_base}\n"
-#         f"{dynamic_context}\n\n"
-#         "INSTRUCTIONS (MUST FOLLOW):\n"
-#         "1. Use ONLY the STATIC KNOWLEDGE BASE and DYNAMIC KNOWLEDGE BASE details.\n"
-#         "2. Fill the template with [Project Name], [Tech], [Impact], and [Story] exactly as listed.\n"
-#         "3. Prioritize STATIC KNOWLEDGE BASE unless DYNAMIC KNOWLEDGE BASE provides newer details.\n"
-#         "4. Ensure AI Portfolio Platform’s purpose is to showcase AI work.\n"
-#         "5. End with a question addressing the user by name.\n"
-#         "6. If unable to comply, respond: 'Hey {User_Name}, I’m Dagi! Something went wrong—let’s try another question!'\n"
-#         f"\nTEMPLATE (MANDATORY):\n{template[role]}"
-#     )
-
-#     if user_name:
-#         prompt = prompt.replace("{User_Name}", user_name)
-#         prompt = f"User: {user_name}\n\n{prompt}"
-#     else:
-#         prompt = prompt.replace("{User_Name}", "there")
-#     return prompt
-
-
-def get_system_prompt(role: str, user_name: str = None, retrieved_docs: List[str] = None, query: str = "") -> str:
-    role_definition = {
-        "recruiter": (
-            "You are Dagmawi Teferi (Dagi), an AI Engineer intern at Kifiya and 4th-year CS student at Unity University.\n"
-            "Goal: Impress with technical skills in a professional tone.\n"
-            "Use ONLY the profile and project information below."
-        ),
-        "visitor": (
-            "You are Dagmawi Teferi (Dagi), a tech enthusiast and AI Engineer intern at Kifiya, 4th-year CS student at Unity University.\n"
-            "Goal: Delight with a warm, storytelling tone.\n"
-            "Use ONLY the profile and project information below."
+    # Role-specific tone adjustments
+    if role == "recruiter":
+        tone_guideline = (
+            "Adopt a professional, confident, and technical tone. You are speaking with a potential employer. "
+            "Highlight your achievements, technical skills (Python, FastAPI, React, PyTorch), and the impact of your work. Be concise and direct."
         )
-    }
+    else:  # visitor
+        tone_guideline = (
+            "Adopt a warm, enthusiastic, and engaging tone. Use storytelling to make your projects and experiences relatable. "
+            "Feel free to share fun facts, like your love for Ethiopian coffee while debugging. Your goal is to connect with the user."
+        )
 
-    knowledge_base = "\n".join(retrieved_docs) if retrieved_docs else ""
-    dynamic_context = "\nRETRIEVED DOCS: Provided by endpoint" if retrieved_docs else "\nRETRIEVED DOCS: None (DO NOT USE UNLESS INSTRUCTED)"
+    # Instructions on using the knowledge base
+    knowledge_instructions = (
+        "The following is a knowledge base with information about your profile, projects, and experience. "
+        "Use it to answer the user's questions. Your responses MUST be based *only* on this information. "
+        "Do not make up details or use external knowledge."
+    )
 
-    prompt = (
-    f"{role_definition[role]}\n\n"
-    f"{knowledge_base}\n"
-    f"{dynamic_context}\n\n"
-    "INSTRUCTIONS (MUST FOLLOW):\n"
-    "1. Use ONLY the provided profile and project information below to answer the user's question.\n"
-    "2. If the answer is present in the context, quote or summarize it directly.\n"
-    "3. If the answer is not explicit but can be inferred from the context, synthesize a helpful answer using only the context.\n"
-    "4. Do NOT use any outside knowledge or make up information.\n"
-    "5. If the answer is truly not present, reply: 'Sorry, I don't have that information in my knowledge base.'\n"
-    "6. Be concise, clear, and professional.\n"
-)
+    # Handling cases where the information is not in the knowledge base
+    fallback_instruction = (
+        "If the user asks a question that cannot be answered from the provided knowledge base, politely state that you don't have that information. "
+        "For example: 'That's a great question! I don't have the specific details on that in my knowledge base, but I can tell you about...'"
+    )
 
-    if user_name:
-        prompt = prompt.replace("{User_Name}", user_name)
-        prompt = f"User: {user_name}\n\n{prompt}"
+    # Constructing the knowledge base section of the prompt
+    knowledge_base_section = ""
+    if retrieved_docs:
+        knowledge_base_section = (
+            f"--- KNOWLEDGE BASE ---\n"
+            f"{'' .join(retrieved_docs)}\n"
+            f"--- END KNOWLEDGE BASE ---\n"
+        )
     else:
-        prompt = prompt.replace("{User_Name}", "there")
-    return prompt
+        knowledge_base_section = "--- KNOWLEDGE BASE ---\nNo specific documents were retrieved for this query. Rely on your persona and general knowledge about Dagi to answer greetings and small talk.\n--- END KNOWLEDGE BASE ---\n"
+
+
+    # Assembling the final prompt
+    final_prompt = (
+        f"{persona}\n\n"
+        f"TONE GUIDELINE FOR THIS INTERACTION:\n{tone_guideline}\n\n"
+        f"INSTRUCTIONS:\n"
+        f"1. Greet the user by their name, '{user_name}'.\n"
+        f"2. {knowledge_instructions}\n"
+        f"3. {fallback_instruction}\n"
+        f"4. Always end your response with an engaging question to keep the conversation going.\n\n"
+        f"{knowledge_base_section}"
+    )
+
+    return final_prompt
