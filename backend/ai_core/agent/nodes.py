@@ -82,18 +82,17 @@ def retrieve_rag_context(state: Dict) -> Dict:
     # Keywords that trigger a knowledge base search
     search_keywords = [
         "project", "experience", "education", "skill", "internship", "contact", "email", 
-        "background", "kifiya", "unity university", "credit scoring", "fraud detection", "about you"
+        "background", "kifiya", "unity university", "credit scoring", "fraud detection", "about you", "dagi"
     ]
     
     # Greetings that should not trigger a search
     greetings = ["hi", "hello", "hey", "how are you", "good morning", "good afternoon", "what's up"]
 
-    # Check if the input is a simple greeting
+    # Check if the input is a simple greeting without any search keywords
     if any(greet in user_input for greet in greetings) and not any(kw in user_input for kw in search_keywords):
         state["retrieved_docs"] = []
         logger.info("Skipping knowledge base search for simple greeting.")
-    # Check if the input contains keywords that require a search
-    elif any(keyword in user_input for keyword in search_keywords):
+    else: # In all other cases, attempt a knowledge base search
         try:
             logger.info(f"Searching knowledge base for query: {user_input}")
             docs = faiss_manager.search_combined(user_input, k=4)  # Increased k for more context
@@ -102,9 +101,6 @@ def retrieve_rag_context(state: Dict) -> Dict:
         except Exception as e:
             logger.error(f"FAISS search failed: {e}", exc_info=True)
             state["retrieved_docs"] = []
-    else:
-        state["retrieved_docs"] = []
-        logger.info("Skipping knowledge base search for non-specific input.")
 
     logger.debug(f"retrieve_rag_context - Duration: {time.time() - start_time:.2f}s")
     return state

@@ -27,17 +27,8 @@ class GeminiClient:
         if not self.api_key:
             logger.error("GOOGLE_API_KEY not found in environment variables.")
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
-
-        self.generation_config = GenerationConfig(temperature=temperature)
-
-        try:
-            self.model = GenerativeModel(
-                model_name="gemini-1.5-flash"
-            )
-            logger.info("Gemini client initialized successfully.")
-        except Exception as e:
-            logger.error(f"Failed to initialize GenerativeModel: {e}", exc_info=True)
-            raise
+        self.temperature = temperature
+        logger.info("Gemini client initialized successfully.")
 
     def generate_response(self, system_prompt: str, history: list, user_input: str) -> str:
         """
@@ -52,6 +43,12 @@ class GeminiClient:
             str: The generated response text.
         """
         try:
+            # Initialize the model with the system prompt
+            model = GenerativeModel(
+                model_name="gemini-1.5-flash",
+                system_instruction=system_prompt,
+            )
+
             # Format the history for the Google AI SDK
             # The roles must be 'user' and 'model'
             formatted_history = []
@@ -62,11 +59,10 @@ class GeminiClient:
             # Add the current user input to the conversation
             messages = formatted_history + [content_types.to_content({"role": "user", "parts": [user_input]})]
 
-            # Generate the response with the system prompt
-            response = self.model.generate_content(
+            # Generate the response
+            response = model.generate_content(
                 contents=messages,
-                system_instruction=content_types.to_content(system_prompt),
-                generation_config=self.generation_config
+                generation_config=GenerationConfig(temperature=self.temperature)
             )
 
             if response and hasattr(response, "text") and response.text:

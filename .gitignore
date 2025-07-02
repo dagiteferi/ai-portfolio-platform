@@ -53,3 +53,4 @@ frontend/dist/
 # GitHub Action secrets and files
 .github/workflows/**/secret-*.yml
 run backend.txt
+.pytest_cache
