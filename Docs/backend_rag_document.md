@@ -39,9 +39,9 @@ This documentation serves as both a technical manual and an onboarding guide, cl
 
 ## 1. Introduction
 
-Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document is designed to provide a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI. Whether you're a new developer, an intern AI engineer, or a seasoned professional, this guide will equip you to confidently discuss, debug, extend, and contribute to the codebase.
+Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document is designed to provide a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI.This guide will equip you to confidently discuss, debug, extend, and contribute to the codebase.
 
-The primary goal of this backend is to power an intelligent chatbot that acts as your personal AI agent. It answers questions about your profile, projects, and skills, adapting its responses based on the user's role (e.g., a friendly visitor or a professional recruiter). This is achieved through a sophisticated combination of Retrieval-Augmented Generation (RAG) and a state-machine-based agent orchestration using LangGraph.
+The primary goal of this backend is to power an intelligent chatbot that acts as my personal AI agent. It answers questions about my profile, projects, and skills, adapting its responses based on the user's role (e.g., a friendly visitor or a professional recruiter). This is achieved through a sophisticated combination of Retrieval-Augmented Generation (RAG) and a state-machine-based agent orchestration using LangGraph.
 
 This documentation serves as both a technical manual and an onboarding guide, clearly explaining the "what," "why," and "how" of the backend system.
 
@@ -51,17 +51,17 @@ At its heart, this project is a **Retrieval-Augmented Generation (RAG)** system 
 
 ### Retrieval-Augmented Generation (RAG)
 
-Imagine you have a vast library of information (your knowledge base). When someone asks a question, instead of trying to answer from memory alone, you first quickly find the most relevant "books" (retrieval) and then use those books to formulate a precise answer (generation). That's RAG. In our case, the "books" are documents about your profile, and the "librarian" is a vector database.
+Imagine you have a vast library of information (your knowledge base). When someone asks a question, instead of trying to answer from memory alone, you first quickly find the most relevant "books" (retrieval) and then use those books to formulate a precise answer (generation). That's RAG. In my case, the "books" are documents about my profile, and the "librarian" is a vector database.
 
 **Why RAG?**
 
-*   **Accuracy & Factuality:** RAG grounds the LLM's responses in specific, verifiable information from your portfolio, reducing hallucinations and ensuring accuracy.
-*   **Up-to-Date Information:** You can update your portfolio content without retraining the entire LLM.
-*   **Reduced LLM Size:** The LLM doesn't need to memorize your entire portfolio; it only needs to be good at understanding context and generating text.
+*   **Accuracy & Factuality:** RAG grounds the LLM's responses in specific, verifiable information from my portfolio, reducing hallucinations and ensuring accuracy.
+*   **Up-to-Date Information:**  can update my portfolio content without retraining the entire LLM.
+*   **Reduced LLM Size:** The LLM doesn't need to memorize  entire portfolio; it only needs to be good at understanding context and generating text.
 
 ### LangGraph
 
-Think of LangGraph as a blueprint for how your AI thinks and acts. It allows us to define a sequence of steps (nodes) and decisions (edges) that the AI follows to process a user's input, retrieve information, generate a response, and update its memory. It's a state machine that ensures a structured and predictable flow for complex AI interactions.
+Think of LangGraph as a blueprint for how my AI thinks and acts. It allows  to define a sequence of steps (nodes) and decisions (edges) that the AI follows to process a user's input, retrieve information, generate a response, and update its memory. It's a state machine that ensures a structured and predictable flow for complex AI interactions.
 
 **Why LangGraph?**
 
@@ -72,8 +72,8 @@ Think of LangGraph as a blueprint for how your AI thinks and acts. It allows us 
 
 ## 3. Backend Features
 
-*   **AI-Powered Chatbot:** An intelligent chatbot that can answer questions about your projects, skills, and experience.
-*   **Retrieval-Augmented Generation (RAG):** The chatbot uses RAG to retrieve relevant information from your portfolio content and generate accurate, context-aware responses.
+*   **AI-Powered Chatbot:** An intelligent chatbot that can answer questions about my projects, skills, and experience.
+*   **Retrieval-Augmented Generation (RAG):** The chatbot uses RAG to retrieve relevant information from my portfolio content and generate accurate, context-aware responses.
 *   **Role-Based Responses:** The chatbot adapts its tone and focus based on the inferred role of the user (e.g., a recruiter, a fellow developer, or a general visitor).
 *   **Scalable Backend:** Built with FastAPI, designed for high performance and easy integration.
 *   **Modular AI Architecture:** Components are designed for reusability and easy extension.
