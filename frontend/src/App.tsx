@@ -1,5 +1,5 @@
 import React from 'react';
-// import Header from './components/Common/Header';
+import Navigation from'./components/Navigation';
 import Hero from './components/Hero';
 import Projects from './components/Projects';
 import Work from './components/Work';
@@ -10,8 +10,7 @@ import About from './components/About'
 function App() {
   return (
     <div className="App">
-      {/* <Header /> */}
-      
+      <Navigation />     
       <Hero />
       <About />
       <Projects />
