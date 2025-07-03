@@ -30,9 +30,9 @@ const Chatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className={`fixed z-50 bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in ${isFullScreen ? 'inset-0 w-full h-full rounded-none' : 'bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)]'}`}>
+        <div className={`fixed z-50 bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in flex flex-col ${isFullScreen ? 'inset-0 w-full h-full rounded-none' : 'bottom-24 right-6 w-[440px] h-[600px] max-w-[calc(100vw-3rem)]'}`}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary to-accent p-4 text-white flex justify-between items-center">
+          <div className="bg-gradient-to-r from-primary to-accent p-4 text-white flex justify-between items-center w-full rounded-t-xl">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <Bot className="w-6 h-6" />
@@ -56,11 +56,13 @@ const Chatbot = () => {
           </div>
 
           {/* Chat Widget Content */}
-          <ChatWidget isFullScreen={isFullScreen} />
+          <div className="flex-grow">
+            <ChatWidget isFullScreen={isFullScreen} />
+          </div>
         </div>
       )}
     </ChatProvider>
   );
 };
 
-export default Chatbot;
+export default Chatbot
