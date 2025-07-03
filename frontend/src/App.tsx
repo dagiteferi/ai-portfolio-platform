@@ -8,6 +8,7 @@ import Projects from './components/Projects';
 import Work from './components/Work';
 import Contact from './components/Contact';
 import Footer from './components/Footer'; 
+import Chatbot from './components/Chat/Chatbot';
 
 
 
@@ -23,6 +24,7 @@ function App() {
       <Projects />
       <Contact />
       <Footer />
+      <Chatbot />
       
     </div>
   );
