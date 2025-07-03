@@ -1,0 +1,130 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Brain, Code, Database, Cloud, ChartBar, Zap } from 'lucide-react';
+
+const Services = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const services = [
+    {
+      icon: Brain,
+      title: 'Machine Learning Consulting',
+      description: 'Expert guidance on ML strategy, model selection, and implementation to solve your business challenges.',
+      color: 'from-primary to-primary-glow'
+    },
+    {
+      icon: Code,
+      title: 'Web Development',
+      description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
+      color: 'from-accent to-info'
+    },
+    {
+      icon: Database,
+      title: 'Data Analysis',
+      description: 'Transform raw data into actionable insights using advanced statistical methods and visualization.',
+      color: 'from-success to-secondary'
+    },
+    {
+      icon: Cloud,
+      title: 'AI Model Deployment',
+      description: 'Scalable deployment of AI models to production environments using cloud platforms and MLOps.',
+      color: 'from-warning to-beige'
+    },
+    {
+      icon: ChartBar,
+      title: 'Business Intelligence',
+      description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
+      color: 'from-pink to-accent'
+    },
+    {
+      icon: Zap,
+      title: 'AI Automation',
+      description: 'Automate repetitive tasks and workflows using intelligent AI-powered solutions.',
+      color: 'from-info to-primary'
+    }
+  ];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} id="services" className="section-padding bg-background">
+      <div className="max-w-7xl mx-auto">
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            My <span className="text-gradient">Services</span>
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Comprehensive AI/ML and development services to bring your ideas to life
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
+            <div
+              key={service.title}
+              className={`card-elegant hover-scale group cursor-pointer ${
+                isVisible ? 'animate-bounce-in' : 'opacity-0'
+              }`}
+              style={{
+                animationDelay: isVisible ? `${index * 0.1}s` : '0s'
+              }}
+            >
+              <div className="space-y-4">
+                <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${service.color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <service.icon className="w-full h-full text-white" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                  {service.title}
+                </h3>
+                
+                <p className="text-muted-foreground leading-relaxed">
+                  {service.description}
+                </p>
+
+                <div className="pt-4">
+                  <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full group-hover:w-full transition-all duration-500"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Call to Action */}
+        <div className={`text-center mt-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <div className="card-elegant max-w-2xl mx-auto bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
+              Ready to Start Your Project?
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Let's discuss how I can help bring your AI/ML vision to reality
+            </p>
+            <button
+              onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="btn-gradient hover-scale"
+            >
+              Get Started Today
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Services;
