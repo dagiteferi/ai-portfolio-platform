@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
+  "homepage": ".",
   "description": "AI/ML Engineer Portfolio",
   "main": "index.js",
   "scripts": {

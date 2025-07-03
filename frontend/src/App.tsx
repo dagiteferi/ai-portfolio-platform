@@ -5,13 +5,15 @@ import Projects from './components/Projects';
 import Work from './components/Work';
 import Education from './components/Education';
 import Contact from './components/Contact';
+import About from './components/About' 
 
 function App() {
   return (
     <div className="App">
       {/* <Header /> */}
-
+      
       <Hero />
+      <About />
       <Projects />
       <Work />
       <Education />
