@@ -16,31 +16,31 @@ const Services = () => {
       icon: Code,
       title: 'Web Development',
       description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
-      color: 'from-accent to-info'
+      color: 'from-primary to-primary-glow'
     },
     {
       icon: Database,
       title: 'Data Analysis',
       description: 'Transform raw data into actionable insights using advanced statistical methods and visualization.',
-      color: 'from-success to-secondary'
+      color: 'from-primary to-primary-glow'
     },
     {
       icon: Cloud,
       title: 'AI Model Deployment',
       description: 'Scalable deployment of AI models to production environments using cloud platforms and MLOps.',
-      color: 'from-warning to-beige'
+      color: 'from-primary to-primary-glow'
     },
     {
       icon: BarChart,
       title: 'Business Intelligence',
       description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
-      color: 'from-pink to-accent'
+      color: 'from-primary to-primary-glow'
     },
     {
       icon: Zap,
       title: 'AI Automation',
       description: 'Automate repetitive tasks and workflows using intelligent AI-powered solutions.',
-      color: 'from-info to-primary'
+      color: 'from-primary to-primary-glow'
     }
   ];
 
@@ -87,7 +87,7 @@ const Services = () => {
                 }}
               >
                 <div className="space-y-4">
-                  <div className="w-16 h-16 rounded-xl bg-gray-300 p-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${service.color} p-4 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="w-full h-full text-white" strokeWidth={1.5} />
                   </div>
                   
