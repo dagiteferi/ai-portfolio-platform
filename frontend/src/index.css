@@ -50,7 +50,7 @@
     position: absolute;
     width: 100%;
     z-index: -30;
-    bottom: 0;
+    top: 0; /* Changed from bottom: 0; */
   }
   .hero {
     width: 100%;
