@@ -55,8 +55,8 @@ const Navigation = () => {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 hover:text-primary ${
-                    isScrolled ? 'text-foreground hover:bg-muted' : 'text-white hover:text-primary-glow'
+                  className={`px-3 py-2 text-lg font-bold rounded-md transition-all duration-300 hover:text-primary ${
+                    isScrolled ? 'text-foreground hover:bg-muted' : 'text-gray-800 hover:text-primary-glow'
                   }`}
                 >
                   {item.name}
@@ -70,7 +70,7 @@ const Navigation = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`p-2 rounded-md transition-colors duration-300 ${
-                isScrolled ? 'text-foreground hover:bg-muted' : 'text-white hover:text-primary-glow'
+                isScrolled ? 'text-foreground hover:bg-muted' : 'text-gray-800 hover:text-primary-glow'
               }`}
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -86,7 +86,7 @@ const Navigation = () => {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-md transition-colors duration-300"
+                  className="block w-full text-left px-3 py-2 text-lg font-bold text-foreground hover:text-primary hover:bg-muted rounded-md transition-colors duration-300"
                 >
                   {item.name}
                 </button>

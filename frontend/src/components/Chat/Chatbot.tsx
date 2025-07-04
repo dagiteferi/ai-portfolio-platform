@@ -20,6 +20,7 @@ const Chatbot = () => {
             : 'bg-gradient-to-r from-primary to-accent hover:shadow-glow'
         }`}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        title={isOpen ? 'Close chat' : 'Chat with Dagi'}
       >
         {isOpen ? (
           <X className="w-5 h-5 text-foreground" />

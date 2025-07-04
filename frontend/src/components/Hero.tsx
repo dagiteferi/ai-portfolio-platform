@@ -1,9 +1,23 @@
-import React from 'react';
-import { Download, Github, Linkedin, Twitter } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { Download, Github, Linkedin, MoveLeft, Facebook } from 'lucide-react';
 import { Button } from './ui/button';
+// Adjust the path as necessary
+
 
 
 const Hero = () => {
+  const roles = ["Beliver","AI/ML Engineer", "Flutter Developer","Full-stack Dev"   ];
+  const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentRoleIndex((prevIndex) => (prevIndex + 1) % roles.length);
+    }, 3000); // Change text every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [roles.length]);
+
   const handleDownloadCV = () => {
     // Create a placeholder CV download
     const link = document.createElement('a');
@@ -24,36 +38,34 @@ const Hero = () => {
       label: 'GitHub'
     },
     { 
-      icon: Twitter, 
+      icon: Facebook, 
       href: 'https://twitter.com/dagmawi_teferi',
       label: 'Twitter'
     }
   ];
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(/hero-bg.jpg)` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70"></div>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Text content */}
-          <div className="text-center lg:text-left order-2 lg:order-1">
-            <div className="animate-fade-in-up">
+    <div className="front">
+      <img className="back" src="/assets/back_n.png" alt="" />
+      <div className="front-child1">
+        <div className="animate-fade-in-up">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-                <span className="block">Dagmawi Teferi</span>
-                <span className="block text-gradient text-3xl md:text-4xl lg:text-5xl mt-2">
-                  Fullstack Developer
-                </span>
+                <span className="block text-gray-900">Dname</span>
+                <AnimatePresence mode='wait'>
+                  <motion.span
+                    key={currentRoleIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="block text-gradient text-3xl md:text-4xl lg:text-5xl mt-2"
+                  >
+                    {roles[currentRoleIndex]}
+                  </motion.span>
+                </AnimatePresence>
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
                 Building Modern Web Solutions & Digital Experiences
               </p>
 
@@ -71,9 +83,9 @@ const Hero = () => {
                 <Button
                   onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
                   size="lg"
-                  className="bg-white/20 text-white border border-white/30 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
+                  className="bg-white/80 text-gray-800 border border-white/50 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
                 >
-                  Get In Touch
+                Chat With My Agent
                 </Button>
               </div>
 
@@ -85,7 +97,7 @@ const Hero = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:border-primary transition-all duration-300 hover-scale"
+                    className="group p-3 rounded-full bg-gray-200/50 backdrop-blur-sm border border-gray-400 text-gray-800 hover:bg-primary hover:border-primary transition-all duration-300 hover-scale"
                     aria-label={social.label}
                   >
                     <social.icon size={24} className="group-hover:scale-110 transition-transform duration-300" />
@@ -93,31 +105,12 @@ const Hero = () => {
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Right side - Profile Image */}
-          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
-            <div className="relative animate-fade-in-up">
-              <div className="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl hover-scale">
-                {/* <img 
-                  src={profilePhoto} 
-                  alt="Dagmawi Teferi - Fullstack Developer" 
-                  className="w-full h-full object-cover"
-                /> */}
-              </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent rounded-full opacity-20 blur-xl"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
-          </div>
-        </div>
       </div>
-    </section>
+      <div className="front-child2">
+        <img className="hero hero1" src="/assets/hero.svg" alt="/" style={{width:"80%" , height:"1000px"}} />
+        <img className="hero hero2" src="/assets/hero.svg" alt="/"  style={{width:"1000px" , height:"150px"}} />
+      </div>
+    </div>
   );
 };
 

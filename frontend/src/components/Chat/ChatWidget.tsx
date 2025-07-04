@@ -42,7 +42,7 @@ const ChatWidget: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen }) => {
             <div className="flex justify-start">
               <div className="flex items-start space-x-2">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                  <img src="/profile-photo.jpg" alt="Bot" className="w-4 h-4 rounded-full" />
+                  <img src="/assets/profile-photo.jpg" alt="Bot" className="w-4 h-4 rounded-full" />
                 </div>
                 <TypingIndicator />
               </div>

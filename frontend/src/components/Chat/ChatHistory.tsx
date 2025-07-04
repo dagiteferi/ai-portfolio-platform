@@ -17,12 +17,12 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen }) => {
 
   return (
     <div
-      className={`bg-muted/50 border-r border-border/20 transition-all duration-300 ease-in-out ${
+      className={`bg-card shadow-lg transition-all duration-300 ease-in-out ${
         isHistoryOpen ? 'w-64 p-4' : 'w-0 p-0'
       } overflow-hidden`}
     >
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-foreground">History</h2>
+        <h2 className="text-xl font-bold text-foreground">History</h2>
         <Button variant="ghost" size="icon">
           <Plus className="w-5 h-5" />
         </Button>
@@ -31,7 +31,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen }) => {
         {chatSessions.map((session) => (
           <div
             key={session.id}
-            className="flex items-center space-x-3 p-2 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors duration-200"
+            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors duration-200"
           >
             <MessageSquare className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-foreground truncate">{session.title}</span>

@@ -64,7 +64,7 @@ const About = () => {
             <div className="relative max-w-md mx-auto">
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
-                  src="/profile-photo.jpg"
+                  src="/assets/profile-photo.jpg"
                   alt="Dagmawi Teferi"
                   className="w-full h-full object-cover"
                 />
