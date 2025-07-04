@@ -54,7 +54,7 @@ const About = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             About <span className="text-gradient">Me</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Passionate AI/ML engineer with expertise in building intelligent solutions that drive innovation
           </p>
         </div>
@@ -68,8 +68,8 @@ const About = () => {
             <div className="relative max-w-xl mx-auto">
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
-                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'}
-                  alt="Dagmawi Teferi"
+                  // src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'}
+                  // alt="Dagmawi Teferi"
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -80,19 +80,19 @@ const About = () => {
           {/* Content */}
           <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
             <div className="space-y-6">
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-gray-900 leading-relaxed">
                 I'm a passionate AI/ML engineer with over 5 years of experience in developing cutting-edge 
                 machine learning solutions. I specialize in building scalable AI systems that solve real-world 
                 problems and drive business value.
               </p>
               
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-gray-900 leading-relaxed">
                 My expertise spans across deep learning, natural language processing, computer vision, and 
                 MLOps. I love working at the intersection of research and engineering, turning innovative 
                 ideas into production-ready solutions.
               </p>
 
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-gray-900 leading-relaxed">
                 When I'm not coding, you can find me contributing to open-source projects, writing technical 
                 articles, or exploring the latest advancements in AI research.
               </p>
@@ -114,7 +114,7 @@ const About = () => {
             <h3 className="text-3xl font-bold text-foreground mb-4">
               Technical <span className="text-gradient">Skills</span>
             </h3>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-gray-900">
               Technologies and frameworks I work with
             </p>
           </div>
