@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Navigation from '../Navigation'
 import Hero from '../Hero';
 import About from '../About';
@@ -8,17 +8,17 @@ import Projects from '../Projects';
 import Work from '../Work';
 import Contact from '../Contact';
 import Footer from '../Footer'; 
-import Chatbot from '../Chat/Chatbot';
+import Chatbot, { ChatbotHandle } from '../Chat/Chatbot';
 
 
 
 function App() {
-  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const chatbotRef = useRef<ChatbotHandle>(null);
 
   return (
     <div className="App">
       <Navigation />     
-      <Hero onChatButtonClick={() => setIsChatbotOpen(true)} />
+      <Hero onChatButtonClick={() => chatbotRef.current?.openChat('fullscreen')} />
       <About />
       <Services />
       <Education />
@@ -26,7 +26,7 @@ function App() {
       <Projects />
       <Contact />
       <Footer />
-      {isChatbotOpen && <Chatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />}
+      <Chatbot ref={chatbotRef} />
       
     </div>
   );
