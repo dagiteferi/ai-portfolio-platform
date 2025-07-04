@@ -1,31 +1,54 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useEffect } from 'react';
-import { Download, Github, Linkedin, MoveLeft, Facebook } from 'lucide-react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { Download, Github, Linkedin, Facebook } from 'lucide-react';
 import { Button } from './ui/button';
-// Adjust the path as necessary
 
+/**
+ * Props for the Hero component.
+ * @interface
+ */
+interface HeroProps {
+  /**
+   * Callback function to be executed when the chat button is clicked.
+   */
+  onChatButtonClick: () => void;
+}
 
-
-const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
-  const roles = ["Beliver","AI/ML Engineer", "Flutter Developer","Full-stack Dev"   ];
+/**
+ * Hero component displays the main introductory section of the portfolio.
+ * It features a dynamic role display, call-to-action buttons, and social media links.
+ * The component is memoized to optimize performance by preventing unnecessary re-renders.
+ */
+const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
+  // Array of roles to be displayed dynamically.
+  const roles = ["Beliver", "AI/ML Engineer", "Flutter Developer", "Full-stack Dev"];
+  // State to manage the currently displayed role's index.
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
 
+  /**
+   * Effect hook to cycle through the roles array every 3 seconds.
+   * Cleans up the interval on component unmount.
+   */
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentRoleIndex((prevIndex) => (prevIndex + 1) % roles.length);
-    }, 3000); // Change text every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [roles.length]);
+  }, [roles.length]); // Dependency array ensures effect runs only if roles.length changes.
 
-  const handleDownloadCV = () => {
-    // Create a placeholder CV download
+  /**
+   * Callback function to handle CV download.
+   * Uses useCallback to memoize the function, preventing unnecessary re-creations on re-renders.
+   */
+  const handleDownloadCV = useCallback(() => {
     const link = document.createElement('a');
     link.href = 'data:text/plain;charset=utf-8,This is a placeholder CV file for Dagmawi Teferi - AI/ML Engineer';
     link.download = 'Dagmawi_Teferi_CV.txt';
     link.click();
-  };
+  }, []); // Empty dependency array ensures the function is created only once.
 
+  // Static array of social media links and their corresponding icons.
   const socialLinks = [
     { 
       icon: Linkedin, 
@@ -46,14 +69,18 @@ const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
 
   return (
     <div className="front">
+      {/* Background image for the hero section. */}
       <img className="back" src="/assets/back_n.png" alt="" />
+      
+      {/* Left content area: Name, dynamic role, and call-to-action buttons. */}
       <div className="front-child1">
         <div className="animate-fade-in-up">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
                 <span className="block text-gray-900">Dname</span>
+                {/* AnimatePresence manages the exit and enter animations of the role text. */}
                 <AnimatePresence mode='wait'>
                   <motion.span
-                    key={currentRoleIndex}
+                    key={currentRoleIndex} // Key prop is crucial for AnimatePresence to detect changes.
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -69,7 +96,7 @@ const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
                 Building Modern Web Solutions & Digital Experiences
               </p>
 
-              {/* CTA Buttons */}
+              {/* Call-to-action buttons. */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
                 <Button
                   onClick={handleDownloadCV}
@@ -81,15 +108,15 @@ const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
                 </Button>
                 
                 <Button
-                  onClick={onChatButtonClick}
+                  onClick={onChatButtonClick} // Triggers the chatbox via prop.
                   size="lg"
-                  className="bg-white/80 text-gray-800 border border-white/50 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
+                  className="bg-white/80 text-gray-800 border border-gray-400 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
                 >
                 Chat With My Agent
                 </Button>
               </div>
 
-              {/* Social Links */}
+              {/* Social media links. */}
               <div className="flex justify-center lg:justify-start space-x-6">
                 {socialLinks.map((social, index) => (
                   <a
@@ -106,12 +133,14 @@ const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
               </div>
             </div>
       </div>
+      
+      {/* Right content area: Hero images. */}
       <div className="front-child2">
-        <img className="hero hero1" src="/assets/hero.svg" alt="/" style={{width:"80%" , height:"1000px"}} />
-        <img className="hero hero2" src="/assets/hero.svg" alt="/"  style={{width:"1000px" , height:"150px"}} />
+        <img className="hero hero1" src="/assets/hero-bg.png" alt="/" style={{width:"80%" , height:"900px"}} />
+        <img className="hero hero2" src="/assets/hero-bg.png" alt="/"  style={{width:"900px" , height:"200px"}} />
       </div>
     </div>
   );
-};
+});
 
 export default Hero;
