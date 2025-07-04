@@ -43,7 +43,7 @@ const Navigation = () => {
             className="flex-shrink-0 cursor-pointer"
             onClick={() => scrollToSection('#home')}
           >
-            <div className="text-2xl font-bold text-gradient">
+            <div className={`text-2xl ${isScrolled ? 'text-black' : 'text-gradient'} font-bold`}>
               DT
             </div>
           </div>
