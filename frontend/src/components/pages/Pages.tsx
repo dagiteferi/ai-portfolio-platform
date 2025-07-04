@@ -26,7 +26,7 @@ function App() {
       <Projects />
       <Contact />
       <Footer />
-      {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
+      {isChatbotOpen && <Chatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />}
       
     </div>
   );

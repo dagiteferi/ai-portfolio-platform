@@ -4,10 +4,11 @@ import ChatWidget from './ChatWidget';
 import ChatHistory from './ChatHistory';
 import { ChatProvider } from '../../contexts/ChatContext';
 
-const Chatbot = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [isFullScreen, setIsFullScreen] = useState(true); // Start in full screen
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+
+  if (!isOpen) return null;
 
   return (
     <ChatProvider>
