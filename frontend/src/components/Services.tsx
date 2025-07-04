@@ -1,48 +1,57 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Brain, Code, Database, Cloud, BarChart, Zap } from 'lucide-react';
+
+const services = [
+  {
+    icon: Brain,
+    title: 'Machine Learning Consulting',
+    description: 'Expert guidance on ML strategy, model selection, and implementation to solve your business challenges.',
+    color: 'from-primary to-primary-glow'
+  },
+  {
+    icon: Code,
+    title: 'Web Development',
+    description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
+    color: 'from-accent to-info'
+  },
+  {
+    icon: Database,
+    title: 'Data Analysis',
+    description: 'Transform raw data into actionable insights using advanced statistical methods and visualization.',
+    color: 'from-success to-secondary'
+  },
+  {
+    icon: Cloud,
+    title: 'AI Model Deployment',
+    description: 'Scalable deployment of AI models to production environments using cloud platforms and MLOps.',
+    color: 'from-warning to-beige'
+  },
+  {
+    icon: BarChart,
+    title: 'Business Intelligence',
+    description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
+    color: 'from-pink to-accent'
+  },
+  {
+    icon: Zap,
+    title: 'AI Automation',
+    description: 'Automate repetitive tasks and workflows using intelligent AI-powered solutions.',
+    color: 'from-info to-primary'
+  }
+];
+
+const colorGradients = {
+  'from-primary to-primary-glow': 'linear-gradient(to right, hsl(195 92% 63%), hsl(195 92% 73%))',
+  'from-accent to-info': 'linear-gradient(to right, hsl(213 94% 68%), hsl(213 94% 68%))',
+  'from-success to-secondary': 'linear-gradient(to right, hsl(142 76% 73%), hsl(142 76% 73%))',
+  'from-warning to-beige': 'linear-gradient(to right, hsl(38 92% 75%), hsl(41 44% 85%))',
+  'from-pink to-accent': 'linear-gradient(to right, hsl(340 82% 82%), hsl(213 94% 68%))',
+  'from-info to-primary': 'linear-gradient(to right, hsl(213 94% 68%), hsl(195 92% 63%))',
+};
 
 const Services = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-
-  const services = [
-    {
-      icon: Brain,
-      title: 'Machine Learning Consulting',
-      description: 'Expert guidance on ML strategy, model selection, and implementation to solve your business challenges.',
-      color: 'from-primary to-primary-glow'
-    },
-    {
-      icon: Code,
-      title: 'Web Development',
-      description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
-      color: 'from-primary to-primary-glow'
-    },
-    {
-      icon: Database,
-      title: 'Data Analysis',
-      description: 'Transform raw data into actionable insights using advanced statistical methods and visualization.',
-      color: 'from-primary to-primary-glow'
-    },
-    {
-      icon: Cloud,
-      title: 'AI Model Deployment',
-      description: 'Scalable deployment of AI models to production environments using cloud platforms and MLOps.',
-      color: 'from-primary to-primary-glow'
-    },
-    {
-      icon: BarChart,
-      title: 'Business Intelligence',
-      description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
-      color: 'from-primary to-primary-glow'
-    },
-    {
-      icon: Zap,
-      title: 'AI Automation',
-      description: 'Automate repetitive tasks and workflows using intelligent AI-powered solutions.',
-      color: 'from-primary to-primary-glow'
-    }
-  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -87,7 +96,7 @@ const Services = () => {
                 }}
               >
                 <div className="space-y-4">
-                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${service.color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className="w-16 h-16 rounded-xl p-4 group-hover:scale-110 transition-transform duration-300" style={{ background: colorGradients[service.color as keyof typeof colorGradients] }}>
                     <Icon className="w-full h-full text-white" strokeWidth={1.5} />
                   </div>
                   
@@ -130,4 +139,4 @@ const Services = () => {
   );
 };
 
-export default Services;
+export default memo(Services);
