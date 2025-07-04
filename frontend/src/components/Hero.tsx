@@ -76,7 +76,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
       <div className="front-child1">
         <div className="animate-fade-in-up">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-                <span className="block text-gray-900">Dname</span>
+                <span className="block text-gray-900">Dagmawi Teferi</span>
                 {/* AnimatePresence manages the exit and enter animations of the role text. */}
                 <AnimatePresence mode='wait'>
                   <motion.span
@@ -92,9 +92,19 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
                 </AnimatePresence>
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
-                Building Modern Web Solutions & Digital Experiences
-              </p>
+              <div className="flex items-center justify-center lg:justify-start flex-wrap gap-y-2 mb-8 text-black">
+                <span className="text-2xl font-mono mr-2">{'<'}</span>
+                <span className="text-sm md:text-base font-medium">Believe</span>
+                <span className="text-cyan-500 text-base mx-2">→</span>
+                <span className="text-sm md:text-base font-medium">Learn</span>
+                <span className="text-cyan-500 text-base mx-2">→</span>
+                <span className="text-sm md:text-base font-medium">Write</span>
+                <span className="text-cyan-500 text-base mx-2">→</span>
+                <span className="text-sm md:text-base font-medium">Solve</span>
+                <span className="text-cyan-500 text-base mx-2">→</span>
+                <span className="text-sm md:text-base font-medium">Done</span>
+                <span className="text-2xl font-mono ml-2">{'/>'}</span>
+              </div>
 
               {/* Call-to-action buttons. */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
