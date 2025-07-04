@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 
 
 
-const Hero = () => {
+const Hero = ({ onChatButtonClick }: { onChatButtonClick: () => void }) => {
   const roles = ["Beliver","AI/ML Engineer", "Flutter Developer","Full-stack Dev"   ];
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
 
@@ -81,7 +81,7 @@ const Hero = () => {
                 </Button>
                 
                 <Button
-                  onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={onChatButtonClick}
                   size="lg"
                   className="bg-white/80 text-gray-800 border border-white/50 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
                 >

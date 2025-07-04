@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navigation from '../Navigation'
 import Hero from '../Hero';
 import About from '../About';
@@ -13,10 +13,12 @@ import Chatbot from '../Chat/Chatbot';
 
 
 function App() {
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+
   return (
     <div className="App">
       <Navigation />     
-      <Hero />
+      <Hero onChatButtonClick={() => setIsChatbotOpen(true)} />
       <About />
       <Services />
       <Education />
@@ -24,7 +26,7 @@ function App() {
       <Projects />
       <Contact />
       <Footer />
-      <Chatbot />
+      {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
       
     </div>
   );
