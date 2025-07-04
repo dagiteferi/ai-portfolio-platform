@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Brain, Code, Database, Cloud, ChartBar, Zap } from 'lucide-react';
+import { Brain, Code, Database, Cloud, BarChart, Zap } from 'lucide-react';
 
 const Services = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,7 +31,7 @@ const Services = () => {
       color: 'from-warning to-beige'
     },
     {
-      icon: ChartBar,
+      icon: BarChart,
       title: 'Business Intelligence',
       description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
       color: 'from-pink to-accent'
@@ -62,47 +62,50 @@ const Services = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} id="services" className="section-padding bg-background">
+    <section ref={sectionRef} id="services" className="section-padding bg-background" style={{ backgroundImage: 'url(/assets/service_background.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="max-w-7xl mx-auto">
         <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             My <span className="text-gradient">Services</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Comprehensive AI/ML and development services to bring your ideas to life
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <div
-              key={service.title}
-              className={`card-elegant hover-scale group cursor-pointer ${
-                isVisible ? 'animate-bounce-in' : 'opacity-0'
-              }`}
-              style={{
-                animationDelay: isVisible ? `${index * 0.1}s` : '0s'
-              }}
-            >
-              <div className="space-y-4">
-                <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${service.color} p-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <service.icon className="w-full h-full text-white" />
-                </div>
-                
-                <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                  {service.title}
-                </h3>
-                
-                <p className="text-muted-foreground leading-relaxed">
-                  {service.description}
-                </p>
+          {services.map((service, index) => {
+            const Icon = service.icon;
+            return (
+              <div
+                key={service.title}
+                className={`card-elegant hover-scale group cursor-pointer ${
+                  isVisible ? 'animate-bounce-in' : 'opacity-0'
+                }`}
+                style={{
+                  animationDelay: isVisible ? `${index * 0.1}s` : '0s'
+                }}
+              >
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-xl bg-gray-300 p-4 group-hover:scale-110 transition-transform duration-300">
+                    <Icon className="w-full h-full text-white" strokeWidth={1.5} />
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                    {service.title}
+                  </h3>
+                  
+                  <p className="text-lg text-gray-900 leading-relaxed">
+                    {service.description}
+                  </p>
 
-                <div className="pt-4">
-                  <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full group-hover:w-full transition-all duration-500"></div>
+                  <div className="pt-4">
+                    <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full group-hover:w-full transition-all duration-500"></div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Call to Action */}
