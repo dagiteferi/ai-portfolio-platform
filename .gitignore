@@ -54,3 +54,4 @@ frontend/dist/
 .github/workflows/**/secret-*.yml
 run backend.txt
 .pytest_cache
+assets/

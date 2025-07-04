@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
-//import profileImg from '../assets/profile-photo.jpg';
+
 
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [animatedSkills, setAnimatedSkills] = useState<boolean[]>([]);
+  const [isHovered, setIsHovered] = useState(false); // Added this line
   const sectionRef = useRef<HTMLElement>(null);
 
   const skills = [
@@ -60,16 +61,19 @@ const About = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Profile Image */}
-          <div className={`${isVisible ? 'animate-scale-in' : 'opacity-0'}`}>
-            <div className="relative max-w-md mx-auto">
+          <div className={`${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div className="relative max-w-xl mx-auto">
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
-                  src="/assets/profile-photo.jpg"
+                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'}
                   alt="Dagmawi Teferi"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl -z-10 blur-xl"></div>
+              <div className="absolute -inset-6 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl -z-10 blur-2xl"></div>
             </div>
           </div>
 
