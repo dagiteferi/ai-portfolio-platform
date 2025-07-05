@@ -3,7 +3,7 @@ import Navigation from '../Navigation'
 import Hero from '../Hero';
 import About from '../About';
 import Services from '../Services/Services';
-import Education from '../Education';
+import Education from '../Education/Education';
 import Gallery from '../Gallery/Gallery';
 import Projects from '../Projects';
 import Work from '../Work';
