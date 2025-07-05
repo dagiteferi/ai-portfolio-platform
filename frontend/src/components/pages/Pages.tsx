@@ -4,6 +4,7 @@ import Hero from '../Hero';
 import About from '../About';
 import Services from '../Services';
 import Education from '../Education';
+import Gallery from '../Gallery';
 import Projects from '../Projects';
 import Work from '../Work';
 import Contact from '../Contact';
@@ -22,6 +23,7 @@ function App() {
       <About />
       <Services />
       <Education />
+      <Gallery />
       <Work />
       <Projects />
       <Contact />

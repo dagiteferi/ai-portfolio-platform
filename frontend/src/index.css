@@ -750,4 +750,15 @@
   }
 }
 
+@keyframes scroll-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%); /* Adjust based on content width */
+  }
+}
 
+.animate-scroll-x {
+  animation: scroll-x 30s linear infinite;
+}
