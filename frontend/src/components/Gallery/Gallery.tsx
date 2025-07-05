@@ -1,45 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface GalleryItem {
-  src: string;
-  alt: string;
-  linkedinUrl: string;
-  title: string;
-}
-
-const galleryItems: GalleryItem[] = [
-  {
-    src: '/assets/10acadamy graducation.png',
-    alt: '10 Academy Graduation',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_1',
-    title: '10 Academy Graduation Ceremony',
-  },
-  {
-    src: '/assets/10acadamy post about me .jpg',
-    alt: '10 Academy Post About Me',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_2',
-    title: 'Featured Post by 10 Academy',
-  },
-  {
-    src: '/assets/posted image .png',
-    alt: 'General Posted Image',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_3',
-    title: 'My Recent Achievement',
-  },
-  {
-    src: '/assets/skylight graduation.png',
-    alt: 'Skylight Graduation',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_4',
-    title: 'Skylight Graduation Day',
-  },
-  {
-    src: '/assets/YAG cerimony.DNG',
-    alt: 'YAG Ceremony',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_5',
-    title: 'YAG Ceremony Participation',
-  },
-];
+import { galleryItems } from './data';
+import GalleryItem from './GalleryItem';
 
 const Gallery = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,22 +77,7 @@ const Gallery = () => {
             className="flex space-x-8 py-4 overflow-x-auto no-scrollbar rounded-lg border-2 border-primary shadow-lg"
           >
             {[...galleryItems, ...galleryItems].map((item, index) => (
-              <a
-                key={index}
-                href={item.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 w-80 h-64 rounded-lg overflow-hidden shadow-lg transform transition-transform duration-300 hover:scale-105 group border border-gray-300"
-              >
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="text-white text-lg font-semibold text-center px-4">{item.title}</p>
-                </div>
-              </a>
+              <GalleryItem key={index} {...item} />
             ))}
           </div>
 

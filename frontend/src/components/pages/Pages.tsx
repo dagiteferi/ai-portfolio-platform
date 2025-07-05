@@ -4,7 +4,7 @@ import Hero from '../Hero';
 import About from '../About';
 import Services from '../Services';
 import Education from '../Education';
-import Gallery from '../Gallery';
+import Gallery from '../Gallery/Gallery';
 import Projects from '../Projects';
 import Work from '../Work';
 import Contact from '../Contact';
