@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import Navigation from '../Navigation'
 import Hero from '../Hero';
 import About from '../About';
-import Services from '../Services';
+import Services from '../Services/Services';
 import Education from '../Education';
 import Gallery from '../Gallery/Gallery';
 import Projects from '../Projects';
