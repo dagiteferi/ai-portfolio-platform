@@ -6,7 +6,7 @@ import Services from '../Services/Services';
 import Education from '../Education/Education';
 import Gallery from '../Gallery/Gallery';
 import Projects from '../Projects';
-import Work from '../Work';
+import Work from '../Work/Work';
 import Contact from '../Contact';
 import Footer from '../Footer'; 
 import Chatbot, { ChatbotHandle } from '../Chat/Chatbot';
