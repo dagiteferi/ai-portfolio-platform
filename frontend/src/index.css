@@ -154,12 +154,14 @@
       margin: 30px 0 10px 1.8rem;
       max-width: 10rem;
     }
-    @media screen and (max-width: 1160px) {
+  }
+  @media screen and (max-width: 1160px) {
       .view,
       .order {
         max-width: 9rem;
-      }
-      @media screen and (max-width: 1040px) {
+    }
+  }
+  @media screen and (max-width: 1040px) {
         .order {
           margin: auto;
         }
@@ -190,7 +192,7 @@
         .order {
           max-width: 13rem;
           margin-top: 35px;
-        }
+        }}
         @media screen and (max-width: 800px) {
           #bd .account {
             display: none;
@@ -237,10 +239,10 @@
             border-radius: 5px;
             transition: all 0.2s ease-in-out;
             background: rgb(255 255 255 / 43%);
-            &:hover {
-              transform: scale(1);
-              box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
-            }
+          }
+          .hamburger-icon:hover {
+            transform: scale(1);
+            box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
           }
   
           .icon-1.a {
@@ -287,27 +289,29 @@
             opacity: 0;
             transition: all 600ms cubic-bezier(0.62, 0.04, 0.3, 1.56);
             transition-delay: 100ms;
-            .ul {
-              margin: 0;
-              position: absolute;
-              top: 30%;
-              left: 7vw;
-              padding: 0;
-              display: flex;
-              flex-direction: column;
-              gap: 0.5rem;
-              .li {
-                list-style: none;
+          }
+          #nav .ul {
+            margin: 0;
+            position: absolute;
+            top: 30%;
+            left: 7vw;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          #nav .ul .li {
+            list-style: none;
                 font-size: 24px;
                 color: #fff;
                 line-height: 2.2;
                 text-transform: uppercase;
                 letter-spacing: 1.7px;
                 cursor: pointer;
-                &:before {
-                }
-              }
-            }
+          }
+          #nav .ul .li::before {
+          }
+          #nav .ul .li {
           }
           .li a {
             text-decoration: none;
@@ -390,7 +394,7 @@
             }
             .front {
               grid-template: 2fr 1fr 1fr 1fr 1fr / 1fr;
-            }
+            }}
             @media screen and (min-width: 480px) {
               #bd .choose-us-cont {
                 margin-top: 28rem;
@@ -439,10 +443,6 @@
               }
             }
           }
-        }
-      }
-    }
-  }
 .dropbtn {
   background-color: #f1f1f1;
   color: white;
