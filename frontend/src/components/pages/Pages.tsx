@@ -5,7 +5,7 @@ import About from '../About';
 import Services from '../Services/Services';
 import Education from '../Education/Education';
 import Gallery from '../Gallery/Gallery';
-import Projects from '../Projects';
+import Projects from '../Projects/Projects';
 import Work from '../Work/Work';
 import Contact from '../Contact';
 import Footer from '../Footer'; 
