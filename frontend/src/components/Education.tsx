@@ -96,7 +96,7 @@ const Education = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Education & <span className="text-gradient">Certifications</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Academic background and professional certifications that shape my expertise
           </p>
         </div>
@@ -116,15 +116,15 @@ const Education = () => {
               <div className="space-y-4">
                 <div className="flex items-center space-x-2 mb-2">
                   <GraduationCap className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">{edu.period}</span>
+                  <span className="text-lg text-gray-900 leading-relaxed">{edu.period}</span>
                 </div>
                 <h3 className="text-xl font-bold text-foreground">{edu.degree}</h3>
                 <p className="text-primary font-semibold">{edu.institution}</p>
                 {edu.gpa && (
-                  <p className="text-sm text-muted-foreground">GPA: {edu.gpa}</p>
+                  <p className="text-lg text-gray-900 leading-relaxed">GPA: {edu.gpa}</p>
                 )}
                 
-                <p className="text-muted-foreground">{edu.description}</p>
+                <p className="text-lg text-gray-900 leading-relaxed">{edu.description}</p>
                 
                 {edu.highlights && (
                   <div>
@@ -133,7 +133,7 @@ const Education = () => {
                       {edu.highlights.map((highlight, i) => (
                         <li key={i} className="flex items-start">
                           <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                          <span className="text-sm text-muted-foreground">{highlight}</span>
+                          <span className="text-lg text-gray-900">{highlight}</span>
                         </li>
                       ))}
                     </ul>
