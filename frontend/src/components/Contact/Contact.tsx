@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
-import { Button } from './ui/button';
-import { useToast } from '../hooks/use-toast';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Send, CheckCircle } from 'lucide-react';
+import { Button } from '../ui/button';
+import { useToast } from '../../hooks/use-toast';
+import { contactInfo, availableServices } from './data';
+import ContactInfoCard from './ContactInfoCard';
 
 const Contact = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -43,7 +45,7 @@ const Contact = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.message) {
-      showToast("Message sent successfully! Thank you for reaching out. I'll get back to you soon.", "success");
+      showToast("Please fill in all fields.", "error");
       return;
     }
 
@@ -58,27 +60,6 @@ const Contact = () => {
     }, 2000);
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: 'Email',
-      value: 'contact@dagmawiteferi.com',
-      href: 'mailto:contact@dagmawiteferi.com'
-    },
-    {
-      icon: Phone,
-      title: 'Phone',
-      value: '+1 (555) 123-4567',
-      href: 'tel:+15551234567'
-    },
-    {
-      icon: MapPin,
-      title: 'Location',
-      value: 'San Francisco, CA',
-      href: 'https://maps.google.com/?q=San+Francisco,CA'
-    }
-  ];
-
   return (
     <section ref={sectionRef} id="contact" className="section-padding bg-background">
       <div className="max-w-7xl mx-auto">
@@ -86,7 +67,7 @@ const Contact = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Get In <span className="text-gradient">Touch</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Ready to discuss your next AI/ML project? Let's connect and explore possibilities together
           </p>
         </div>
@@ -99,7 +80,7 @@ const Contact = () => {
               <h3 className="text-2xl font-bold text-foreground mb-6">
                 Let's Start a Conversation
               </h3>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+              <p className="text-lg text-gray-900 leading-relaxed mb-8">
                 I'm always excited to discuss new opportunities, collaborate on innovative projects, 
                 or simply chat about the latest developments in AI and machine learning. Whether you 
                 have a specific project in mind or just want to explore possibilities, I'd love to hear from you.
@@ -108,23 +89,7 @@ const Contact = () => {
 
             <div className="space-y-6">
               {contactInfo.map((info, index) => (
-                <a
-                  key={index}
-                  href={info.href}
-                  className="flex items-center space-x-4 p-4 rounded-xl hover:bg-muted/50 transition-colors duration-300 group"
-                  target={info.href.startsWith('http') ? '_blank' : '_self'}
-                  rel={info.href.startsWith('http') ? 'noopener noreferrer' : ''}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <info.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">{info.title}</h4>
-                    <p className="text-muted-foreground group-hover:text-primary transition-colors duration-300">
-                      {info.value}
-                    </p>
-                  </div>
-                </a>
+                <ContactInfoCard key={index} {...info} />
               ))}
             </div>
 
@@ -132,12 +97,7 @@ const Contact = () => {
               <div className="space-y-4">
                 <h4 className="text-xl font-bold text-foreground">Available for:</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    'AI/ML Consulting',
-                    'Full-stack Development', 
-                    'Technical Mentoring',
-                    'Research Collaboration'
-                  ].map((service, index) => (
+                  {availableServices.map((service, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <CheckCircle className="w-4 h-4 text-success" />
                       <span className="text-sm text-foreground">{service}</span>
@@ -165,7 +125,7 @@ const Contact = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
                       placeholder="Your full name"
                       required
                     />
@@ -181,7 +141,7 @@ const Contact = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
                       placeholder="your.email@example.com"
                       required
                     />
@@ -197,7 +157,7 @@ const Contact = () => {
                       value={formData.message}
                       onChange={handleInputChange}
                       rows={6}
-                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 resize-none"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 resize-none"
                       placeholder="Tell me about your project or just say hello..."
                       required
                     />
@@ -224,7 +184,7 @@ const Contact = () => {
               </form>
 
               <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-sm text-gray-900 text-center">
                   Typically respond within 24 hours
                 </p>
               </div>
@@ -237,4 +197,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default memo(Contact);

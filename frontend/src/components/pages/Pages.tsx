@@ -7,7 +7,7 @@ import Education from '../Education/Education';
 import Gallery from '../Gallery/Gallery';
 import Projects from '../Projects/Projects';
 import Work from '../Work/Work';
-import Contact from '../Contact';
+import Contact from '../Contact/Contact';
 import Footer from '../Footer'; 
 import Chatbot, { ChatbotHandle } from '../Chat/Chatbot';
 
