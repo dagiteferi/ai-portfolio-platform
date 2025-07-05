@@ -40,7 +40,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
                 <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                   {project.title}
                 </h3>
-                <p className="text-sm text-muted-foreground">{project.category}</p>
+                <p className="text-sm text-gray-900">{project.category}</p>
               </div>
             </div>
             <div className="flex space-x-2">
@@ -67,7 +67,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
           </div>
 
           {/* Project Description */}
-          <p className="text-muted-foreground leading-relaxed text-lg">
+          <p className="text-gray-900 leading-relaxed text-lg">
             {project.description}
           </p>
 
