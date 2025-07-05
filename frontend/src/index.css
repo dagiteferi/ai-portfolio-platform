@@ -755,12 +755,16 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%); /* Adjust based on content width */
+    transform: translateX(-100%);
   }
 }
 
 .animate-scroll-x {
-  animation: scroll-x 30s linear infinite;
+  animation: scroll-x 40s linear infinite;
+}
+
+.group:hover .animate-scroll-x {
+  animation-play-state: paused;
 }
 
 @layer utilities {
