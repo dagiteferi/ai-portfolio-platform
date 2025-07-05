@@ -1,68 +1,120 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { GraduationCap, Award, ExternalLink, X } from 'lucide-react';
+import EducationCard from './Education/EducationCard';
+import CertificationCard from './Education/CertificationCard';
 
-const Education = () => {
+interface EducationEntry {
+  degree: string;
+  institution: string;
+  period: string;
+  description: string;
+  gpa?: string;
+  highlights?: string[];
+  courses?: string[];
+}
+
+interface Certification {
+  name: string;
+  issuer: string;
+  date: string;
+  skills: string[];
+  image: string;
+}
+
+const education: EducationEntry[] = [
+  {
+    degree: 'Master of Science in Computer Science',
+    institution: 'Stanford University',
+    period: '2020 - 2022',
+    description: 'Specialized in Artificial Intelligence and Machine Learning with focus on Deep Learning and Natural Language Processing.',
+    gpa: '3.9/4.0',
+    highlights: [
+      'Summa Cum Laude graduate with highest honors',
+      'Research focus on neural networks and NLP',
+      'Published 2 papers in top-tier conferences',
+      'Teaching Assistant for ML courses'
+    ],
+    courses: ['Deep Learning', 'NLP', 'Computer Vision', 'Reinforcement Learning', 'Statistical Learning']
+  },
+  {
+    degree: 'Bachelor of Science in Computer Engineering',
+    institution: 'University of California, Berkeley',
+    period: '2016 - 2020',
+    description: 'Strong foundation in computer systems, algorithms, and software engineering with honors.',
+    gpa: '3.8/4.0',
+    highlights: [
+      "Dean's List for 6 consecutive semesters",
+      'President of Computer Science Club',
+      'Winner of hackathon competitions',
+      'Completed senior capstone project on AI'
+    ],
+    courses: ['Data Structures', 'Algorithms', 'Software Engineering', 'Database Systems', 'Computer Networks']
+  }
+];
+
+const certifications: Certification[] = [
+  {
+    name: 'Data Science',
+    issuer: '10 Academy',
+    date: '2023',
+    skills: ['MLOps', 'TensorFlow', 'GCP'],
+    image: '/assets/data-science-10Acadamy-Certificate.jpg',
+  },
+  {
+    name: 'Data Science Learning',
+    issuer: '10 Academy',
+    date: '2023',
+    skills: ['Data Preprocessing', 'Exploratory Data Analysis', 'Model Evaluation', 'Data Visualization'],
+    image: '/assets/10acadami learing certaficate.jpg',
+  },
+  {
+    name: 'YALI RLC',
+    issuer: 'Kifiya',
+    date: '2023',
+    skills: ['Leadership', 'Community Development', 'Entrepreneurship'],
+    image: '/assets/kifiya YAG Certificate.jpg',
+  },
+  {
+    name: 'Web Development',
+    issuer: 'Kuraz',
+    date: '2022',
+    skills: ['HTML', 'CSS', 'JavaScript', 'React'],
+    image: '/assets/kurazw web-dev-Certificate.jpeg',
+  },
+  {
+    name: 'React JS',
+    issuer: 'SoloLearn',
+    date: '2022',
+    skills: ['React', 'Frontend Development', 'UI/UX'],
+    image: '/assets/React-js-Certificate.png',
+  },
+  {
+    name: 'JavaScript Algorithms and Data Structures',
+    issuer: 'freeCodeCamp',
+    date: '2021',
+    skills: ['JavaScript', 'Algorithms', 'Data Structures'],
+    image: '/assets/javascript-Certificate.jpeg',
+  },
+  {
+    name: 'Software Engineering Internship',
+    issuer: 'ABC Tech',
+    date: '2020',
+    skills: ['Software Development', 'Teamwork', 'Problem Solving'],
+    image: '/assets/intership-Certificate.png',
+  },
+  {
+    name: 'Computer Science Fundamentals',
+    issuer: 'HarvardX',
+    date: '2019',
+    skills: ['Computer Science', 'Programming', 'Algorithms'],
+    image: '/assets/computer-science-Certificate.jpeg',
+  },
+];
+
+const Education = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
-
-  const education = [
-    {
-      degree: 'Master of Science in Computer Science',
-      institution: 'Stanford University',
-      period: '2020 - 2022',
-      description: 'Specialized in Artificial Intelligence and Machine Learning with focus on Deep Learning and Natural Language Processing.',
-      gpa: '3.9/4.0',
-      highlights: [
-        'Summa Cum Laude graduate with highest honors',
-        'Research focus on neural networks and NLP',
-        'Published 2 papers in top-tier conferences',
-        'Teaching Assistant for ML courses'
-      ],
-      courses: ['Deep Learning', 'NLP', 'Computer Vision', 'Reinforcement Learning', 'Statistical Learning']
-    },
-    {
-      degree: 'Bachelor of Science in Computer Engineering',
-      institution: 'University of California, Berkeley',
-      period: '2016 - 2020',
-      description: 'Strong foundation in computer systems, algorithms, and software engineering with honors.',
-      gpa: '3.8/4.0',
-      highlights: [
-        'Dean\'s List for 6 consecutive semesters',
-        'President of Computer Science Club',
-        'Winner of hackathon competitions',
-        'Completed senior capstone project on AI'
-      ],
-      courses: ['Data Structures', 'Algorithms', 'Software Engineering', 'Database Systems', 'Computer Networks']
-    }
-  ];
-
-  const certifications = [
-    {
-      name: 'Google Professional ML Engineer',
-      issuer: 'Google Cloud',
-      date: '2023',
-      skills: ['MLOps', 'TensorFlow', 'GCP']
-    },
-    {
-      name: 'AWS ML Specialty',
-      issuer: 'Amazon Web Services',
-      date: '2023',
-      skills: ['SageMaker', 'ML Pipeline', 'AWS']
-    },
-    {
-      name: 'TensorFlow Developer',
-      issuer: 'TensorFlow',
-      date: '2022',
-      skills: ['Deep Learning', 'TensorFlow', 'Keras']
-    },
-    {
-      name: 'Full Stack Development',
-      issuer: 'Meta',
-      date: '2022',
-      skills: ['React', 'Node.js', 'Database Design']
-    }
-  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -104,59 +156,11 @@ const Education = () => {
         {/* Education Section */}
         <div className="grid lg:grid-cols-2 gap-8 mb-20">
           {education.map((edu, index) => (
-            <div
+            <EducationCard
               key={index}
-              className={`card-elegant hover-scale transition-all duration-300 ${
-                isVisible ? 'animate-fade-in-up' : 'opacity-0'
-              }`}
-              style={{
-                animationDelay: isVisible ? `${index * 0.2}s` : '0s'
-              }}
-            >
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 mb-2">
-                  <GraduationCap className="w-5 h-5 text-primary" />
-                  <span className="text-lg text-gray-900 leading-relaxed">{edu.period}</span>
-                </div>
-                <h3 className="text-xl font-bold text-foreground">{edu.degree}</h3>
-                <p className="text-primary font-semibold">{edu.institution}</p>
-                {edu.gpa && (
-                  <p className="text-lg text-gray-900 leading-relaxed">GPA: {edu.gpa}</p>
-                )}
-                
-                <p className="text-lg text-gray-900 leading-relaxed">{edu.description}</p>
-                
-                {edu.highlights && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Key Highlights:</h4>
-                    <ul className="space-y-1">
-                      {edu.highlights.map((highlight, i) => (
-                        <li key={i} className="flex items-start">
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                          <span className="text-lg text-gray-900">{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                {edu.courses && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Relevant Coursework:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {edu.courses.map((course, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm"
-                        >
-                          {course}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+              {...edu}
+              animationDelay={isVisible ? `${index * 0.2}s` : '0s'}
+            />
           ))}
         </div>
 
@@ -168,34 +172,12 @@ const Education = () => {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {certifications.map((cert, index) => (
-              <div
+              <CertificationCard
                 key={index}
-                className={`card-elegant hover-scale transition-all duration-300 text-center ${
-                  isVisible ? 'animate-scale-in' : 'opacity-0'
-                }`}
-                style={{
-                  animationDelay: isVisible ? `${index * 0.1 + 0.5}s` : '0s'
-                }}
-              >
-                <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-lg font-bold text-foreground mb-2">{cert.name}</h4>
-                <p className="text-primary font-semibold mb-2">{cert.issuer}</p>
-                <p className="text-sm text-muted-foreground mb-4">{cert.date}</p>
-                {cert.skills && (
-                  <div className="flex flex-wrap gap-1 justify-center">
-                    {cert.skills.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                {...cert}
+                animationDelay={isVisible ? `${index * 0.1 + 0.5}s` : '0s'}
+                onClick={handleCertificateClick}
+              />
             ))}
           </div>
         </div>
@@ -215,11 +197,7 @@ const Education = () => {
                   </button>
                 </div>
                 <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-8 text-center border-2 border-dashed border-primary/30">
-                  <Award className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <p className="text-lg text-foreground mb-2">Certificate Placeholder</p>
-                  <p className="text-muted-foreground">
-                    This would display the actual certificate image in a real implementation.
-                  </p>
+                  <img src={selectedCertificate} alt="Certificate Preview" className="w-full h-auto object-contain" />
                 </div>
               </div>
             </div>
@@ -228,6 +206,6 @@ const Education = () => {
       </div>
     </section>
   );
-};
+});
 
 export default Education;
