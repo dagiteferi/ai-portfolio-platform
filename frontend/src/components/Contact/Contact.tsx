@@ -61,7 +61,7 @@ const Contact = () => {
   };
 
   return (
-    <section ref={sectionRef} id="contact" className="section-padding bg-background">
+    <section ref={sectionRef} id="contact" className="section-padding bg-background" style={{ backgroundImage: 'url(/assets/service_background.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="max-w-7xl mx-auto">
         <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -82,8 +82,7 @@ const Contact = () => {
               </h3>
               <p className="text-lg text-gray-900 leading-relaxed mb-8">
                 I'm always excited to discuss new opportunities, collaborate on innovative projects, 
-                or simply chat about the latest developments in AI and machine learning. Whether you 
-                have a specific project in mind or just want to explore possibilities, I'd love to hear from you.
+                or simply chat about the latest developments in AI and machine learning. Let's connect!
               </p>
             </div>
 
