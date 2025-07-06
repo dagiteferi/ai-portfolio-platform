@@ -4,7 +4,7 @@ import EducationCard from './EducationCard';
 import CertificationCard from './CertificationCard';
 import { education, certifications } from './data';
 
-const Education = memo(() => {
+const EducationContent = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -101,4 +101,4 @@ const Education = memo(() => {
   );
 });
 
-export default Education;
+export default EducationContent;
