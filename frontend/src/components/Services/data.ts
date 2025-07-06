@@ -1,22 +1,22 @@
-import { Brain, Code, Database, Cloud, BarChart, Zap } from 'lucide-react';
+import { Brain, Code, Cloud, Zap, BarChart, Smartphone } from 'lucide-react';
 
 export const services = [
   {
     icon: Brain,
-    title: 'Machine Learning Consulting',
-    description: 'Expert guidance on ML strategy, model selection, and implementation to solve your business challenges.',
+    title: 'AI Model Development',
+    description: 'Crafting tailored machine learning models to address specific business challenges, enhancing decision-making and operational efficiency.',
     color: 'from-primary to-primary-glow'
   },
   {
     icon: Code,
-    title: 'Web Development',
+    title: 'Full-Stack Web Development',
     description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
     color: 'from-accent to-info'
   },
   {
-    icon: Database,
-    title: 'Data Analysis',
-    description: 'Transform raw data into actionable insights using advanced statistical methods and visualization.',
+    icon: BarChart,
+    title: 'Data Science & Analytics',
+    description: 'Leveraging advanced statistical methods and machine learning to extract actionable insights and drive data-driven strategies.',
     color: 'from-success to-secondary'
   },
   {
@@ -26,9 +26,9 @@ export const services = [
     color: 'from-warning to-beige'
   },
   {
-    icon: BarChart,
-    title: 'Business Intelligence',
-    description: 'Create dashboards and analytics solutions that drive data-driven decision making.',
+    icon: Smartphone,
+    title: 'Flutter Mobile App Development',
+    description: 'Crafting high-performance, cross-platform mobile applications with Flutter for seamless user experiences.',
     color: 'from-pink to-accent'
   },
   {

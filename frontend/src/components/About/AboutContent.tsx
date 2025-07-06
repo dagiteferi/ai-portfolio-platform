@@ -1,33 +1,26 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
+import SkillBar from './SkillBar'; // Import the new SkillBar component
+import { skills } from './data'; // Import skills data
+
+interface Skill {
+  name: string;
+  level: number;
+}
 
 /**
- * About component displays information about Dagmawi Teferi, including a profile image,
+ * AboutContent component displays information about Dagmawi Teferi, including a profile image,
  * a brief biography, and technical skills with animated progress bars.
  * The component is memoized to optimize performance by preventing unnecessary re-renders.
  */
-const About: React.FC = memo(() => {
+const AboutContent: React.FC = memo(() => {
   // State to control the visibility of the section for animation purposes.
   const [isVisible, setIsVisible] = useState(false);
-  // State to manage the animation status of individual skill bars.
-  const [animatedSkills, setAnimatedSkills] = useState<boolean[]>([]);
   // State to track hover status on the profile image for a dynamic effect.
   const [isHovered, setIsHovered] = useState(false);
   // Ref to observe the section's intersection with the viewport.
   const sectionRef = useRef<HTMLElement>(null);
-
-  // Data for technical skills, including name and proficiency level.
-  const skills = [
-    { name: 'Python', level: 95 },
-    { name: 'TensorFlow', level: 90 },
-    { name: 'PyTorch', level: 88 },
-    { name: 'React', level: 85 },
-    { name: 'Machine Learning', level: 92 },
-    { name: 'Deep Learning', level: 89 },
-    { name: 'Data Science', level: 87 },
-    { name: 'Cloud Computing', level: 83 }
-  ];
 
   /**
    * Effect hook to set up an Intersection Observer.
@@ -38,16 +31,6 @@ const About: React.FC = memo(() => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Animate skills one by one with a delay for a staggered effect.
-          skills.forEach((_, index) => {
-            setTimeout(() => {
-              setAnimatedSkills(prev => {
-                const newState = [...prev];
-                newState[index] = true;
-                return newState;
-              });
-            }, index * 200); // Staggered animation delay.
-          });
         }
       },
       { threshold: 0.3 } // Trigger when 30% of the section is visible.
@@ -60,7 +43,7 @@ const About: React.FC = memo(() => {
 
     // Cleanup function to disconnect the observer when the component unmounts.
     return () => observer.disconnect();
-  }, [skills]); // Dependency array includes skills to re-run if skills data changes.
+  }, []); // No dependency on skills anymore as SkillBar handles its own animation.
 
   /**
    * Callback function to handle opening the LinkedIn profile.
@@ -106,20 +89,22 @@ const About: React.FC = memo(() => {
           <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
             <div className="space-y-6">
               <p className="text-lg text-gray-900 leading-relaxed">
-                I'm a passionate AI/ML engineer with over 5 years of experience in developing cutting-edge 
-                machine learning solutions. I specialize in building scalable AI systems that solve real-world 
-                problems and drive business value.
+                I am a passionate AI and machine learning engineer, full stack developer, and Flutter 
+                enthusiast with a strong computer science background, holding a 3.93 GPA, dedicated to 
+                creating intelligent systems and scalable applications.
               </p>
               
               <p className="text-lg text-gray-900 leading-relaxed">
-                My expertise spans across deep learning, natural language processing, computer vision, and 
-                MLOps. I love working at the intersection of research and engineering, turning innovative 
-                ideas into production-ready solutions.
+                My expertise spans across deep learning, natural language processing, 
+                computer vision, full‑stack development, Flutter, and MLOps, and I 
+                thrive at the intersection of research and engineering, transforming 
+                innovative ideas into production-ready solutions.
               </p>
 
               <p className="text-lg text-gray-900 leading-relaxed">
-                When I'm not coding, you can find me contributing to open-source projects, writing technical 
-                articles, or exploring the latest advancements in AI research.
+                I am committed to continuous learning and professional development.
+                 I actively seek opportunities to expand my knowledge, stay updated with emerging 
+                 technologies, and embrace new challenges that enhance my skills and expertise.
               </p>
             </div>
 
@@ -145,21 +130,8 @@ const About: React.FC = memo(() => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {skills.map((skill, index) => (
-              <div key={skill.name} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-foreground">{skill.name}</span>
-                  <span className="text-sm text-muted-foreground">{skill.level}%</span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{
-                      width: animatedSkills[index] ? `${skill.level}%` : '0%'
-                    }}
-                  ></div>
-                </div>
-              </div>
+            {skills.map((skill: Skill, index: number) => (
+              <SkillBar key={skill.name} {...skill} isVisible={isVisible} index={index} />
             ))}
           </div>
         </div>
@@ -168,4 +140,4 @@ const About: React.FC = memo(() => {
   );
 });
 
-export default About;
+export default AboutContent;

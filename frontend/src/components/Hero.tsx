@@ -43,8 +43,9 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
    */
   const handleDownloadCV = useCallback(() => {
     const link = document.createElement('a');
-    link.href = 'data:text/plain;charset=utf-8,This is a placeholder CV file for Dagmawi Teferi - AI/ML Engineer';
-    link.download = 'Dagmawi_Teferi_CV.txt';
+    link.href = '/assets/Dagmawi Teferi\'s cv.pdf';
+    link.target = '_blank'; // Open in a new tab
+    link.rel = 'noopener noreferrer'; // Security best practice
     link.click();
   }, []); // Empty dependency array ensures the function is created only once.
 
@@ -57,7 +58,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
     },
     { 
       icon: Github, 
-      href: 'https://github.com/dagmawi-teferi',
+      href: 'https://github.com/dagiteferi',
       label: 'GitHub'
     },
     { 
