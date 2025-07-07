@@ -4,26 +4,26 @@ export const contactInfo = [
   {
     icon: Mail,
     title: 'Email',
-    value: 'contact@dagmawiteferi.com',
-    href: 'mailto:contact@dagmawiteferi.com'
+    value: 'dagiteferi2011@gmail.com',
+    href: 'mailto:dagiteferi2011@gmail.com'
   },
   {
     icon: Phone,
     title: 'Phone',
-    value: '+1 (555) 123-4567',
-    href: 'tel:+15551234567'
+    value: '+251 920 362324',
+    href: 'tel:++201 920 362324'
   },
   {
     icon: MapPin,
     title: 'Location',
-    value: 'San Francisco, CA',
+    value: 'Adiss Ababa, Ethiopia',
     href: 'https://maps.google.com/?q=San+Francisco,CA'
   }
 ];
 
 export const availableServices = [
-  'AI/ML Consulting',
+  'AI/ML ',
   'Full-stack Development', 
-  'Technical Mentoring',
-  'Research Collaboration'
+  'Flutter Development',
+  'Data science',
 ];
