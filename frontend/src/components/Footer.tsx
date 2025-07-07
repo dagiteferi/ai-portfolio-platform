@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Linkedin, Twitter, Heart, ArrowUp } from 'lucide-react';
+import { Github, Linkedin, Twitter, Heart, ArrowUp, Facebook } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -7,16 +7,16 @@ const Footer = () => {
   const socialLinks = [
     { 
       icon: Linkedin, 
-      href: 'https://www.linkedin.com/in/dagmawi-teferi',
+      href: 'www.linkedin.com/in/dagmawi-teferi',
       label: 'LinkedIn'
     },
     { 
       icon: Github, 
-      href: 'https://github.com/dagmawi-teferi',
+      href: 'https://github.com/dagiteferi',
       label: 'GitHub'
     },
     { 
-      icon: Twitter, 
+      icon: Facebook, 
       href: 'https://twitter.com/dagmawi_teferi',
       label: 'Twitter'
     }
@@ -103,7 +103,7 @@ const Footer = () => {
               <div className="space-y-3 text-muted-foreground">
                 <p>
                   <a 
-                    href="mailto:contact@dagmawiteferi.com"
+                    href="mailto:contact@dagiteferi2011@gmail.com"
                     className="hover:text-primary transition-colors duration-300"
                   >
                     contact@dagmawiteferi.com
@@ -111,13 +111,13 @@ const Footer = () => {
                 </p>
                 <p>
                   <a 
-                    href="tel:+15551234567"
+                    href="tel:+251920362324"
                     className="hover:text-primary transition-colors duration-300"
                   >
-                    +1 (555) 123-4567
+                    +1 251920362324
                   </a>
                 </p>
-                <p>San Francisco, CA</p>
+                <p>Adiss Ababa, Ethiopia'</p>
               </div>
             </div>
           </div>

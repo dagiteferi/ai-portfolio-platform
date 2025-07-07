@@ -17,7 +17,7 @@ export const contactInfo = [
     icon: MapPin,
     title: 'Location',
     value: 'Adiss Ababa, Ethiopia',
-    href: 'https://maps.google.com/?q=San+Francisco,CA'
+    href: 'https://maps.app.goo.gl/iCWq14Bj8RVkELv56'
   }
 ];
 
