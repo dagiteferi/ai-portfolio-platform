@@ -24,6 +24,7 @@ def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
     documents = []
     profile_data = {}
     knowledge_base_path = "backend/ai_core/knowledge/github_knowledge_base.json"
+    personal_knowledge_base_path = "backend/ai_core/knowledge/personal_knowledge_base.json"
 
     try:
         if source == "all" and os.path.exists(knowledge_base_path):
@@ -86,6 +87,69 @@ def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
                     metadata={"title": "Recent Activity", "url": "https://github.com/dagiteferi"}
                 ))
                 logger.debug("Added recent activity document")
+
+            # Process personal interests
+            if os.path.exists(personal_knowledge_base_path):
+                logger.debug(f"Loading personal knowledge base from {personal_knowledge_base_path}")
+                with open(personal_knowledge_base_path, 'r', encoding='utf-8') as f:
+                    personal_data = json.load(f)
+                if "interests" in personal_data:
+                    interests = personal_data["interests"]
+                    if "music" in interests:
+                        music_content_lines = ["# Musical Interests"]
+                        for artist in interests["music"].get("artists", []):
+                            music_content_lines.append(f"## {artist['name']}")
+                            if "bio" in artist: music_content_lines.append(f"Bio: {artist['bio']}")
+                            if "popular_songs" in artist: music_content_lines.append(f"Popular Songs: {', '.join(artist['popular_songs'])}")
+                            if "songs" in artist: music_content_lines.append(f"Favorite Songs: {', '.join(artist['songs'])}")
+                            if "playlists" in artist: music_content_lines.append(f"Playlists: {', '.join(artist['playlists'])}")
+                        music_content = "\n".join(music_content_lines)
+                        documents.append(Document(
+                            page_content=music_content,
+                            metadata={"title": "Musical Interests"}
+                        ))
+                        logger.debug("Added musical interests document")
+
+                    if "books" in interests:
+                        book_content = "# Reading Interests\n"
+                        book_content += f"Favorite Book: {interests['books']['favorite_book']}\n"
+                        book_content += f"Comment: {interests['books']['comment']}\n"
+                        documents.append(Document(
+                            page_content=book_content,
+                            metadata={"title": "Reading Interests"}
+                        ))
+                        logger.debug("Added reading interests document")
+
+                    if "hobbies" in interests:
+                        hobbies_content = "# Hobbies\n"
+                        hobbies_content += ", ".join(interests['hobbies'])
+                        documents.append(Document(
+                            page_content=hobbies_content,
+                            metadata={"title": "Hobbies"}
+                        ))
+                        logger.debug("Added hobbies document")
+
+                    if "friends" in interests:
+                        friends_content = "# Friends\n"
+                        for friend in interests["friends"]:
+                            friends_content += f"- {friend['name']} ({friend['relationship']})\n"
+                        documents.append(Document(
+                            page_content=friends_content,
+                            metadata={"title": "Friends"}
+                        ))
+                        logger.debug("Added friends document")
+
+                    if "spiritual_beliefs" in interests:
+                        spiritual_content = "# Spiritual Beliefs\n"
+                        spiritual_content += f"Faith: {interests['spiritual_beliefs']['faith']}\n"
+                        spiritual_content += "Core Principles:\n"
+                        for principle in interests['spiritual_beliefs']['core_principles']:
+                            spiritual_content += f"- {principle}\n"
+                        documents.append(Document(
+                            page_content=spiritual_content,
+                            metadata={"title": "Spiritual Beliefs"}
+                        ))
+                        logger.debug("Added spiritual beliefs document")
 
         else:
             logger.warning(f"No valid source or file not found: {knowledge_base_path}")
