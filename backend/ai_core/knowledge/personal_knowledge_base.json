@@ -1,0 +1,114 @@
+{
+  "interests": {
+    "music": {
+      "artists": [
+        {
+          "name": "Dagi's Favorites",
+          "songs": [
+            "Eyulign",
+            "Amelkehalehu",
+            "Bechegninet Aysemagnim"
+          ]
+        },
+        {
+          "name": "Kalkidan Tilahun (Lili)",
+          "bio": "Kalkidan Tilahun, popularly known as \"Lili,\" is a prominent Ethiopian gospel singer. She rose to fame in the 1990s and is considered one of the most well-known singers of her time in Ethiopia. Currently, she resides in the United States. Her brothers, Dagmawi (Dagi) Tilahun and Dr. Lealem (Laly) Tilahun, are also well-known singers.",
+          "popular_songs": [
+            "Eyulign",
+            "Kibir Esetihalehu",
+            "Ye Nazretu Eyesus",
+            "Gena Sayikefel Bahiru",
+            "Girum Neh",
+            "Amenkuh Sitinager",
+            "Min Ale",
+            "Amelkalehu",
+            "Zim Yemayasegn",
+            "Mesgana Zariem Genana",
+            "Egeziabhier Yalew Yihonal",
+            "Talak Honeh",
+            "Geta Eko New"
+          ],
+          "playlists": [
+            "https://www.youtube.com/@kalkidantilahunlily9353/playlists"
+          ]
+        },
+        {
+          "name": "Pastor Tekeste Getnet",
+          "bio": "Pastor Tekeste Getnet was a renowned Ethiopian Protestant singer and songwriter whose music has left a lasting impact on the gospel landscape. While detailed biographical information remains somewhat scarce, it is known that he was born in the Wolayta zone of the Southern Nations, Nationalities, and Peoples' Region of Ethiopia. He was a beloved figure in the Ethiopian Christian community, known for his powerful voice and heartfelt lyrics that touched the lives of many.",
+          "popular_songs": [
+            "Amelkehalehu",
+            "Egirin New",
+            "Yene Aleme",
+            "Getaye",
+            "Enamesgink",
+            "Amlakie Hoye",
+            "Yekassa Zemen",
+            "Libie Temamaneh",
+            "Egziabher Melkam New",
+            "Beselam Enjera"
+          ],
+          "playlists": [
+            "https://www.youtube.com/@PastorTekesteGetnet"
+          ]
+        },
+        {
+          "name": "Yidnekachew Teka",
+          "bio": "Yidnekachew Teka is an Ethiopian Protestant singer and worship minister. He has released at least two albums: \"Chekolebegn Lebie Liyagegneh\" (ቸኮለብኝ ልቤ ሊያገኝህ), which translates to \"My heart is in a hurry to find you,\" and \"Iyesus\" (ኢየሱስ), meaning \"Jesus,\" released in 2023.",
+          "popular_songs": [
+            "Bechegninet Aysemagnim",
+            "Yegid Tasfelegegnaleh",
+            "Fikren Anteftefe",
+            "Semeh",
+            "Bedemeh Yagete",
+            "Yemedenegeteleh",
+            "Gin Bante",
+            "Lawudeleh Hagerun",
+            "Yekbre Degash",
+            "Wongel Sele Liju",
+            "Eyesus Nektehegnal",
+            "Tamagn Neh",
+            "Hulu Yidersal",
+            "Leala Kal Ale"
+          ],
+          "playlists": [
+            "https://www.youtube.com/results?search_query=yidnekachew+teka+mezmur"
+          ]
+        }
+      ]
+    },
+    "books": {
+      "favorite_book": "The Bible",
+      "comment": "It changed my life and opened my mind and creativity."
+    },
+    "hobbies": [
+      "Learning new things",
+      "Reading spiritual books"
+    ],
+    "friends": [
+      {
+        "name": "Abenezer Ayele",
+        "relationship": "University friend"
+      },
+      {
+        "name": "Nehamiya Beruk",
+        "relationship": "University friend"
+      },
+      {
+        "name": "Henok Tesfaye",
+        "relationship": "University friend"
+      },
+      {
+        "name": "Aser Minase",
+        "relationship": "Best friend and like a brother"
+      }
+    ],
+    "spiritual_beliefs": {
+      "faith": "Protestant Christian",
+      "core_principles": [
+        "I am nothing without the Holy Spirit.",
+        "My work is a way to serve Jesus and show my love for Him.",
+        "Respecting and loving people is how I show my love for God."
+      ]
+    }
+  }
+}
