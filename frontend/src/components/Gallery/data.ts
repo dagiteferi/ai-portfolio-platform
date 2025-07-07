@@ -2,20 +2,20 @@ export const galleryItems = [
   {
     src: '/assets/10acadamy graducation.png',
     alt: '10 Academy Graduation',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_1',
+    linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/recent-activity/all/',
     title: '10 Academy Graduation Ceremony',
   },
   {
     src: '/assets/10acadamy post about me .jpg',
-    alt: '10 Academy Post About Me',
-    linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_2',
-    title: 'Featured Post by 10 Academy',
+    alt: '10 Academy Kifiya AI Mastery Program Alumni',
+    linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/recent-activity/all/',
+    title: 'Kifiya AI Mastery Program Alumni',
   },
   {
     src: '/assets/posted image .png',
     alt: 'General Posted Image',
     linkedinUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:PLACEHOLDER_LINK_3',
-    title: 'My Recent Achievement',
+    title: '10 Academy Graduation Ceremony',
   },
   {
     src: '/assets/skylight graduation.png',
