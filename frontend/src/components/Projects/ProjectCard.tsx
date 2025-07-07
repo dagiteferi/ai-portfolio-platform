@@ -7,7 +7,7 @@ interface ProjectCardProps {
     title: string;
     category: string;
     description: string;
-    image: string;
+    image?: string; // Made optional
     technologies: string[];
     github?: string;
     demo?: string;
@@ -31,11 +31,21 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
       <div className="card-elegant hover-scale h-full">
         <div className="space-y-6">
           {/* Project Header */}
+          {project.image ? (
+            <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-semibold">
+              No Image Available
+            </div>
+          )}
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Github className="w-7 h-7 text-white" />
-              </div>
               <div>
                 <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                   {project.title}

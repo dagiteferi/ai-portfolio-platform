@@ -5,27 +5,8 @@ import { categories, projects } from './data';
 import ProjectCard from './ProjectCard';
 
 const Projects = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     if (activeFilter === 'All') {
@@ -38,9 +19,9 @@ const Projects = () => {
   const featuredProject = projects.find(p => p.featured);
 
   return (
-    <section ref={sectionRef} id="projects" className="section-padding bg-muted/30">
+    <section id="projects" className="section-padding bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Featured <span className="text-gradient">Projects</span>
           </h2>
@@ -50,7 +31,7 @@ const Projects = () => {
         </div>
 
         {/* Filter Buttons */}
-        <div className={`flex flex-wrap justify-center gap-4 mb-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category) => (
             <Button
               key={category}
@@ -70,7 +51,7 @@ const Projects = () => {
 
         {/* Featured Project */}
         {activeFilter === 'All' && featuredProject ? (
-          <div className={`mb-16 ${isVisible ? 'animate-scale-in' : 'opacity-0'}`}>
+          <div className="mb-16">
             <div className="card-elegant bg-gradient-to-br from-primary/5 via-accent/5 to-pink/5 border-primary/20">
               <div className="grid lg:grid-cols-2 gap-8 items-center">
                 <div className="space-y-6">
@@ -148,12 +129,12 @@ const Projects = () => {
         {/* Projects Grid */}
         <div className="grid lg:grid-cols-2 gap-12">
           {filteredProjects.filter(p => !p.featured).map((project, index) => (
-            <ProjectCard key={project.title} project={project} isVisible={isVisible} index={index} />
+            <ProjectCard key={project.title} project={project} isVisible={true} index={index} />
           ))}
         </div>
 
         {/* Call to Action */}
-        <div className={`text-center mt-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className="text-center mt-16">
           <div className="card-elegant max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-foreground mb-4">
               Want to See More?
