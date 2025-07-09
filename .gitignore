@@ -55,4 +55,5 @@ frontend/dist/
 run backend.txt
 .pytest_cache
 assets/
-personal_knowledge_base.json    
+personal_knowledge_base.json   
+data 

@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 from typing import List, Tuple, Dict
@@ -25,6 +26,7 @@ def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
     profile_data = {}
     knowledge_base_path = "backend/ai_core/knowledge/github_knowledge_base.json"
     personal_knowledge_base_path = "backend/ai_core/knowledge/personal_knowledge_base.json"
+    data_dir = "backend/data"
 
     try:
         if source == "all" and os.path.exists(knowledge_base_path):
@@ -150,6 +152,8 @@ def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
                             metadata={"title": "Spiritual Beliefs"}
                         ))
                         logger.debug("Added spiritual beliefs document")
+
+            
 
         else:
             logger.warning(f"No valid source or file not found: {knowledge_base_path}")

@@ -1,5 +1,6 @@
 import os
 import requests
+import pandas as pd
 from langchain_core.documents import Document
 from backend.ai_core.utils.logger import log_interaction
 import time
@@ -42,4 +43,25 @@ def get_repo_languages(languages_url: str, token: str) -> list[str]:
         response.raise_for_status()
         return list(response.json().keys())
     except requests.RequestException:
+        return []
+
+def load_csv_data(file_path: str) -> list[Document]:
+    start_time = time.time()
+    try:
+        df = pd.read_csv(file_path)
+        documents = []
+        for index, row in df.iterrows():
+            if 'top_10_chats_and_senders.csv' in file_path:
+                content = f"""Chat Entry:
+Chat ID: {row.get('chat_title', 'N/A')}
+Sender: {row.get('sender_name', 'N/A')}
+Message Count: {row.get('chat_message_count', 'N/A')}"""
+            else:
+                content = ", ".join([f"{col}: {row[col]}" for col in df.columns])
+            documents.append(Document(page_content=content, metadata={"source": file_path}))
+        end_time = time.time()
+        log_interaction("CSV data loaded", f"File: {file_path}, Rows: {len(documents)}, Time: {end_time - start_time:.2f} seconds")
+        return documents
+    except Exception as e:
+        log_interaction("Error loading CSV data", f"File: {file_path}, Error: {str(e)}")
         return []

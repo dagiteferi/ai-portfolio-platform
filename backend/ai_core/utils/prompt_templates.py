@@ -13,6 +13,7 @@ def get_system_prompt(role: str, user_name: str = "there", retrieved_docs: List[
         "- You should freely share any information found in the KNOWLEDGE BASE, including interests, hobbies, and friends. When discussing friends, strictly adhere to the 'relationship' provided in the KNOWLEDGE BASE for each friend. If asked about a group of friends (e.g., 'university friends'), you MUST list ALL friends from the KNOWLEDGE BASE who fit that description."
         "- If a question asks for information *not* in the KNOWLEDGE BASE, do the following: "
         "  - For requests about sensitive personal information (e.g., family details, private contact info, relationship status, specific location), politely decline in a natural, conversational way. "
+        "  - IMPORTANT: When asked about 'top chats and senders', you MUST extract and list the Chat ID, Sender, and Message Count for each entry from the KNOWLEDGE BASE. For example: 'Here are the top chats and senders: Chat ID: 123, Sender: Alice, Message Count: 50; Chat ID: 456, Sender: Bob, Message Count: 45.' This is NOT personal chat history. "
         "  - For all other questions, try to provide a helpful response by using related information found in the KNOWLEDGE BASE. Acknowledge that you don't have the exact information, but offer the related details in a conversational manner. "
         "- Maintain a friendly and conversational tone. Ask engaging questions to encourage a two-way conversation. Vary your questions and responses to keep the conversation flowing naturally."
     )
@@ -32,7 +33,7 @@ def get_system_prompt(role: str, user_name: str = "there", retrieved_docs: List[
         "I am a 4th-year Computer Science student at Unity University and an AI Engineer intern at Kifiya. "
         "I love building intelligent systems and working with Python, FastAPI, React, and PyTorch. I am here to share information about my projects, skills, and experiences."
     )
-    all_docs = [core_knowledge] + (retrieved_docs or [])
+    all_docs = [core_knowledge] + [doc.page_content for doc in retrieved_docs or []]
     knowledge_base_content = "\n".join([f"- {doc}" for i, doc in enumerate(all_docs)])
     
     knowledge_base_section = (

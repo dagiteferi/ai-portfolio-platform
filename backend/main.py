@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
 from backend.vector_db.faiss_manager import faiss_manager
 from backend.ai_core.knowledge.static_loader import load_static_content
+from backend.ai_core.knowledge.dynamic_loader import load_csv_data
 import uvicorn
 import os
 import logging
@@ -27,10 +28,23 @@ app.add_middleware(
 
 # Initialize FAISS vector store
 try:
-    documents, profile = load_static_content(source="all")  
-    faiss_manager.initialize(documents)
+    # Load static content (JSON)
+    static_documents, profile = load_static_content(source="all")
+    
+    # Load dynamic content (CSV)
+    csv_documents = []
+    data_dir = "backend/data"
+    for filename in os.listdir(data_dir):
+        if filename.endswith(".csv"):
+            file_path = os.path.join(data_dir, filename)
+            csv_documents.extend(load_csv_data(file_path))
+            
+    # Combine all documents
+    all_documents = static_documents + csv_documents
+    
+    faiss_manager.initialize(all_documents)
     app.state.profile = profile 
-    logger.info("FAISS vector store initialized at startup")
+    logger.info(f"FAISS vector store initialized at startup with {len(all_documents)} documents")
 except Exception as e:
     logger.error(f"Failed to initialize FAISS at startup: {str(e)}")
 

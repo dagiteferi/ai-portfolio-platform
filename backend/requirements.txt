@@ -12,3 +12,4 @@ sentence-transformers
 pytest
 tenacity
 langchain-huggingface
+pandas

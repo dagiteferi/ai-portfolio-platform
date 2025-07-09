@@ -1,5 +1,6 @@
 from langchain_community.vectorstores import FAISS
-from backend.ai_core.knowledge.embeddings import get_embeddings
+from ..ai_core.knowledge.embeddings import get_embeddings
+from ..ai_core.knowledge.dynamic_loader import load_github_data, load_csv_data
 import logging
 from backend.config import FAISS_DOCUMENT_COUNT, FAISS_SEARCH_K
 
@@ -23,6 +24,14 @@ class FAISSManager:
         except Exception as e:
             logger.error(f"Failed to initialize FAISS: {str(e)}")
             self.vector_store = None
+
+    def update_dynamic_vector_store(self):
+        logger.info("Updating dynamic vector store...")
+        github_docs = load_github_data()
+        csv_docs = load_csv_data("/home/dagi/Documents/ai-portfolio-platform/backend/data/top_10_chats_and_senders.csv")
+        all_docs = github_docs + csv_docs
+        self.initialize(all_docs)
+        logger.info("Dynamic vector store updated.")
 
     def search_combined(self, query, k=FAISS_SEARCH_K):
         logger.info(f"Searching FAISS for query: {query[:50]}...")
