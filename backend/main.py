@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
 from backend.vector_db.faiss_manager import faiss_manager
-from backend.ai_core.knowledge.static_loader import load_static_content
-from backend.ai_core.knowledge.dynamic_loader import load_csv_data
+from backend.ai_core.knowledge.static_loader import load_profile_data
 import uvicorn
 import os
 import logging
@@ -26,27 +25,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize FAISS vector store
-try:
-    # Load static content (JSON)
-    static_documents, profile = load_static_content(source="all")
-    
-    # Load dynamic content (CSV)
-    csv_documents = []
-    data_dir = "backend/data"
-    for filename in os.listdir(data_dir):
-        if filename.endswith(".csv"):
-            file_path = os.path.join(data_dir, filename)
-            csv_documents.extend(load_csv_data(file_path))
-            
-    # Combine all documents
-    all_documents = static_documents + csv_documents
-    
-    faiss_manager.initialize(all_documents)
-    app.state.profile = profile 
-    logger.info(f"FAISS vector store initialized at startup with {len(all_documents)} documents")
-except Exception as e:
-    logger.error(f"Failed to initialize FAISS at startup: {str(e)}")
+@app.on_event("startup")
+def startup_event():
+    try:
+        faiss_manager.update_vector_store()
+        logger.info("FAISS vector store updated at startup.")
+        app.state.profile = load_profile_data()
+        logger.info("Profile data loaded at startup.")
+    except Exception as e:
+        logger.error(f"Failed to update FAISS at startup: {str(e)}")
 
 try:
     app.include_router(chat_router, prefix="/api")

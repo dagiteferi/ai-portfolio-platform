@@ -19,7 +19,7 @@ EMBEDDINGS_MODEL_NAME = "all-MiniLM-L6-v2"
 
 # --- Vector DB Configuration ---
 FAISS_DOCUMENT_COUNT = 32 # Example value, adjust as needed
-FAISS_SEARCH_K = 5
+FAISS_SEARCH_K = 3
 
 # --- Agent Configuration ---
 # Keywords to infer user role

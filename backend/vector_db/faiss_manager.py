@@ -1,7 +1,9 @@
 from langchain_community.vectorstores import FAISS
 from ..ai_core.knowledge.embeddings import get_embeddings
 from ..ai_core.knowledge.dynamic_loader import load_github_data, load_csv_data
+from ..ai_core.knowledge.static_loader import load_all_json_files
 import logging
+import os
 from backend.config import FAISS_DOCUMENT_COUNT, FAISS_SEARCH_K
 
 logging.basicConfig(
@@ -25,15 +27,25 @@ class FAISSManager:
             logger.error(f"Failed to initialize FAISS: {str(e)}")
             self.vector_store = None
 
-    def update_dynamic_vector_store(self):
-        logger.info("Updating dynamic vector store...")
+    def update_vector_store(self):
+        logger.info("Updating vector store...")
         github_docs = load_github_data()
-        csv_docs = load_csv_data("/home/dagi/Documents/ai-portfolio-platform/backend/data/top_10_chats_and_senders.csv")
-        all_docs = github_docs + csv_docs
-        self.initialize(all_docs)
-        logger.info("Dynamic vector store updated.")
+        
+        # Load all CSV files from the data directory
+        csv_docs = []
+        data_dir = "/home/dagi/Documents/ai-portfolio-platform/backend/data"
+        for filename in os.listdir(data_dir):
+            if filename.endswith(".csv"):
+                csv_docs.extend(load_csv_data(os.path.join(data_dir, filename)))
 
-    def search_combined(self, query, k=FAISS_SEARCH_K):
+        # Load all JSON files from the knowledge directory
+        json_docs = load_all_json_files()
+
+        all_docs = github_docs + csv_docs + json_docs
+        self.initialize(all_docs)
+        logger.info("Vector store updated.")
+
+    def search(self, query, k=FAISS_SEARCH_K):
         logger.info(f"Searching FAISS for query: {query[:50]}...")
         if self.vector_store is None:
             logger.warning("FAISS vector store not initialized")

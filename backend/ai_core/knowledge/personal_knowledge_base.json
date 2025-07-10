@@ -110,5 +110,19 @@
         "Respecting and loving people is how I show my love for God."
       ]
     }
-  }
+  },
+  "work_experience": [
+    {
+      "title": "AI/ML Engineer",
+      "company": "10 Academy",
+      "location": "Addis Ababa, Ethiopia",
+      "start_date": "2023",
+      "end_date": "Present",
+      "responsibilities": [
+        "Developed and deployed machine learning models for various projects.",
+        "Worked on natural language processing tasks, including text classification and sentiment analysis.",
+        "Built and maintained data pipelines for training and evaluating models."
+      ]
+    }
+  ]
 }

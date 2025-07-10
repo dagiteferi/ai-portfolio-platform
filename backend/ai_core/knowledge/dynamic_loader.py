@@ -9,7 +9,7 @@ def load_github_data() -> list[Document]:
     start_time = time.time()
     token = os.getenv("GITHUB_TOKEN")
     if not token:
-        log_interaction("Error", "GITHUB_TOKEN not set")
+        log_interaction("Error", "GITHUB_TOKEN not set. Please set the GITHUB_TOKEN environment variable.")
         return []
 
     username = "dagiteferi"  # Replace with your GitHub username
@@ -56,6 +56,14 @@ def load_csv_data(file_path: str) -> list[Document]:
 Chat ID: {row.get('chat_title', 'N/A')}
 Sender: {row.get('sender_name', 'N/A')}
 Message Count: {row.get('chat_message_count', 'N/A')}"""
+            elif 'cleaned_Linkdin_data.csv' in file_path:
+                content = f"""LinkedIn Profile:
+Name: {row.get('First Name', '')} {row.get('Last Name', '')}
+Headline: {row.get('Headline', '')}
+Summary: {row.get('Summary', '')}
+Industry: {row.get('Industry', '')}
+Location: {row.get('Geo Location', '')}
+Keywords: professional background, summary, experience, skills, projects, hire"""
             else:
                 content = ", ".join([f"{col}: {row[col]}" for col in df.columns])
             documents.append(Document(page_content=content, metadata={"source": file_path}))
