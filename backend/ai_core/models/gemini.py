@@ -6,10 +6,13 @@ import google.generativeai as genai
 from google.generativeai.types import content_types
 from google.api_core import exceptions as google_exceptions
 from backend.config import LLM_MODEL_NAME, LLM_TEMPERATURE
+import structlog
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 # Load environment variables and configure the API key
 load_dotenv()

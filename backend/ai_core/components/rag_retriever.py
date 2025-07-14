@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import json
+import structlog
 from typing import Dict, Optional, List
 from backend.vector_db.faiss_manager import faiss_manager
 from backend.config import FAISS_SEARCH_K
 from backend.ai_core.models.gemini import GeminiClient
 from langchain_core.documents import Document
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 def generate_sub_queries(query: str) -> List[str]:
     """

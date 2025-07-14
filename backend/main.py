@@ -10,12 +10,22 @@ import structlog
 import sentry_sdk
 from backend.config import API_PORT
 
+# Define the logs directory
+LOGS_DIR = "logs"
+
+# Create the logs directory if it doesn't exist
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Configure structlog processors
+shared_processors = [
+    structlog.stdlib.add_logger_name,
+    structlog.stdlib.add_log_level,
+    structlog.processors.TimeStamper(fmt="iso"),
+]
+
 # Configure structlog
 structlog.configure(
-    processors=[
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
+    processors=shared_processors + [
         structlog.dev.ConsoleRenderer() if os.getenv("ENV") == "development" else structlog.processors.JSONRenderer()
     ],
     logger_factory=structlog.stdlib.LoggerFactory(),
@@ -24,10 +34,44 @@ structlog.configure(
 )
 
 # Configure standard logging to use structlog
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[logging.StreamHandler(), logging.FileHandler('app.log')]
+# This ensures that logs from other libraries also get processed by structlog
+logging.basicConfig(level=logging.INFO, handlers=[]) # Remove default handlers
+
+# Create a structlog formatter for all handlers
+formatter = structlog.stdlib.ProcessorFormatter(
+    processor=structlog.dev.ConsoleRenderer() if os.getenv("ENV") == "development" else structlog.processors.JSONRenderer(),
+    foreign_pre_chain=shared_processors,
 )
+
+# Define specific file handlers for different log types
+log_handlers = {
+    "app": logging.FileHandler(os.path.join(LOGS_DIR, 'app.log')),
+    "chat": logging.FileHandler(os.path.join(LOGS_DIR, 'chat.log')),
+    "faiss": logging.FileHandler(os.path.join(LOGS_DIR, 'faiss.log')),
+    "nodes": logging.FileHandler(os.path.join(LOGS_DIR, 'nodes.log')),
+    "embeddings": logging.FileHandler(os.path.join(LOGS_DIR, 'embeddings.log')),
+}
+
+# Set formatter for all file handlers
+for handler in log_handlers.values():
+    handler.setFormatter(formatter)
+
+# Add handlers to specific loggers
+logging.getLogger("backend.api.endpoints.chat").addHandler(log_handlers["chat"])
+logging.getLogger("backend.vector_db.faiss_manager").addHandler(log_handlers["faiss"])
+logging.getLogger("backend.ai_core.agent.nodes").addHandler(log_handlers["nodes"])
+logging.getLogger("backend.ai_core.knowledge.embeddings").addHandler(log_handlers["embeddings"])
+
+# Add a console handler to the root logger for general output
+root_logger = logging.getLogger()
+root_logger.addHandler(logging.StreamHandler())
+root_logger.addHandler(log_handlers["app"]) # General app logs
+
+# Configure uvicorn loggers to propagate to the root logger
+logging.getLogger("uvicorn.access").handlers = []
+logging.getLogger("uvicorn.access").propagate = True
+logging.getLogger("uvicorn.error").handlers = []
+logging.getLogger("uvicorn.error").propagate = True
 
 # Initialize Sentry SDK
 sentry_sdk.init(
