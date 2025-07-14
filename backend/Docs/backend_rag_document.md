@@ -25,11 +25,13 @@ This documentation serves as both a technical manual and an onboarding guide, cl
         *   [`memory_updater.py`](#memory_updaterpy)
     *   [`ai_core/knowledge/` - Your Knowledge Base](#ai_coreknowledge---your-knowledge-base)
         *   [`static_loader.py`](#static_loaderpy)
+        *   [`dynamic_loader.py`](#dynamic_loaderpy)
         *   [`embeddings.py`](#embeddingspy)
     *   [`ai_core/models/gemini.py` - The LLM Client](#ai_coremodelsgeminipy---the-llm-client)
     *   [`ai_core/utils/prompt_templates.py` - The Prompt Engineer](#ai_coreutilsprompt_templatespy---the-prompt-engineer)
     *   [`vector_db/faiss_manager.py` - The Vector Database Manager](#vector_dbfaiss_managerpy---the-vector-database-manager)
     *   [`config.py` - Centralized Configuration](#configpy---centralized-configuration)
+    *   [`scripts/knowledge_update.py`](#scripts/knowledge_update.py)
 6.  [How the AI Works (End-to-End Flow)](#6-how-the-ai-works-end-to-end-flow)
 7.  [Getting Started & Running the Backend](#7-getting-started--running-the-backend)
     *   [Prerequisites](#prerequisites)
@@ -159,7 +161,7 @@ Let's trace the journey of a user's message through the backend, explaining each
 *   **Key Responsibilities:**
     *   **FastAPI Application Instance:** Creates the FastAPI application instance (`app = FastAPI(...)`), which is the foundation of our web API.
     *   **CORS Configuration:** Configures Cross-Origin Resource Sharing (CORS) using `CORSMiddleware`. This is crucial for allowing a frontend application (e.g., running on `localhost:3000`) to securely communicate with this backend API.
-    *   **FAISS Vector Store Initialization:** Initializes the FAISS vector store by loading static knowledge base content (processed by `static_loader.py`) via `faiss_manager.initialize(documents)`. This is a critical, one-time setup that occurs when the application starts, preparing the RAG system for efficient knowledge retrieval.
+    *   **FAISS Vector Store Initialization:** At startup, it calls `faiss_manager.update_vector_store()`. This function is responsible for loading all static and dynamic knowledge (from JSON and CSV files), processing it, and initializing the FAISS vector store. It also loads the profile data into `app.state.profile` to make it available to the chat endpoint.
     *   **API Endpoint Mounting:** Mounts the chat API endpoints (defined in `api/endpoints/chat.py`) under the `/api` path using `app.include_router(chat_router, prefix="/api")`. This makes the `/api/chat` endpoint accessible.
     *   **Uvicorn Server Startup:** Starts the Uvicorn ASGI server (`uvicorn.run(...)`), making the FastAPI application accessible over HTTP.
 
@@ -170,7 +172,7 @@ Let's trace the journey of a user's message through the backend, explaining each
     *   **Request Data Validation:** Defines the expected structure of incoming JSON requests (e.g., `message`, `user_name`, `history`) using Pydantic's `ChatRequest(BaseModel)`. This ensures robust data validation, preventing malformed requests from reaching the core AI logic.
     *   **Endpoint Registration:** Registers the `chat_endpoint` asynchronous function to handle HTTP POST requests to `/api/chat` using the `@router.post("/chat")` decorator.
     *   **LangGraph Initialization:** Initializes the LangGraph state machine (`graph = create_chatbot_graph()`). This graph encapsulates the entire flow of how the AI processes a request, from input to response.
-    *   **Initial State Preparation:** Prepares the `initial_state` dictionary containing essential data such as the user's input, conversation history, and other context that will be passed into the LangGraph for processing.
+    *   **Initial State Preparation:** Prepares the `initial_state` dictionary containing essential data such as the user's input, conversation history, and the user's profile (from `request.app.state.profile`), which is passed into the LangGraph for processing.
     *   **LangGraph Execution:** Executes the core AI logic by asynchronously running the LangGraph (`response_state = await graph.ainvoke(initial_state)`). This is where the `initial_state` traverses through all the defined nodes and edges of the graph.
     *   **Response Extraction and Return:** Extracts the final generated response from the `response_state` and returns it as a JSON object to the client.
 
@@ -205,11 +207,14 @@ This directory contains the core business logic of the AI, broken down into smal
 *   **Purpose:** Infers the likely role of the user (e.g., "recruiter" or "visitor") based on keywords present in their message. This inference is crucial for tailoring the AI's tone and response strategy.
 *   **How it works:** Utilizes predefined `RECRUITER_KEYWORDS` (sourced from `config.py`) to analyze the user's input. It then adjusts confidence scores for each role, which directly influences how the AI will interact in subsequent steps, ensuring a contextually appropriate response.
 
-#### `rag_retriever.py`
-*   **Purpose:** Implements the "Retrieval" part of the Retrieval-Augmented Generation (RAG) process. Its function is to search the knowledge base for information relevant to the user's query.
+### `ai_core/components/rag_retriever.py`
+
+*   **Purpose:** Implements the "Retrieval" part of the Retrieval-Augmented Generation (RAG) process. Its function is to search the knowledge base for information relevant to the user's query using a sophisticated multi-query strategy.
 *   **How it works:**
-    *   First, it checks if the user's input is a simple greeting (using `GREETING_KEYWORDS` from `config.py`) to avoid unnecessary and costly knowledge base searches.
-    *   If a search is deemed necessary, it calls `faiss_manager.search_combined(user_input, k=FAISS_SEARCH_K)` to query the FAISS vector store. This query retrieves the `k` most semantically similar documents to the user's input.
+    *   **Query Decomposition:** Instead of using the user's raw query directly, it first calls `generate_sub_queries()` to use an LLM to break down a potentially complex user question into several simpler, self-contained sub-queries. This allows for more targeted and comprehensive retrieval.
+    *   **Metadata Filtering:** For each generated sub-query, it calls `get_metadata_filter()` to analyze the query and determine if a specific metadata filter should be applied (e.g., `{"type": "project"}` if the query is about projects). This significantly narrows down the search space and improves the relevance of retrieved documents.
+    *   **Iterative Search:** It then iterates through each sub-query, performing a FAISS search with the corresponding metadata filter.
+    *   **Aggregation and De-duplication:** The results from all sub-query searches are aggregated, and duplicates are removed to create a clean, comprehensive set of documents.
     *   Finally, it stores the content of these retrieved documents in `state["retrieved_docs"]`, making them available as context for the Large Language Model (LLM) during the generation phase.
 
 #### `response_generator.py`
@@ -228,9 +233,30 @@ This directory contains the core business logic of the AI, broken down into smal
 
 This directory handles the loading, processing, and embedding of your portfolio's knowledge base, which is critical for the RAG system's effectiveness.
 
-#### `static_loader.py`
-*   **Purpose:** Responsible for loading your static profile information and project details from a predefined source (e.g., a JSON file, Markdown files). This file represents your raw, unstructured knowledge base content.
-*   **How it works:** Reads and processes your structured data into a format suitable for subsequent embedding and indexing by the vector database.
+### `ai_core/knowledge/static_loader.py`
+
+*   **Purpose:** Responsible for loading static profile information, project details, and personal data from predefined JSON files. This file represents the core of the personal and professional knowledge base.
+*   **How it works:**
+    *   It scans the `ai_core/knowledge` directory for JSON files.
+    *   **`github_knowledge_base.json`:**
+        *   It parses the `profile` section, creating individual `Document` objects for education, experience, skills, and projects, each with detailed metadata (e.g., `{"source": "profile", "type": "experience"}`). It specifically identifies the "current" job.
+        *   It processes `repositories`, creating a `Document` for each with the repo's README content and metadata.
+        *   It processes `recent_activity`, creating documents for recent GitHub events.
+    *   **`personal_knowledge_base.json`:**
+        *   It parses `interests`, creating documents for different categories like books, movies, etc.
+        *   It processes `work_experience` in a similar way to the github experience, creating documents for each role and its responsibilities.
+    *   This detailed parsing and metadata assignment are crucial for the `rag_retriever`'s ability to perform targeted searches.
+
+### `ai_core/knowledge/dynamic_loader.py`
+
+*   **Purpose:** Responsible for loading dynamic data from various CSV files located in the `/data` directory. This allows for easy updates to certain types of data without changing the core application code.
+*   **How it works:**
+    *   The `load_csv_data` function is the main entry point, which takes a file path as input.
+    *   It has specific parsing logic for different CSV files, identified by their filenames:
+        *   `top_10_chats_and_senders.csv`: Creates documents with chat title, sender, and message count.
+        *   `cleaned_Linkdin_data.csv`: Creates detailed documents from LinkedIn profile data, including headline, summary, and location, with rich metadata.
+        *   `cleaned_favorited_data.csv`, `cleaned_followers_data.csv`, `cleaned_following_data.csv`, `top_20_common_words.csv`: Each of these is parsed to create documents with relevant content and metadata.
+    *   A generic handler ensures that any other CSV file is also parsed, with its columns and values turned into content and metadata.
 
 #### `embeddings.py`
 *   **Purpose:** Converts textual data (both your knowledge base documents and user queries) into numerical representations called "embeddings." These embeddings are high-dimensional vectors that capture the semantic meaning of the text, enabling efficient similarity searches.
@@ -254,6 +280,7 @@ This directory handles the loading, processing, and embedding of your portfolio'
     *   Defines a core `persona` for Dagi, establishing the AI's identity and overall communication style.
     *   Sets `core_instructions` for the AI (e.g., "answer *only* from knowledge base," "never mention being an AI," "politely decline private info"). These instructions act as essential guardrails for the LLM's behavior.
     *   Applies `role`-specific `tone_guideline` (e.g., a professional tone for recruiters, a warm and helpful tone for general visitors) to tailor the interaction style based on the inferred user role.
+    *   **Crucially, it emphasizes the importance of the "current" role by explicitly instructing the AI to prioritize and highlight any information where `is_current` is `True` in the metadata.**
     *   Combines all these elements—persona, core instructions, tone guidelines, and crucially, the `retrieved_docs` (from the RAG process)—into a single, powerful `final_prompt`. This comprehensive prompt is then sent to the Gemini LLM, providing it with all the necessary context and directives to generate an accurate and appropriate response.
 
 ### `vector_db/faiss_manager.py` - The Vector Database Manager
@@ -267,6 +294,13 @@ This directory handles the loading, processing, and embedding of your portfolio'
 
 *   **Purpose:** Serves as a single source of truth for all configurable parameters within the backend application. This centralized approach significantly simplifies modification and tuning of the AI's behavior without requiring changes deep within the codebase.
 *   **Key Details:** Includes essential settings such as API ports, the names and temperature settings for the LLM models, the names of embedding models, parameters for FAISS searches, and keywords used for role inference and knowledge base searching. Any parameter that might vary between development, testing, and production environments, or that requires frequent tuning, is placed here to enhance maintainability and flexibility.
+
+### `scripts/knowledge_update.py`
+
+*   **Purpose:** Provides a mechanism for periodically updating the knowledge base with fresh data from dynamic sources.
+*   **How it works:**
+    *   The `update_knowledge_base` function calls `faiss_manager.update_dynamic_vector_store()`, which is responsible for re-fetching and processing data from dynamic sources like GitHub.
+    *   The `main` function uses the `schedule` library to run the `update_knowledge_base` function on a daily basis at midnight. It also runs the update once on startup. This ensures that the chatbot's knowledge is kept reasonably up-to-date without manual intervention.
 
 ## 6. How the AI Works (End-to-End Flow)
 

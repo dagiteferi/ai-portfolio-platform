@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
 from backend.vector_db.faiss_manager import faiss_manager
-from backend.ai_core.knowledge.static_loader import load_profile_data
+
 import uvicorn
 import os
 import logging
@@ -30,7 +30,7 @@ def startup_event():
     try:
         faiss_manager.update_vector_store()
         logger.info("FAISS vector store updated at startup.")
-        app.state.profile = load_profile_data()
+        app.state.profile = faiss_manager.profile_data
         logger.info("Profile data loaded at startup.")
     except Exception as e:
         logger.error(f"Failed to update FAISS at startup: {str(e)}")

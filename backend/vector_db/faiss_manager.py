@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from ..ai_core.knowledge.embeddings import get_embeddings
 from ..ai_core.knowledge.dynamic_loader import load_github_data, load_csv_data
-from ..ai_core.knowledge.static_loader import load_all_json_files
+from ..ai_core.knowledge.static_loader import load_static_content
 import logging
 import os
 from backend.config import FAISS_DOCUMENT_COUNT, FAISS_SEARCH_K
@@ -29,8 +29,6 @@ class FAISSManager:
 
     def update_vector_store(self):
         logger.info("Updating vector store...")
-        github_docs = load_github_data()
-        
         # Load all CSV files from the data directory
         csv_docs = []
         data_dir = "/home/dagi/Documents/ai-portfolio-platform/backend/data"
@@ -38,20 +36,22 @@ class FAISSManager:
             if filename.endswith(".csv"):
                 csv_docs.extend(load_csv_data(os.path.join(data_dir, filename)))
 
-        # Load all JSON files from the knowledge directory
-        json_docs = load_all_json_files()
+        # Load all JSON files using the refined static_loader
+        static_docs, profile_data = load_static_content()
+        self.profile_data = profile_data
 
-        all_docs = github_docs + csv_docs + json_docs
+        all_docs = csv_docs + static_docs
         self.initialize(all_docs)
         logger.info("Vector store updated.")
 
-    def search(self, query, k=FAISS_SEARCH_K):
+    def search(self, query, k=FAISS_SEARCH_K, filter=None):
         logger.info(f"Searching FAISS for query: {query[:50]}...")
         if self.vector_store is None:
             logger.warning("FAISS vector store not initialized")
             return []
         try:
-            results = self.vector_store.similarity_search(query, k=k)
+            # Pass the filter to the similarity search if it's provided
+            results = self.vector_store.similarity_search(query, k=k, filter=filter)
             logger.info(f"Found {len(results)} results")
             return results
         except Exception as e:
