@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import json
 from typing import Dict, Optional, List
@@ -60,7 +61,7 @@ def get_metadata_filter(query: str) -> Optional[Dict]:
         return {"type": "contact"}
     return None
 
-def retrieve_rag_context(state: Dict) -> Dict:
+async def retrieve_rag_context(state: Dict) -> Dict:
     """
     Retrieves relevant documents from the knowledge base using a multi-query strategy.
     It decomposes the main query into sub-queries, searches for each, and aggregates the results.
@@ -68,7 +69,7 @@ def retrieve_rag_context(state: Dict) -> Dict:
     user_input = state.get("input", "")
     
     # Step 1: Decompose the user query into sub-queries
-    sub_queries = generate_sub_queries(user_input)
+    sub_queries = await asyncio.to_thread(generate_sub_queries, user_input)
     
     all_retrieved_docs = []
     doc_content_set = set()
@@ -81,7 +82,7 @@ def retrieve_rag_context(state: Dict) -> Dict:
             if metadata_filter:
                 logger.info(f"Applying metadata filter: {metadata_filter} for sub-query: {sub_query}")
             
-            docs = faiss_manager.search(sub_query, k=FAISS_SEARCH_K, filter=metadata_filter)
+            docs = await asyncio.to_thread(faiss_manager.search, sub_query, k=FAISS_SEARCH_K, filter=metadata_filter)
             
             # Step 3: Aggregate and de-duplicate documents
             for doc in docs:
@@ -98,4 +99,3 @@ def retrieve_rag_context(state: Dict) -> Dict:
         state["retrieved_docs"] = []
 
     return state
-''

@@ -15,8 +15,8 @@ def receive_user_input(state: Dict) -> Dict:
 def infer_user_role(state: Dict) -> Dict:
     return analyze_user_role(state)
 
-def call_retrieve_rag_context(state: Dict) -> Dict:
-    return retrieve_rag_context(state)
+async def call_retrieve_rag_context(state: Dict) -> Dict:
+    return await retrieve_rag_context(state)
 
 def generate_response(state: Dict) -> Dict:
     return generate_ai_response(state)

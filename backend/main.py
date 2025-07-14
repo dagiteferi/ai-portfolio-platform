@@ -6,14 +6,37 @@ from backend.vector_db.faiss_manager import faiss_manager
 import uvicorn
 import os
 import logging
+import structlog
+import sentry_sdk
 from backend.config import API_PORT
 
+# Configure structlog
+structlog.configure(
+    processors=[
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.dev.ConsoleRenderer() if os.getenv("ENV") == "development" else structlog.processors.JSONRenderer()
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+# Configure standard logging to use structlog
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
     handlers=[logging.StreamHandler(), logging.FileHandler('app.log')]
 )
-logger = logging.getLogger(__name__)
+
+# Initialize Sentry SDK
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
+
+logger = structlog.get_logger(__name__)
 
 app = FastAPI(title="AI Portfolio Chatbot Backend")
 
@@ -33,13 +56,13 @@ def startup_event():
         app.state.profile = faiss_manager.profile_data
         logger.info("Profile data loaded at startup.")
     except Exception as e:
-        logger.error(f"Failed to update FAISS at startup: {str(e)}")
+        logger.error("Failed to update FAISS at startup", error=str(e))
 
 try:
     app.include_router(chat_router, prefix="/api")
     logger.info("Chat router included successfully")
 except Exception as e:
-    logger.error(f"Failed to include chat router: {str(e)}")
+    logger.error("Failed to include chat router", error=str(e))
     raise
 
 @app.get("/health")
@@ -49,7 +72,7 @@ async def health_check():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", API_PORT))
-    logger.info(f"Starting Uvicorn server on port {port}")
+    logger.info("Starting Uvicorn server", port=port)
     uvicorn.run(
         "backend.main:app",
         host="0.0.0.0",

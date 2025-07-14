@@ -392,10 +392,36 @@ If you prefer to run the backend application without Docker, follow these steps:
 
 This section outlines potential enhancements and important considerations for the future development of the AI Portfolio Chatbot backend:
 
+### Production Readiness Enhancements
+
+To ensure the chatbot backend is robust, observable, and performant in a production environment, several key enhancements have been implemented:
+
+#### Asynchronous Operations for FAISS Search
+*   **Issue Addressed:** Previously, the `faiss_manager.search` function was a synchronous call. In a FastAPI application, synchronous I/O operations can block the event loop, leading to performance bottlenecks and reduced concurrency, especially under heavy load.
+*   **Solution Implemented:** The `retrieve_rag_context` function in `ai_core/components/rag_retriever.py` has been refactored to be asynchronous (`async def`). The synchronous `faiss_manager.search` call within it is now executed in a separate thread using `asyncio.to_thread()`. This offloads the potentially blocking I/O operation from the main event loop, allowing the FastAPI application to remain responsive and handle multiple concurrent requests efficiently.
+*   **Code Changes:**
+    *   `ai_core/components/rag_retriever.py`: `retrieve_rag_context` is now an `async` function, and `faiss_manager.search` is awaited using `await asyncio.to_thread()`. `generate_sub_queries` is also now awaited using `await asyncio.to_thread()`. 
+    *   `ai_core/agent/nodes.py`: The `call_retrieve_rag_context` function is now an `async` function and `await`s the call to `retrieve_rag_context`.
+
+#### Structured Logging with `structlog`
+*   **Issue Addressed:** The default Python `logging` module provides plain text logs, which are difficult to parse, filter, and analyze programmatically in a production environment. For effective monitoring and debugging, especially with centralized logging systems (like ELK stack, Datadog, Splunk), structured (e.g., JSON) logs are essential.
+*   **Solution Implemented:** The logging setup has been migrated to use `structlog`. `structlog` allows for context-rich, machine-readable logs, making it easier to query and understand application behavior.
+*   **Code Changes:**
+    *   `backend/ai_core/utils/logger.py`: This file now configures `structlog` to output JSON-formatted logs (or console-rendered logs in development). The `log_interaction` function has been updated to pass key-value pairs for structured logging.
+    *   `backend/main.py`: `structlog` is configured at the application startup. Standard Python `logging` is also configured to pipe its output through `structlog`'s processors.
+
+#### Error Tracking with Sentry
+*   **Issue Addressed:** Unhandled exceptions in a production application can lead to unexpected behavior, degraded user experience, and a lack of visibility for developers. Without a dedicated error tracking system, identifying, diagnosing, and resolving these issues can be challenging.
+*   **Solution Implemented:** `sentry-sdk` has been integrated into the application. Sentry is an open-source error tracking platform that automatically captures unhandled exceptions, provides detailed stack traces, context (e.g., user information, request details), and aggregates errors for easier management.
+*   **Code Changes:**
+    *   `backend/main.py`: `sentry_sdk.init()` is called at application startup, configured with a Data Source Name (DSN) from the `SENTRY_DSN` environment variable. This enables automatic error reporting to your Sentry project.
+    *   **Configuration Note:** For Sentry to function, you must set the `SENTRY_DSN` environment variable in your production deployment.
+
+### Other Considerations
+
 *   **Dynamic Knowledge Base Updates:** Implement the functionality within `dynamic_loader.py` and `knowledge_update.py` to allow for real-time or scheduled updates to the knowledge base without requiring a server restart. This would enable more agile content management.
 *   **Robust Session Management:** Fully utilize the `backend/ai_core/memory/` module to implement more robust session management. This would allow for persistent conversation history across multiple user interactions and potentially different sessions, enhancing the user experience.
 *   **Advanced Role Inference:** Explore and integrate more sophisticated methods for user role inference beyond simple keyword matching. This could involve machine learning models or more complex linguistic analysis for greater accuracy.
-*   **Comprehensive Error Handling & Monitoring:** Implement more granular error handling mechanisms throughout the application. Integrate with industry-standard monitoring tools (e.g., Prometheus, Grafana, Sentry) for better observability, alerting, and debugging in production environments.
 *   **Frontend Integration:** Develop a dedicated React frontend (as hinted in the project structure) to provide a user-friendly and visually appealing interface for interacting with the chatbot.
 *   **WhatsApp Integration:** Integrating this backend with platforms like WhatsApp would involve utilizing a WhatsApp Business API client (e.g., Twilio, MessageBird) to send and receive messages, routing them through your FastAPI backend for AI processing. This would expand the chatbot's reach.
 *   **Scalability and Deployment:** Consider production-grade deployment strategies, including container orchestration (Kubernetes), load balancing, and database scaling for high-traffic scenarios.

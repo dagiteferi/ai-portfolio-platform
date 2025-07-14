@@ -13,3 +13,5 @@ pytest
 tenacity
 langchain-huggingface
 pandas
+structlog
+sentry-sdk[fastapi]
