@@ -43,6 +43,11 @@ def get_metadata_filter(query: str) -> Optional[Dict]:
     Analyzes the query to determine if a metadata filter should be applied.
     """
     query_lower = query.lower()
+
+    # Add a specific check for the current job to avoid ambiguity
+    if "current" in query_lower and ("job" in query_lower or "role" in query_lower or "experience" in query_lower):
+        return {"is_current": True}
+
     if "project" in query_lower or "portfolio" in query_lower:
         return {"type": "project"}
     if "skill" in query_lower or "technolog" in query_lower:

@@ -33,15 +33,29 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                 elif key == "experience" and isinstance(value, list):
                                     for job in value:
                                         end_date = job.get('end_date')
-                                        # Ensure end_date is a string before calling .lower()
-                                        is_current = isinstance(end_date, str) and end_date.lower() == "present"
-                                        job_content = f"Experience: {job.get('title', '')} at {job.get('company', '')} ({job.get('start_date', '')} - {end_date}) in {job.get('location', '')}."
+                                        # A job is current if the end date is null or the string "present"
+                                        is_current = end_date is None or (isinstance(end_date, str) and end_date.lower() == "present")
+                                        
+                                        # Combine job info and responsibilities into a single document
+                                        responsibilities_text = "\n".join([f"- {resp}" for resp in job.get("responsibilities", [])])
+                                        job_content = (
+                                            f"Experience: {job.get('title', '')} at {job.get('company', '')} "
+                                            f"({job.get('start_date', '')} - {end_date}) in {job.get('location', '')}.\n"
+                                            f"Responsibilities:\n{responsibilities_text}"
+                                        )
                                         if is_current:
-                                            job_content += " (Current Role)"
-                                        documents.append(Document(page_content=job_content, metadata={"source": "profile", "type": "experience", "company": job.get('company', ''), "title": job.get('title', ''), "is_current": is_current}))
-                                        if "responsibilities" in job and isinstance(job["responsibilities"], list):
-                                            for resp in job["responsibilities"]:
-                                                documents.append(Document(page_content=f"Responsibility for {job.get('title', '')} at {job.get('company', '')}: {resp}", metadata={"source": "profile", "type": "responsibility", "company": job.get('company', ''), "title": job.get('title', ''), "is_current": is_current}))
+                                            job_content += "\n(Current Role)"
+
+                                        documents.append(Document(
+                                            page_content=job_content,
+                                            metadata={
+                                                "source": "profile", 
+                                                "type": "experience", 
+                                                "company": job.get('company', ''), 
+                                                "title": job.get('title', ''), 
+                                                "is_current": is_current
+                                            }
+                                        ))
                                 elif key == "skills" and isinstance(value, str):
                                     documents.append(Document(page_content=f"Skills: {value}", metadata={"source": "profile", "type": "skills"}))
                                 elif key == "projects" and isinstance(value, list):

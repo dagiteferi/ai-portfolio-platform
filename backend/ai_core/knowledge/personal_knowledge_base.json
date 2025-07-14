@@ -111,18 +111,32 @@
       ]
     }
   },
-  "work_experience": [
+  "education": [
     {
-      "title": "AI/ML Engineer",
-      "company": "10 Academy",
-      "location": "Addis Ababa, Ethiopia",
-      "start_date": "2023",
-      "end_date": "Present",
-      "responsibilities": [
-        "Developed and deployed machine learning models for various projects.",
-        "Worked on natural language processing tasks, including text classification and sentiment analysis.",
-        "Built and maintained data pipelines for training and evaluating models."
-      ]
+      "degree": "BSc in Computer Science",
+      "institution": "Unity University, Adama",
+      "year": "Expected 2025",
+      "gpa": "3.95/4.0"
+    },
+    {
+      "certificate": "Generative AI",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "ML Engineering",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "Data Engineering",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "Full-Stack Web Development (MERN Stack)",
+      "institution": "Kuraz Technology",
+      "year": "2021"
     }
   ]
 }
