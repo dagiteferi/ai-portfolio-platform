@@ -10,9 +10,8 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 API_PORT = int(os.getenv("PORT", 8000))
 
 # --- LLM Configuration ---
-# LLM_MODEL_NAME = "gemini-1.5-flash"  
-LLM_MODEL_NAME = "gemini-2.0-flash"
-LLM_TEMPERATURE = 0.6
+LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-1.5-flash")
+LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", 0.6))
 
 # --- Embeddings Configuration ---
 EMBEDDINGS_MODEL_NAME = "all-MiniLM-L6-v2"

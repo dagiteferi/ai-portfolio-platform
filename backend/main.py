@@ -86,7 +86,7 @@ app = FastAPI(title="AI Portfolio Chatbot Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://your-frontend-domain.com"],
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -114,13 +114,3 @@ async def health_check():
     logger.info("Health check requested")
     return {"status": "healthy"}
 
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", API_PORT))
-    logger.info("Starting Uvicorn server", port=port)
-    uvicorn.run(
-        "backend.main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=True,
-        log_level="info"
-    )
