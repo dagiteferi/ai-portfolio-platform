@@ -6,6 +6,7 @@ langchain-huggingface==0.0.3
 google-generativeai 
 fastapi 
 uvicorn
+faiss-cpu   
 python-dotenv
 redis
 sentence-transformers
