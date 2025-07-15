@@ -317,46 +317,15 @@ This section provides a step-by-step walkthrough of how a user's message is proc
 
 ## 7. Getting Started & Running the Backend
 
-This section provides detailed instructions for setting up and running the AI Portfolio Chatbot backend. While Docker is recommended for a streamlined setup, direct execution instructions are also provided.
+This section provides detailed instructions for setting up and running the AI Portfolio Chatbot backend, with clear distinctions between running in a local development environment and a production environment.
 
 ### Prerequisites
 
 *   **Python 3.9+**: The backend is developed using Python 3.9 or newer.
 *   **`pip`**: Python's package installer, used for managing dependencies.
-*   **`uvicorn`**: An ASGI server, required to run the FastAPI application.
 *   **Google Gemini API Key**: Essential for the AI backend to interact with the Gemini Large Language Model. This key should be set as an environment variable (`GOOGLE_API_KEY`).
 
 ### Setup Instructions
-
-#### Using Docker (Recommended)
-
-For the most straightforward setup, especially in a multi-service environment, Docker is highly recommended.
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/dagiteferi/ai-portfolio-platform.git
-    cd ai-portfolio-platform
-    ```
-2.  **Set up your Google Gemini API Key:**
-    *   Obtain your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-    *   Create a `.env` file in the root of your project (`ai-portfolio-platform/`) and add your API key:
-        ```
-        GOOGLE_API_KEY="YOUR_API_KEY_HERE"
-        ```
-3.  **Build and run the Docker containers:**
-    ```bash
-    docker-compose up --build
-    ```
-    This command will:
-    *   Build the Docker images for both the backend and any other configured services (e.g., frontend).
-    *   Start all defined services, making them accessible.
-
-4.  **Access the Backend API:**
-    *   Once the services are running, you can access the Backend API's interactive documentation (Swagger UI) at: `http://localhost:8000/docs`
-
-#### Running Backend Directly
-
-If you prefer to run the backend application without Docker, follow these steps:
 
 1.  **Navigate to the `backend` directory:**
     ```bash
@@ -368,25 +337,40 @@ If you prefer to run the backend application without Docker, follow these steps:
     source .venv/bin/activate
     pip install -r requirements.txt
     ```
-3.  **Set up your Google Gemini API Key:**
-    *   Obtain your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-    *   Create a `.env` file in the `backend/` directory (if not already present) and add your API key:
+    *Note: The `requirements.txt` file includes both `uvicorn` for development and `gunicorn` for production.*
+3.  **Set up your Environment Variables:**
+    *   Create a `.env` file in the `backend/` directory.
+    *   Add your Google Gemini API key:
         ```
         GOOGLE_API_KEY="YOUR_API_KEY_HERE"
         ```
-4.  **Prepare your Knowledge Base:**
-    *   Ensure your static knowledge base content (e.g., defined or loaded by `backend/ai_core/knowledge/static_loader.py`) is up-to-date with your profile, projects, and skills. This content is crucial for the RAG system's accuracy and relevance.
+    *   For production, you will also need to set the `ALLOWED_ORIGINS` variable to a comma-separated list of your frontend domains (e.g., `https://your-frontend.com,https://www.your-frontend.com`).
 
 ### Running the Backend
 
-1.  **Start the Uvicorn server:**
-    ```bash
-    uvicorn main:app --reload --host 0.0.0.0 --port 8000
-    ```
-    *   `--reload`: This flag enables automatic server reloading when code changes are detected, which is highly convenient during development.
-    *   `--host 0.0.0.0`: Makes the server accessible from any network interface, allowing access from other devices on your local network or within a Docker container.
-    *   `--port 8000`: Specifies that the server will listen on port 8000.
-    The backend API will then be available at `http://localhost:8000`.
+There are two ways to run the backend, depending on your needs:
+
+#### For Local Development (Recommended for testing and making changes)
+
+Use the `uvicorn` server for fast startup and automatic code reloading. Run this command from the project's **root directory** (`ai-portfolio-platform/`):
+
+```bash
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+*   `--reload`: Enables automatic server reloading when code changes are detected.
+*   The backend API will be available at `http://localhost:8000`.
+
+#### For Production
+
+Use the `gunicorn` server, which is a robust, production-grade WSGI server. Run this command from the project's **root directory** (`ai-portfolio-platform/`):
+
+```bash
+gunicorn -c backend/gunicorn_config.py backend.main:app
+```
+
+*   This command uses the `backend/gunicorn_config.py` file to configure the server, including the number of worker processes and the use of the `UvicornWorker` for compatibility with FastAPI.
+*   This setup provides a stable and performant environment for a live application.
 
 ## 8. Future Improvements & Considerations
 
@@ -395,6 +379,18 @@ This section outlines potential enhancements and important considerations for th
 ### Production Readiness Enhancements
 
 To ensure the chatbot backend is robust, observable, and performant in a production environment, several key enhancements have been implemented:
+
+#### Gunicorn Production Server
+*   **Issue Addressed:** Running a FastAPI application with `uvicorn --reload` is not suitable for production.
+*   **Solution Implemented:** The application is now configured to be run with `gunicorn`, a production-ready WSGI server. A `gunicorn_config.py` file has been added to manage server settings, and `gunicorn` has been added to `requirements.txt`. The `worker_class` is set to `uvicorn.workers.UvicornWorker` to ensure compatibility with FastAPI's ASGI nature.
+
+#### Dynamic CORS Configuration
+*   **Issue Addressed:** Hardcoding allowed origins for CORS is a security risk and inflexible.
+*   **Solution Implemented:** The `CORSMiddleware` in `main.py` now dynamically reads the allowed origins from an `ALLOWED_ORIGINS` environment variable. This allows for secure and easy configuration in different environments.
+
+#### Environment-Driven Configuration
+*   **Issue Addressed:** Hardcoding settings like the LLM model name and temperature makes the application less flexible.
+*   **Solution Implemented:** The `config.py` file has been updated to load these settings from environment variables, with sensible defaults. This allows for easy tuning of the AI's behavior without code changes.
 
 #### Asynchronous Operations for FAISS Search
 *   **Issue Addressed:** Previously, the `faiss_manager.search` function was a synchronous call. In a FastAPI application, synchronous I/O operations can block the event loop, leading to performance bottlenecks and reduced concurrency, especially under heavy load.
