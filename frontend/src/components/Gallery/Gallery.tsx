@@ -5,14 +5,14 @@ import GalleryItem from './GalleryItem';
 
 const Gallery = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const [isHovering, setIsHovering] = useState(false);
 
   const startAutoScroll = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    intervalRef.current = setInterval(() => {
+    intervalRef.current = window.setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth } = scrollRef.current;
         if (scrollLeft >= scrollWidth / 2 - 1) {
@@ -21,7 +21,7 @@ const Gallery = () => {
           scrollRef.current.scrollLeft += 1;
         }
       }
-    }, 25);
+    }, 25) as number;
   }, []);
 
   const stopAutoScroll = useCallback(() => {
