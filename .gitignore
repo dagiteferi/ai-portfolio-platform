@@ -55,5 +55,23 @@ frontend/dist/
 run backend.txt
 .pytest_cache
 assets/
+feat/integration-update
+personal_knowledge_base.json  
+
+
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development.local 
+
+# Node.js/npm specific logs and temporary files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage reports
+coverage/ 
+
+
 personal_knowledge_base.json   
 data 
+main
