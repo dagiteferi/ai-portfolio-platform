@@ -88,8 +88,8 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
                 </button>
               </div>
 
-              {/* Chat Widget Content */}
-              <div className="flex-grow">
+              {/* Chat Widget Content: Crucial flex container for scrolling */}
+              <div className="flex-1 flex flex-col min-h-0">
                 <ChatWidget isFullScreen={isFullScreen} messages={messages} isLoading={isLoading} error={error} sendMessage={sendMessage} />
               </div>
             </div>

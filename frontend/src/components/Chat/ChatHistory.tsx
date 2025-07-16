@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { History, MessageSquare, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Message } from '../../services/api';
@@ -10,20 +10,27 @@ interface ChatHistoryProps {
 }
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen, messages }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   return (
     <div
-      className={`bg-card shadow-lg transition-all duration-300 ease-in-out ${
+      className={`bg-card shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
         isHistoryOpen ? 'w-64 p-4' : 'w-0 p-0'
       } overflow-hidden`}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-foreground">History</h2>
         <Button variant="ghost" size="icon">
           <Plus className="w-5 h-5" />
         </Button>
       </div>
-      <div className="space-y-2">
+      <div ref={scrollContainerRef} className="space-y-2 overflow-y-auto flex-grow">
         {messages.map((message, index) => (
           <div
             key={index}
