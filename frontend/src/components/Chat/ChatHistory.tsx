@@ -1,22 +1,23 @@
-
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { History, MessageSquare, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
-import { Message } from '../../services/api';
+import { Conversation } from '../../hooks/useChat'; // Import the Conversation type
 
 interface ChatHistoryProps {
   isHistoryOpen: boolean;
-  messages: Message[];
+  conversations: Conversation[];
+  activeConversationId: string | null;
+  setActiveConversation: (id: string) => void;
+  startNewConversation: () => void;
 }
 
-const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen, messages }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
+const ChatHistory: React.FC<ChatHistoryProps> = ({ 
+  isHistoryOpen, 
+  conversations, 
+  activeConversationId,
+  setActiveConversation,
+  startNewConversation 
+}) => {
 
   return (
     <div
@@ -26,18 +27,21 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen, messages }) =>
     >
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-foreground">History</h2>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" onClick={startNewConversation} title="Start new chat">
           <Plus className="w-5 h-5" />
         </Button>
       </div>
-      <div ref={scrollContainerRef} className="space-y-2 overflow-y-auto flex-grow">
-        {messages.map((message, index) => (
+      <div className="space-y-2 overflow-y-auto flex-grow">
+        {conversations.map((convo) => (
           <div
-            key={index}
-            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors duration-200"
+            key={convo.id}
+            onClick={() => setActiveConversation(convo.id)}
+            className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
+              activeConversationId === convo.id ? 'bg-primary/20' : 'hover:bg-primary/10'
+            }`}
           >
             <MessageSquare className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-foreground truncate">{message.text}</span>
+            <span className="text-sm text-foreground truncate">{convo.title}</span>
           </div>
         ))}
       </div>
