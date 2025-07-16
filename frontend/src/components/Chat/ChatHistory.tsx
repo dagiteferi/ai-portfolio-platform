@@ -2,18 +2,14 @@
 import React from 'react';
 import { History, MessageSquare, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Message } from '../../services/api';
 
 interface ChatHistoryProps {
   isHistoryOpen: boolean;
+  messages: Message[];
 }
 
-const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen }) => {
-  const chatSessions = [
-    { id: 1, title: 'AI/ML Consulting Opportunities' },
-    { id: 2, title: 'Full-stack Development Projects' },
-    { id: 3, title: 'Technical Mentoring Discussion' },
-    { id: 4, title: 'Collaboration on Research' },
-  ];
+const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen, messages }) => {
 
   return (
     <div
@@ -28,13 +24,13 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ isHistoryOpen }) => {
         </Button>
       </div>
       <div className="space-y-2">
-        {chatSessions.map((session) => (
+        {messages.map((message, index) => (
           <div
-            key={session.id}
+            key={index}
             className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors duration-200"
           >
             <MessageSquare className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-foreground truncate">{session.title}</span>
+            <span className="text-sm text-foreground truncate">{message.text}</span>
           </div>
         ))}
       </div>

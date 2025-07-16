@@ -1,14 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { Button } from '../ui/button';
 import MessageBubble from './MessageBubble';
-import { useChat } from '../../contexts/ChatContext';
+import { Message } from '../../services/api';
 
-const ChatWidget: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen }) => {
-  const { messages, sendMessage, isTyping, messagesEndRef } = useChat();
+interface ChatWidgetProps {
+  isFullScreen: boolean;
+  messages: Message[];
+  isLoading: boolean;
+  error: string | null;
+  sendMessage: (text: string, userName?: string) => Promise<void>;
+}
+
+const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoading, error, sendMessage }) => {
   const [inputValue, setInputValue] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = async () => {
+    console.log('handleSendMessage triggered');
+    console.log('Input value:', inputValue);
+    if (!inputValue.trim()) {
+      console.log('Input value is empty, not sending message.');
+      return;
+    }
     await sendMessage(inputValue);
     setInputValue('');
   };
@@ -34,11 +52,11 @@ const ChatWidget: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen }) => {
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-y-auto bg-muted/20 py-10">
         <div className="max-w-3xl mx-auto px-4 space-y-4">
-          {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+          {messages.map((message, index) => (
+            <MessageBubble key={index} message={message} />
           ))}
           
-          {isTyping && (
+          {isLoading && (
             <div className="flex justify-start">
               <div className="flex items-start space-x-2">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
@@ -48,6 +66,7 @@ const ChatWidget: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen }) => {
               </div>
             </div>
           )}
+          {error && <p className="text-red-500 text-center mt-2">{error}</p>}
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -61,12 +80,12 @@ const ChatWidget: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen }) => {
               onKeyPress={handleKeyPress}
               placeholder="Chat with me .."
               className={`w-full px-4 pr-16 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 resize-none overflow-hidden ${isFullScreen ? 'py-6 text-lg bg-muted/20 border-2 border-border/20 shadow-sm' : 'py-3 bg-muted/10 border border-border/30'}`}
-              disabled={isTyping}
+              disabled={isLoading}
               rows={1}
             ></textarea>
             <Button
               onClick={handleSendMessage}
-              disabled={isTyping || !inputValue.trim()}
+              disabled={isLoading || !inputValue.trim()}
               size="sm"
               className="absolute right-2 btn-gradient px-3 h-10"
             >

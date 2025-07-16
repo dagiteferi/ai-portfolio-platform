@@ -2,7 +2,7 @@ import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { MessageCircle, X, Bot, PanelLeft, Maximize, Minimize } from 'lucide-react';
 import ChatWidget from './ChatWidget';
 import ChatHistory from './ChatHistory';
-import { ChatProvider } from '../../contexts/ChatContext';
+import { useChat } from '../../hooks/useChat';
 
 export interface ChatbotHandle {
   openChat: (initialMode: 'small' | 'fullscreen') => void;
@@ -12,6 +12,7 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const { messages, isLoading, error, sendMessage } = useChat();
 
   useImperativeHandle(ref, () => ({
     openChat: (initialMode: 'small' | 'fullscreen') => {
@@ -19,9 +20,9 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
       setIsFullScreen(initialMode === 'fullscreen');
     },
   }));
+  
 
   return (
-    <ChatProvider>
       <>
         {/* Chat Toggle Button */}
         <button
@@ -47,7 +48,7 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
         {/* Chat Window */}
         {isOpen && (
           <div className={`fixed z-50 bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in flex ${isFullScreen ? 'inset-0 w-full h-full rounded-none' : 'bottom-24 right-6 w-[700px] h-[600px] max-w-[calc(100vw-3rem)]'}`}>
-            <ChatHistory isHistoryOpen={isHistoryOpen} />
+            <ChatHistory isHistoryOpen={isHistoryOpen} messages={messages} />
             <div className="flex flex-col flex-grow">
               {/* Header */}
               <div className="bg-gradient-to-r from-primary to-accent p-4 text-white flex justify-between items-center w-full rounded-t-xl">
@@ -64,7 +65,7 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
                   </div>
                   <div>
                     <h3 className="font-semibold">AI Assistant</h3>
-                    <p className="text-sm opacity-90">Ask me about Dagmawi</p>
+                    <p className="text-sm opacity-90">Ask  about me</p>
                   </div>
                 </div>
                 <button
@@ -89,13 +90,12 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
 
               {/* Chat Widget Content */}
               <div className="flex-grow">
-                <ChatWidget isFullScreen={isFullScreen} />
+                <ChatWidget isFullScreen={isFullScreen} messages={messages} isLoading={isLoading} error={error} sendMessage={sendMessage} />
               </div>
             </div>
           </div>
         )}
       </>
-    </ChatProvider>
   );
 });
 
