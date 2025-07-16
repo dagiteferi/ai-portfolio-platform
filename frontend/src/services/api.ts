@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
 
 // Define the structure of a message object for the UI.
 export interface Message {
@@ -13,6 +13,22 @@ interface ErrorResponse {
   detail: string;
 }
 
+// --- Configuration for Retries ---
+const MAX_RETRIES = 3; // Maximum number of retries for transient errors
+const RETRY_DELAY_MS = 1000; // Initial delay in milliseconds before retrying
+
+// Function to introduce a delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Function to check if an error is transient and should be retried
+const isTransientError = (error: AxiosError): boolean => {
+  // Retry on network errors (no response) or 5xx server errors
+  return (
+    axios.isAxiosError(error) &&
+    (!error.response || (error.response.status >= 500 && error.response.status < 600))
+  );
+};
+
 // Create a single, configured axios instance for the entire application.
 const apiClient = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
@@ -20,7 +36,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   // Set a timeout for requests to prevent them from hanging indefinitely.
-  timeout: 10000, 
+  timeout: 10000,
 });
 
 // --- Axios Interceptors ---
@@ -29,6 +45,19 @@ const apiClient = axios.create({
 // Request Interceptor: Use this to inject authentication tokens, logs, or other headers.
 apiClient.interceptors.request.use(
   (config) => {
+    const startTime = performance.now();
+    // Store start time for response interceptor
+    config.headers['x-request-start-time'] = startTime;
+
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        message: `API Request Started: ${config.method?.toUpperCase()} ${config.url}`,
+        timestamp: new Date().toISOString(),
+        method: config.method?.toUpperCase(),
+        url: config.url,
+      })
+    );
     // For example, you could retrieve a token from localStorage here.
     // const token = localStorage.getItem('authToken');
     // if (token) {
@@ -37,8 +66,15 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    // Handle request errors (e.g., network issues before the request is sent).
-    console.error('Request Error:', error);
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        message: 'API Request Error',
+        timestamp: new Date().toISOString(),
+        error: error.message,
+        stack: error.stack,
+      })
+    );
     return Promise.reject(error);
   }
 );
@@ -46,22 +82,90 @@ apiClient.interceptors.request.use(
 // Response Interceptor: Use this to handle responses globally.
 apiClient.interceptors.response.use(
   // Any status code that lie within the range of 2xx cause this function to trigger
-  (response: AxiosResponse) => response.data,
-  // Any status codes that falls outside the range of 2xx cause this function to trigger
-  (error: AxiosError<ErrorResponse>) => {
+  (response: AxiosResponse) => {
+    const startTime = response.config.headers['x-request-start-time'] as number;
+    const duration = performance.now() - startTime;
+
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        message: `API Request Succeeded: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+        timestamp: new Date().toISOString(),
+        method: response.config.method?.toUpperCase(),
+        url: response.config.url,
+        status: response.status,
+        durationMs: duration.toFixed(2),
+      })
+    );
+    return response.data;
+  },
+  async (error: AxiosError<ErrorResponse>) => {
+    const config = error.config as AxiosRequestConfig & { _retryCount?: number };
+    config._retryCount = config._retryCount || 0;
+
+    const startTime = config.headers?.['x-request-start-time'] as number;
+    const duration = performance.now() - startTime;
+
+    if (isTransientError(error) && config._retryCount < MAX_RETRIES) {
+      config._retryCount++;
+      const delayMs = RETRY_DELAY_MS * Math.pow(2, config._retryCount - 1); // Exponential backoff
+      console.warn(
+        JSON.stringify({
+          level: 'warn',
+          message: `Transient API Error: Retrying ${config.method?.toUpperCase()} ${config.url} (Attempt ${config._retryCount}/${MAX_RETRIES})`,
+          timestamp: new Date().toISOString(),
+          method: config.method?.toUpperCase(),
+          url: config.url,
+          status: error.response?.status,
+          error: error.message,
+          retryDelayMs: delayMs,
+        })
+      );
+      await delay(delayMs);
+      return apiClient(config); // Retry the request
+    }
+
+    // Log final error after retries or for non-transient errors
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx.
-      console.error('API Error Response:', error.response.data);
-      // Here, we return a consistent error message from the server's 'detail' field.
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'API Error Response',
+          timestamp: new Date().toISOString(),
+          method: error.config?.method?.toUpperCase(),
+          url: error.config?.url,
+          status: error.response.status,
+          data: error.response.data,
+          durationMs: duration.toFixed(2),
+          error: error.message,
+          stack: error.stack,
+        })
+      );
       return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
     } else if (error.request) {
-      // The request was made but no response was received.
-      console.error('Network Error:', error.request);
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'Network Error: No response received',
+          timestamp: new Date().toISOString(),
+          method: error.config?.method?.toUpperCase(),
+          url: error.config?.url,
+          durationMs: duration.toFixed(2),
+          error: error.message,
+          stack: error.stack,
+        })
+      );
       return Promise.reject(new Error('Network error: Please check your connection.'));
     } else {
-      // Something happened in setting up the request that triggered an Error.
-      console.error('Error:', error.message);
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'Error setting up request',
+          timestamp: new Date().toISOString(),
+          error: error.message,
+          stack: error.stack,
+        })
+      );
       return Promise.reject(new Error(error.message));
     }
   }
@@ -92,7 +196,7 @@ export interface ChatResponseData {
  */
 export const sendMessageToBackend = async (payload: ChatRequestPayload): Promise<ChatResponseData> => {
   try {
-    // The interceptor will automatically handle the response data extraction.
+    // The interceptor will automatically handle the response data extraction and retries.
     const data: ChatResponseData = await apiClient.post('/chat', payload);
     return data;
   } catch (error) {
