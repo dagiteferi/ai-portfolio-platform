@@ -1,3 +1,4 @@
+import re
 import logging
 from typing import Dict
 from backend.ai_core.models.gemini import GeminiClient
@@ -18,6 +19,8 @@ def generate_ai_response(state: Dict) -> Dict:
 
     try:
         role = "recruiter" if is_recruiter else "visitor"
+        
+        # The improved system prompt now handles all cases, so no special logic is needed here.
         system_prompt = get_system_prompt(role, user_name, retrieved_docs)
         
         gemini = GeminiClient(temperature=LLM_TEMPERATURE)

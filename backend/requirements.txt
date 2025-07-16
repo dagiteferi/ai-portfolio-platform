@@ -6,9 +6,14 @@ langchain-huggingface==0.0.3
 google-generativeai 
 fastapi 
 uvicorn
+gunicorn
+faiss-cpu   
 python-dotenv
 redis
 sentence-transformers
 pytest
 tenacity
 langchain-huggingface
+pandas
+structlog
+sentry-sdk[fastapi]

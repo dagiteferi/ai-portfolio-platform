@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional
 import logging
+import time
 from backend.ai_core.agent.graph import create_chatbot_graph
 
 # Configure logging
@@ -25,6 +26,7 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
     """
     Handles chat requests by invoking the chatbot graph.
     """
+    start_time = time.time()
     logger.info(f"Received chat request from user: {chat_request.user_name}")
     
     try:
@@ -51,6 +53,10 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
 
         # Extract the final response
         final_response = response_state.get("response", "Sorry, I couldn't process your request.")
+        
+        end_time = time.time()
+        response_time = end_time - start_time
+        logger.info(f"Response generated in {response_time:.2f} seconds.")
         logger.info(f"Sending response to user {chat_request.user_name}: {final_response[:100]}...")
         
         return {"response": final_response}

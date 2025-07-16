@@ -1,166 +1,118 @@
 import json
 import os
-from typing import List, Tuple, Dict
+from typing import List, Dict, Tuple
 from langchain_core.documents import Document
 import logging
-import time
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('static_loader.log')
-    ]
-)
 logger = logging.getLogger(__name__)
 
-def load_static_content(source: str = "all") -> Tuple[List[Document], Dict]:
+def load_static_content() -> tuple[List[Document], Dict]:
     """
-    Load static content from JSON files and return a tuple:
+    Loads static content from JSON files and returns a tuple:
     (list of Document objects, profile dictionary).
     """
-    start_time = time.time()
     documents = []
     profile_data = {}
-    knowledge_base_path = "backend/ai_core/knowledge/github_knowledge_base.json"
-    personal_knowledge_base_path = "backend/ai_core/knowledge/personal_knowledge_base.json"
+    knowledge_dir = "/home/dagi/Documents/ai-portfolio-platform/backend/ai_core/knowledge"
 
-    try:
-        if source == "all" and os.path.exists(knowledge_base_path):
-            logger.debug(f"Loading knowledge base from {knowledge_base_path}")
-            with open(knowledge_base_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+    for filename in os.listdir(knowledge_dir):
+        if filename.endswith(".json"):
+            file_path = os.path.join(knowledge_dir, filename)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
 
-            # Process profile
-            if "profile" in data:
-                profile_data = data["profile"]
-                education_str = ""
-                if "education" in profile_data and isinstance(profile_data["education"], list):
-                    education_str = "\n".join(
-                        [
-                            f"{edu.get('degree', edu.get('certificate', '') or '')} at {edu.get('institution', '')} ({edu.get('year', '')}), GPA: {edu.get('gpa', '')}"
-                            for edu in profile_data["education"]
-                        ]
-                    )
-                profile_content = (
-                    f"# Dagmawi Teferi Profile\n"
-                    f"Name: {profile_data.get('name', 'Unknown')}\n"
-                    f"Bio: {profile_data.get('bio', '')}\n"
-                    f"Location: {profile_data.get('location', '')}\n"
-                    f"Email: {profile_data.get('email', '')}\n"
-                    f"Phone: {profile_data.get('phone', '')}\n"
-                    f"LinkedIn: {profile_data.get('linkedin', '')}\n"
-                    f"Education:\n{education_str}\n"
-                    f"Experience: {profile_data.get('experience', '')}\n"
-                    f"Skills: {profile_data.get('skills', '')}\n"
-                    f"Certifications: {profile_data.get('certifications', '')}\n"
-                    f"Languages: {profile_data.get('languages', '')}\n"
-                    f"Awards: {profile_data.get('awards', '')}\n"
-                )
-                documents.append(Document(
-                    page_content=profile_content,
-                    metadata={"title": "Dagmawi Teferi Profile", "url": profile_data.get('linkedin', '')}
-                ))
-                logger.debug("Added profile document")
+                    if filename == "github_knowledge_base.json":
+                        if "profile" in data:
+                            profile_data = data["profile"]
+                            # Process individual profile fields
+                            for key, value in profile_data.items():
+                                if key == "education" and isinstance(value, list):
+                                    for edu in value:
+                                        documents.append(Document(page_content=f"Education: {json.dumps(edu)}", metadata={"source": "profile", "type": "education"}))
+                                elif key == "experience" and isinstance(value, list):
+                                    for job in value:
+                                        end_date = job.get('end_date')
+                                        # A job is current if the end date is null or the string "present"
+                                        is_current = end_date is None or (isinstance(end_date, str) and end_date.lower() == "present")
+                                        
+                                        # Combine job info and responsibilities into a single document
+                                        responsibilities_text = "\n".join([f"- {resp}" for resp in job.get("responsibilities", [])])
+                                        job_content = (
+                                            f"Experience: {job.get('title', '')} at {job.get('company', '')} "
+                                            f"({job.get('start_date', '')} - {end_date}) in {job.get('location', '')}.\n"
+                                            f"Responsibilities:\n{responsibilities_text}"
+                                        )
+                                        if is_current:
+                                            job_content += "\n(Current Role)"
 
-            # Process repositories
-            if "repositories" in data:
-                for repo in data["repositories"]:
-                    content = repo.get("content", "").strip()
-                    if not content:
-                        content = f"No description available for {repo.get('title', 'Unknown')}."
-                    documents.append(Document(
-                        page_content=content,
-                        metadata={"title": repo.get("title", "Unknown"), "url": repo.get("url", "")}
-                    ))
-                logger.debug(f"Added {len(data['repositories'])} repository documents")
+                                        documents.append(Document(
+                                            page_content=job_content,
+                                            metadata={
+                                                "source": "profile", 
+                                                "type": "experience", 
+                                                "company": job.get('company', ''), 
+                                                "title": job.get('title', ''), 
+                                                "is_current": is_current
+                                            }
+                                        ))
+                                elif key == "skills" and isinstance(value, str):
+                                    documents.append(Document(page_content=f"Skills: {value}", metadata={"source": "profile", "type": "skills"}))
+                                elif key == "projects" and isinstance(value, list):
+                                    for project in value:
+                                        documents.append(Document(page_content=f"Project: {project}", metadata={"source": "profile", "type": "project"}))
+                                else:
+                                    documents.append(Document(page_content=f"Profile {key}: {value}", metadata={"source": "profile", "type": key}))
 
-            # Process recent activity (optional)
-            if "recent_activity" in data:
-                activity_content = "# Recent Activity\n" + "\n".join([
-                    f"- {event['type']} on {event['repo']} at {event['created_at']}: {event['description']}"
-                    for event in data["recent_activity"]
-                ])
-                documents.append(Document(
-                    page_content=activity_content,
-                    metadata={"title": "Recent Activity", "url": "https://github.com/dagiteferi"}
-                ))
-                logger.debug("Added recent activity document")
+                        # Process repositories
+                        if "repositories" in data:
+                            for repo in data["repositories"]:
+                                content = repo.get("content", "").strip()
+                                if not content:
+                                    content = f"No description available for {repo.get('title', 'Unknown')}."
+                                documents.append(Document(
+                                    page_content=content,
+                                    metadata={"title": repo.get("title", "Unknown"), "url": repo.get("url", ""), "source": "github_repo", "type": "project"}
+                                ))
 
-            # Process personal interests
-            if os.path.exists(personal_knowledge_base_path):
-                logger.debug(f"Loading personal knowledge base from {personal_knowledge_base_path}")
-                with open(personal_knowledge_base_path, 'r', encoding='utf-8') as f:
-                    personal_data = json.load(f)
-                if "interests" in personal_data:
-                    interests = personal_data["interests"]
-                    if "music" in interests:
-                        music_content_lines = ["# Musical Interests"]
-                        for artist in interests["music"].get("artists", []):
-                            music_content_lines.append(f"## {artist['name']}")
-                            if "bio" in artist: music_content_lines.append(f"Bio: {artist['bio']}")
-                            if "popular_songs" in artist: music_content_lines.append(f"Popular Songs: {', '.join(artist['popular_songs'])}")
-                            if "songs" in artist: music_content_lines.append(f"Favorite Songs: {', '.join(artist['songs'])}")
-                            if "playlists" in artist: music_content_lines.append(f"Playlists: {', '.join(artist['playlists'])}")
-                        music_content = "\n".join(music_content_lines)
-                        documents.append(Document(
-                            page_content=music_content,
-                            metadata={"title": "Musical Interests"}
-                        ))
-                        logger.debug("Added musical interests document")
+                        # Process recent activity
+                        if "recent_activity" in data:
+                            for event in data["recent_activity"]:
+                                documents.append(Document(
+                                    page_content=f"Recent Activity: {event['type']} on {event['repo']} at {event['created_at']}: {event['description']}",
+                                    metadata={"source": "github_activity"}
+                                ))
 
-                    if "books" in interests:
-                        book_content = "# Reading Interests\n"
-                        book_content += f"Favorite Book: {interests['books']['favorite_book']}\n"
-                        book_content += f"Comment: {interests['books']['comment']}\n"
-                        documents.append(Document(
-                            page_content=book_content,
-                            metadata={"title": "Reading Interests"}
-                        ))
-                        logger.debug("Added reading interests document")
+                    elif filename == "personal_knowledge_base.json":
+                        if "interests" in data:
+                            for interest_type, items in data["interests"].items():
+                                if interest_type == "books" and isinstance(items, dict):
+                                    # Special handling for books to include the comment
+                                    book_content = f"Favorite Book: {items.get('favorite_book', '')}"
+                                    if "comment" in items:
+                                        book_content += f" (Comment: {items['comment']})"
+                                    documents.append(Document(page_content=book_content, metadata={"source": "personal_knowledge", "type": interest_type}))
+                                elif isinstance(items, list):
+                                    for item in items:
+                                        documents.append(Document(page_content=f"Personal Interest ({interest_type}): {json.dumps(item)}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                elif isinstance(items, dict):
+                                    for sub_key, sub_value in items.items():
+                                        documents.append(Document(page_content=f"Personal Interest ({interest_type} - {sub_key}): {json.dumps(sub_value)}", metadata={"source": "personal_knowledge", "type": interest_type}))
 
-                    if "hobbies" in interests:
-                        hobbies_content = "# Hobbies\n"
-                        hobbies_content += ", ".join(interests['hobbies'])
-                        documents.append(Document(
-                            page_content=hobbies_content,
-                            metadata={"title": "Hobbies"}
-                        ))
-                        logger.debug("Added hobbies document")
+                        if "work_experience" in data:
+                            for job in data["work_experience"]:
+                                end_date = job.get('end_date', '')
+                                is_current = end_date.lower() == "present" or end_date is None
+                                job_content = f"Work Experience: {job.get('title', '')} at {job.get('company', '')} ({job.get('start_date', '')} - {end_date}) in {job.get('location', '')}."
+                                if is_current:
+                                    job_content += " (Current Role)"
+                                documents.append(Document(page_content=job_content, metadata={"source": "personal_knowledge", "type": "work_experience", "company": job.get('company', ''), "title": job.get('title', ''), "is_current": is_current}))
+                                if "responsibilities" in job and isinstance(job["responsibilities"], list):
+                                    for resp in job["responsibilities"]:
+                                        documents.append(Document(page_content=f"Responsibility for {job.get('title', '')} at {job.get('company', '')}: {resp}", metadata={"source": "personal_knowledge", "type": "responsibility", "company": job.get('company', ''), "title": job.get('title', ''), "is_current": is_current}))
 
-                    if "friends" in interests:
-                        friends_content = "# Friends\n"
-                        for friend in interests["friends"]:
-                            friends_content += f"- {friend['name']} ({friend['relationship']})\n"
-                        documents.append(Document(
-                            page_content=friends_content,
-                            metadata={"title": "Friends"}
-                        ))
-                        logger.debug("Added friends document")
+                logger.info(f"Processed JSON file: {filename}")
+            except Exception as e:
+                logger.error(f"Error processing JSON file {filename}: {e}")
 
-                    if "spiritual_beliefs" in interests:
-                        spiritual_content = "# Spiritual Beliefs\n"
-                        spiritual_content += f"Faith: {interests['spiritual_beliefs']['faith']}\n"
-                        spiritual_content += "Core Principles:\n"
-                        for principle in interests['spiritual_beliefs']['core_principles']:
-                            spiritual_content += f"- {principle}\n"
-                        documents.append(Document(
-                            page_content=spiritual_content,
-                            metadata={"title": "Spiritual Beliefs"}
-                        ))
-                        logger.debug("Added spiritual beliefs document")
-
-        else:
-            logger.warning(f"No valid source or file not found: {knowledge_base_path}")
-            return [], {}
-
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse JSON: {str(e)}")
-        return [], {}
-    except Exception as e:
-        logger.error(f"Error loading static content: {str(e)}")
-        return [], {}
-
-    logger.debug(f"Loaded {len(documents)} documents in {time.time() - start_time:.2f}s")
     return documents, profile_data

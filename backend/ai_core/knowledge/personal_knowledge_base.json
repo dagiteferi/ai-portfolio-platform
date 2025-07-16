@@ -110,5 +110,33 @@
         "Respecting and loving people is how I show my love for God."
       ]
     }
-  }
+  },
+  "education": [
+    {
+      "degree": "BSc in Computer Science",
+      "institution": "Unity University, Adama",
+      "year": "Expected 2025",
+      "gpa": "3.95/4.0"
+    },
+    {
+      "certificate": "Generative AI",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "ML Engineering",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "Data Engineering",
+      "institution": "10 Academy",
+      "year": "2025"
+    },
+    {
+      "certificate": "Full-Stack Web Development (MERN Stack)",
+      "institution": "Kuraz Technology",
+      "year": "2021"
+    }
+  ]
 }

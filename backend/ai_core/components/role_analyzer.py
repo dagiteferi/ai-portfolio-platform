@@ -12,7 +12,7 @@ def analyze_user_role(state: Dict) -> Dict:
     role_confidence = state.get("role_confidence") or {"visitor": 0.5, "recruiter": 0.5}
 
     if any(word in user_input for word in RECRUITER_KEYWORDS):
-        role_confidence["recruiter"] += 0.25
+        role_confidence["recruiter"] += 0.4 # Increased confidence boost
     else:
         role_confidence["visitor"] += 0.1
 
