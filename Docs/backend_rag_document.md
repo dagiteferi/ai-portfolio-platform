@@ -1,6 +1,6 @@
 # AI Portfolio Chatbot Backend Documentation: Comprehensive Guide
 
-Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document is designed to provide a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI.This guide will equip you to confidently discuss, debug, extend, and contribute to the codebase.
+Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document provides a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI. This guide equips you to confidently discuss, debug, extend, and contribute to the codebase.
 
 This documentation serves as both a technical manual and an onboarding guide, clearly explaining the "what," "why," and "how" of the backend system.
 
@@ -41,7 +41,7 @@ This documentation serves as both a technical manual and an onboarding guide, cl
 
 ## 1. Introduction
 
-Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document is designed to provide a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI.This guide will equip you to confidently discuss, debug, extend, and contribute to the codebase.
+Welcome to the comprehensive backend documentation for the AI Portfolio Chatbot! This document provides a deep, end-to-end understanding of the project's architecture, core components, and the intricate workings of its AI. This guide equips you to confidently discuss, debug, extend, and contribute to the codebase.
 
 The primary goal of this backend is to power an intelligent chatbot that acts as my personal AI agent. It answers questions about my profile, projects, and skills, adapting its responses based on the user's role (e.g., a friendly visitor or a professional recruiter). This is achieved through a sophisticated combination of Retrieval-Augmented Generation (RAG) and a state-machine-based agent orchestration using LangGraph.
 
@@ -53,17 +53,17 @@ At its heart, this project is a **Retrieval-Augmented Generation (RAG)** system 
 
 ### Retrieval-Augmented Generation (RAG)
 
-Imagine you have a vast library of information (your knowledge base). When someone asks a question, instead of trying to answer from memory alone, you first quickly find the most relevant "books" (retrieval) and then use those books to formulate a precise answer (generation). That's RAG. In my case, the "books" are documents about my profile, and the "librarian" is a vector database.
+Imagine you have a vast library of information (my knowledge base). When someone asks a question, instead of trying to answer from memory alone, you first quickly find the most relevant "books" (retrieval) and then use those books to formulate a precise answer (generation). That's RAG. In my case, the "books" are documents about my profile, and the "librarian" is a vector database.
 
 **Why RAG?**
 
 *   **Accuracy & Factuality:** RAG grounds the LLM's responses in specific, verifiable information from my portfolio, reducing hallucinations and ensuring accuracy.
-*   **Up-to-Date Information:**  can update my portfolio content without retraining the entire LLM.
-*   **Reduced LLM Size:** The LLM doesn't need to memorize  entire portfolio; it only needs to be good at understanding context and generating text.
+*   **Up-to-Date Information:** I can update my portfolio content without retraining the entire LLM.
+*   **Reduced LLM Size:** The LLM doesn't need to memorize my entire portfolio; it only needs to be good at understanding context and generating text.
 
 ### LangGraph
 
-Think of LangGraph as a blueprint for how my AI thinks and acts. It allows  to define a sequence of steps (nodes) and decisions (edges) that the AI follows to process a user's input, retrieve information, generate a response, and update its memory. It's a state machine that ensures a structured and predictable flow for complex AI interactions.
+Think of LangGraph as a blueprint for how my AI thinks and acts. It allows me to define a sequence of steps (nodes) and decisions (edges) that the AI follows to process a user's input, retrieve information, generate a response, and update its memory. It's a state machine that ensures a structured and predictable flow for complex AI interactions.
 
 **Why LangGraph?**
 
@@ -159,7 +159,7 @@ Let's trace the journey of a user's message through the backend, explaining each
 
 *   **Purpose:** This is the primary entry point for the FastAPI application. It handles the initialization of the web server, middleware configuration, and the setup of critical services like the FAISS vector store upon application startup.
 *   **Key Responsibilities:**
-    *   **FastAPI Application Instance:** Creates the FastAPI application instance (`app = FastAPI(...)`), which is the foundation of our web API.
+    *   **FastAPI Application Instance:** Creates the FastAPI application instance (`app = FastAPI(...)`), which is the foundation of the web API.
     *   **CORS Configuration:** Configures Cross-Origin Resource Sharing (CORS) using `CORSMiddleware`. This is crucial for allowing a frontend application (e.g., running on `localhost:3000`) to securely communicate with this backend API.
     *   **FAISS Vector Store Initialization:** At startup, it calls `faiss_manager.update_vector_store()`. This function is responsible for loading all static and dynamic knowledge (from JSON and CSV files), processing it, and initializing the FAISS vector store. It also loads the profile data into `app.state.profile` to make it available to the chat endpoint.
     *   **API Endpoint Mounting:** Mounts the chat API endpoints (defined in `api/endpoints/chat.py`) under the `/api` path using `app.include_router(chat_router, prefix="/api")`. This makes the `/api/chat` endpoint accessible.
@@ -173,12 +173,12 @@ Let's trace the journey of a user's message through the backend, explaining each
     *   **Endpoint Registration:** Registers the `chat_endpoint` asynchronous function to handle HTTP POST requests to `/api/chat` using the `@router.post("/chat")` decorator.
     *   **LangGraph Initialization:** Initializes the LangGraph state machine (`graph = create_chatbot_graph()`). This graph encapsulates the entire flow of how the AI processes a request, from input to response.
     *   **Initial State Preparation:** Prepares the `initial_state` dictionary containing essential data such as the user's input, conversation history, and the user's profile (from `request.app.state.profile`), which is passed into the LangGraph for processing.
-    *   **LangGraph Execution:** Executes the core AI logic by asynchronously running the LangGraph (`response_state = await graph.ainvoke(initial_state)`). This is where the `initial_state` traverses through all the defined nodes and edges of the graph.
+    *   **LangGraph Execution:** Executes the core AI logic by asynchronously running the LangGraph (`response_state = await graph.ainvoke(initial_state)`). This is where the `initial_state` moves through all the defined nodes and edges of the graph.
     *   **Response Extraction and Return:** Extracts the final generated response from the `response_state` and returns it as a JSON object to the client.
 
 ### `ai_core/agent/graph.py` - The LangGraph Orchestrator
 
-*   **Purpose:** This file is the "brain" of the AI, defining the state machine that dictates the flow of information and processing steps. It leverages LangGraph to create a directed graph of operations, ensuring a structured and predictable AI workflow.
+*   **Purpose:** This file serves as the AI's "brain," defining the state machine that dictates the flow of information and processing steps. It leverages LangGraph to create a directed graph of operations, ensuring a structured and predictable AI workflow.
 *   **Key Responsibilities:**
     *   **State Definition:** Defines the structure of the `state` object (`class AgentState(TypedDict):`) that is passed between nodes in the graph. Each node receives and potentially modifies this `state`, maintaining the conversational context and intermediate processing results.
     *   **Workflow Initialization:** Initializes the LangGraph workflow (`workflow = StateGraph(AgentState)`) with the defined state schema.
@@ -231,7 +231,7 @@ This directory contains the core business logic of the AI, broken down into smal
 
 ### `ai_core/knowledge/` - Your Knowledge Base
 
-This directory handles the loading, processing, and embedding of your portfolio's knowledge base, which is critical for the RAG system's effectiveness.
+This directory handles the loading, processing, and embedding of my portfolio's knowledge base, which is critical for the RAG system's effectiveness.
 
 ### `ai_core/knowledge/static_loader.py`
 
@@ -259,7 +259,7 @@ This directory handles the loading, processing, and embedding of your portfolio'
     *   A generic handler ensures that any other CSV file is also parsed, with its columns and values turned into content and metadata.
 
 #### `embeddings.py`
-*   **Purpose:** Converts textual data (both your knowledge base documents and user queries) into numerical representations called "embeddings." These embeddings are high-dimensional vectors that capture the semantic meaning of the text, enabling efficient similarity searches.
+*   **Purpose:** Converts textual data (both my knowledge base documents and user queries) into numerical representations called "embeddings." These embeddings are high-dimensional vectors that capture the semantic meaning of the text, enabling efficient similarity searches.
 *   **How it works:**
     *   Utilizes a `SentenceTransformer` model (e.g., `all-MiniLM-L6-v2`) to generate these embeddings.
     *   Crucially, it wraps the `SentenceTransformer` with `HuggingFaceEmbeddings` (from `langchain_huggingface`) to ensure compatibility with LangChain's vector store interfaces. This compatibility is essential for seamless integration with FAISS and other LangChain-compatible components.

@@ -1,8 +1,8 @@
 # AI Portfolio Chatbot Frontend Documentation: Comprehensive Guide
 
-Welcome to the comprehensive frontend documentation for the AI Portfolio Chatbot! This document is designed to provide a deep, end-to-end understanding of the project's user interface, its architecture, core components, and how it interacts with the backend to deliver an intelligent and engaging experience.
+Welcome to the comprehensive frontend documentation for the AI Portfolio Chatbot! This document provides a deep, end-to-end understanding of the project's user interface, its architecture, core components, and how it interacts with the backend to deliver an intelligent and engaging experience.
 
-This guide will equip you to confidently discuss, debug, extend, and contribute to the codebase, ensuring a high standard of quality and maintainability.
+This guide equips you to confidently discuss, debug, extend, and contribute to the codebase, ensuring a high standard of quality and maintainability.
 
 ## Table of Contents
 
@@ -77,9 +77,9 @@ This guide will equip you to confidently discuss, debug, extend, and contribute 
 
 ## 1. Introduction
 
-Welcome to the comprehensive frontend documentation for the AI Portfolio Chatbot! This document serves as your definitive guide to the user-facing component of the AI Portfolio Chatbot, which acts as the interactive window into Dagi's professional profile. It's designed to be intuitive, responsive, and visually appealing, providing a seamless experience for visitors, recruiters, and fellow developers alike.
+Welcome to the comprehensive frontend documentation for the AI Portfolio Chatbot! This document serves as my definitive guide to the user-facing component of the AI Portfolio Chatbot, which acts as the interactive window into my professional profile. It's designed to be intuitive, responsive, and visually appealing, providing a seamless experience for visitors, recruiters, and fellow developers alike.
 
-The primary goal of this frontend is to present Dagi's skills, projects, education, and work experience in a dynamic and engaging manner, complemented by an intelligent AI chatbot for interactive queries. This documentation will delve into the "what," "why," and "how" of the frontend system, from its core architectural choices to the granular details of its components and their interactions.
+The primary goal of this frontend is to present my skills, projects, education, and work experience in a dynamic and engaging manner, complemented by an intelligent AI chatbot for interactive queries. This documentation will delve into the "what," "why," and "how" of the frontend system, from its core architectural choices to the granular details of its components and their interactions.
 
 ## 2. Project Overview & Core Concepts
 
@@ -145,7 +145,7 @@ The AI Portfolio Chatbot frontend is designed to showcase Dagi's professional pr
 *   **Dynamic Hero Section:** A prominent introductory section with a captivating background and key personal branding elements.
 *   **Comprehensive About Section:** Details about Dagi's background, interests, and a visual representation of technical skills through skill bars.
 *   **Detailed Education & Certifications:** Presents academic achievements and professional certifications in an organized and easily digestible format.
-*   **Interactive Projects Showcase:** Highlights key projects with descriptions, technologies used, and links, allowing visitors to explore Dagi's practical experience.
+*   **Interactive Projects Showcase:** Highlights key projects with descriptions, technologies used, and links, allowing visitors to explore my practical experience.
 *   **Structured Work Experience:** Outlines professional roles, responsibilities, and achievements, providing insight into career progression.
 *   **Contact Information & Form:** Provides various methods for visitors to get in touch, including a direct contact form.
 *   **Integrated AI Chatbot:** A central feature allowing users to ask questions about Dagi's profile, projects, and skills, powered by the intelligent backend.
@@ -282,7 +282,7 @@ Let's trace the journey of how the AI Portfolio Chatbot frontend renders and int
 ### `components/Hero.tsx` - The Welcome Section
 
 *   **Purpose:** This is the initial, prominent section users see upon landing on the portfolio. It's designed to make a strong first impression.
-*   **How it works:** Displays a large background image (`hero-bg.jpeg` or `hero-bg.png` from `public/assets`), a hero image (`hero_image.png`), and key introductory text about Dagi. It uses Tailwind CSS for layout and styling to create a visually appealing and responsive introductory experience.
+*   **How it works:** Displays a large background image (`hero-bg.jpeg` or `hero-bg.png` from `public/assets`), a hero image (`hero_image.png`), and key introductory text about me. It uses Tailwind CSS for layout and styling to create a visually appealing and responsive introductory experience.
 
 ### `components/About/` - About Me Section
 
