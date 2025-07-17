@@ -43,9 +43,30 @@ const Navigation = () => {
             className="flex-shrink-0 cursor-pointer"
             onClick={() => scrollToSection('#home')}
           >
-            <div className={`text-2xl ${isScrolled ? 'text-black' : 'text-gradient'} font-bold`}>
-              DT
-            </div>
+            <div
+              className="h-10 w-20" // Adjusted width for a div
+              style={
+                isScrolled
+                  ? {
+                      backgroundImage: `url('/assets/blackbg.png')`,
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }
+                  : {
+                      backgroundColor: 'hsl(213 94% 68%)',
+                      maskImage: `url('/assets/withbg.png')`,
+                      WebkitMaskImage: `url('/assets/withbg.png')`,
+                      maskSize: 'contain',
+                      WebkitMaskSize: 'contain',
+                      maskRepeat: 'no-repeat',
+                      WebkitMaskRepeat: 'no-repeat',
+                      maskPosition: 'center',
+                      WebkitMaskPosition: 'center',
+                    }
+              }
+              aria-label="Logo"
+            ></div>
           </div>
 
           {/* Desktop Navigation */}
