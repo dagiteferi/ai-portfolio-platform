@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pages from './components/pages/Pages';
-import SplashScreen from './components/SplashScreen';
+import SkeletonLoader from './components/SkeletonLoader';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div className="App">
-      {loading ? <SplashScreen /> : <Pages />}
+      {loading ? <SkeletonLoader /> : <Pages />}
     </div>
   );
 }
