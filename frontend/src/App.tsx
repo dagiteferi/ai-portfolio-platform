@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pages from './components/pages/Pages';
-import SkeletonLoader from './components/SkeletonLoader';
+import SkeletonLoader from './components/Splash/SkeletonLoader';
 
 function App() {
   const [loading, setLoading] = useState(true);
