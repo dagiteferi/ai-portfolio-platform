@@ -17,7 +17,7 @@ const Footer = () => {
     },
     { 
       icon: Facebook, 
-      href: 'https://twitter.com/dagmawi_teferi',
+      href: 'https://web.facebook.com/dagmawi.teferi.98',
       label: 'Twitter'
     }
   ];
@@ -106,7 +106,7 @@ const Footer = () => {
                     href="mailto:contact@dagiteferi2011@gmail.com"
                     className="hover:text-primary transition-colors duration-300"
                   >
-                    contact@dagmawiteferi.com
+                    dagiteferi2011@gmail.com
                   </a>
                 </p>
                 <p>
@@ -114,10 +114,10 @@ const Footer = () => {
                     href="tel:+251920362324"
                     className="hover:text-primary transition-colors duration-300"
                   >
-                    +1 251920362324
+                    +251 920 362 324
                   </a>
                 </p>
-                <p>Adiss Ababa, Ethiopia'</p>
+                <p>Adiss Ababa, Ethiopia</p>
               </div>
             </div>
           </div>

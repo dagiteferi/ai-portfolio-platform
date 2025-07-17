@@ -143,7 +143,7 @@ const Projects = () => {
               Check out my GitHub for additional projects and contributions to open-source
             </p>
             <Button
-              onClick={() => window.open('https://github.com/dagmawi-teferi', '_blank')}
+              onClick={() => window.open('https://github.com/dagiteferi/', '_blank')}
               className="btn-gradient hover-scale"
             >
               <Github className="w-4 h-4 mr-2" />

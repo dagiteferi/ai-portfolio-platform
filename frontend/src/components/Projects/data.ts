@@ -10,7 +10,7 @@ export const projects = [
     image:'/assets/ai portifilo.png',
     github: 'https://github.com/dagiteferi/ai-portfolio-platform',
     demo: 'https://prompt-optimizer-demo.com',
-    featured: true
+    featured: false
   },
   {
     title: 'RENT-MANAGMENT-SYSTEM',
@@ -164,6 +164,7 @@ export const projects = [
     description: 'No description provided.',
     
     technologies: ['Dart' , 'Flutter'],
+    image:'/assets/flutter calculater.jpg',
     github: 'https://github.com/dagiteferi/Calculator',
     demo: '#'
   },

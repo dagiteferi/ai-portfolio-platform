@@ -63,7 +63,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick }) => {
     },
     { 
       icon: Facebook, 
-      href: 'https://twitter.com/dagmawi_teferi',
+      href: 'https://web.facebook.com/dagmawi.teferi.98',
       label: 'Twitter'
     }
   ];
