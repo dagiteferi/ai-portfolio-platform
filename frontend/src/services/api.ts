@@ -31,7 +31,7 @@ const isTransientError = (error: AxiosError): boolean => {
 
 // Create a single, configured axios instance for the entire application.
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_BACKEND_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
