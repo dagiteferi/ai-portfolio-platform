@@ -1,0 +1,27 @@
+
+# Ignore Python cache and virtual environment directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+
+# Ignore editor/IDE specific files
+.vscode/
+.idea/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore data directories that might contain local data or large files
+data/
+vector_db/
+
+# Ignore environment variables file
+.env
+
+# Ignore test files if not needed in production image
+test_*.py
