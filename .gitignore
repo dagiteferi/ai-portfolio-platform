@@ -1,9 +1,23 @@
-venv
-# Byte-compiled / optimized / DLL files
+# --- System & Editor Files ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# --- Python ---
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Compiled files
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
 *.py[cod]
 *$py.class
-resume.pdf
 
 # Distribution / packaging
 build/
@@ -11,67 +25,54 @@ dist/
 .eggs/
 *.egg-info/
 
-# Virtual environments
+# Pytest cache
+.pytest_cache/
 
-venv/
-
-
-# Environment variables and secrets
-.env
-
-# Logs and databases
-*.log
-logs/
-*.sqlite3
-*.db
-description.md
-github_knowledge_base.json
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Docker files
-docker-compose.override.yml
-*.pid
-*.seed
-
-# Static assets from build
+# --- Node.js ---
+# Dependencies
 frontend/node_modules/
+
+# Build output
 frontend/build/
 frontend/dist/
 
-# IDEs and editors
-.vscode/
-.idea/
-*.swp
-
-# Sensitive configuration or keys not meant for VCS
-# (Add any additional project-specific files to ignore)
-# For example: custom_keys.json, private_config.yaml
-
-# GitHub Action secrets and files
-.github/workflows/**/secret-*.yml
-run backend.txt
-.pytest_cache
-assets/
-feat/integration-update
-personal_knowledge_base.json  
-
-
-frontend/.env.local
-frontend/.env.production
-frontend/.env.development.local 
-
-# Node.js/npm specific logs and temporary files
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Test coverage reports
-coverage/ 
+# Env files
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development.local
 
+# --- Docker ---
+docker-compose.override.yml
+*.pid
+*.seed
 
-personal_knowledge_base.json   
-data 
-main
+# --- Project-specific ---
+# Secrets & Environment
+.env
+
+# Logs
+logs/
+*.log
+
+# Databases
+*.sqlite3
+*.db
+
+# Data & Knowledge Base (DO NOT COMMIT SENSITIVE DATA)
+backend/data/
+github_knowledge_base.json
+personal_knowledge_base.json
+resume.pdf
+
+# Test reports
+coverage/
+
+# User-specific/temp
+description.md
+run backend.txt
+assets/
