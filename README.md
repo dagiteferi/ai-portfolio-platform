@@ -53,6 +53,10 @@ The AI core of the backend uses a RAG pipeline:
 *   **Vector Storage:** Embeddings are stored in a FAISS vector database for efficient similarity searches.
 *   **Chat Logic:** When a user sends a message, the system retrieves relevant information from the knowledge base, combines it with the conversation history, and generates a response using a large language model.
 
+## Documentation
+
+For a deeper dive into the project's architecture, components, and integration details, please see the [full documentation here](./Docs).
+
 ## Getting Started
 
 ### Prerequisites
