@@ -1,6 +1,10 @@
 
 # AI Portfolio Platform
 
+<p align="center">
+  <img src="./frontend/public/assets/ai-portfolio.png" alt="AI Portfolio Platform" width="700"/>
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dagi-b/ai-portfolio-platform)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dagib/ai-portfolio-platform.svg)](https://hub.docker.com/r/dagib/ai-portfolio-platform)
