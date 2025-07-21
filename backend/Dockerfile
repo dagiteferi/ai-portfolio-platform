@@ -31,7 +31,6 @@ WORKDIR /app
 
 # Copy pre-built wheels from the builder stage
 COPY --from=builder /wheels /wheels
-COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/
 
 # Install dependencies from wheels
 RUN pip install --no-cache-dir /wheels/*
