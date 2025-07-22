@@ -102,10 +102,10 @@ const Projects = () => {
                       <div className="text-center space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-success/20 rounded-lg p-3 text-center">
-                            <div className="text-sm font-medium text-foreground">Prompt Components</div>
+                            <div className="text-sm font-medium text-foreground"> Components</div>
                           </div>
                           <div className="bg-info/20 rounded-lg p-3 text-center">
-                            <div className="text-sm font-medium text-foreground">Prompt Techniques</div>
+                            <div className="text-sm font-medium text-foreground"> Techniques</div>
                           </div>
                           <div className="bg-warning/20 rounded-lg p-3 text-center">
                             <div className="text-sm font-medium text-foreground">Context Mapping</div>
@@ -115,7 +115,7 @@ const Projects = () => {
                           </div>
                         </div>
                         <div className="text-xs text-gray-900">
-                          Interactive Prompt Engineering Visualization
+                          Interactive  Engineering Visualization
                         </div>
                       </div>
                     </div>

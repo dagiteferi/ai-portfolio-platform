@@ -20,7 +20,8 @@ export const projects = [
     technologies: ['Python', 'React', 'FastApi', 'PostgrewSql'],
     image:'/assets/rent managent .png',
     github: 'https://github.com/dagiteferi/RENT-MANAGMENT-SYSTEM',
-    demo: '#'
+    demo: '#',
+    featured: true
   },
   {
     title: 'Credit scoring model',
@@ -123,7 +124,7 @@ export const projects = [
   },
   {
     title: 'insurance-risk-analytics',
-    category: 'Mobile Apps',
+    category: 'Data Solutions',
     description: 'Comprehensive data analytics project to optimize car insurance strategies for AlphaCare Insurance Solutions. Includes EDA, statistical modeling, and A/B testing to identify low-risk clients and enhance marketing effectiveness using historical insurance claim data.',
     
     technologies: ['python', 'notebook'],
@@ -160,7 +161,7 @@ export const projects = [
   },
   {
     title: 'Calculator',
-    category: 'Software Applications',
+    category: 'Mobile Apps',
     description: 'No description provided.',
     
     technologies: ['Dart' , 'Flutter'],
@@ -170,7 +171,7 @@ export const projects = [
   },
   {
     title: 'Attendance-System',
-    category: 'web Development',
+    category: 'Web Development',
     description: 'No description provided.',
     
     technologies: ['HTML' , 'CSS' , 'JavaScript', 'PHP', 'MySQL'],
@@ -207,7 +208,7 @@ export const projects = [
   },
    {
     title: 'Anasimos',
-    category: 'web Development',
+    category: 'Web Development',
     description: 'No description provided.',
     
     technologies: ['Html' , "css" , 'javascript'  ],
