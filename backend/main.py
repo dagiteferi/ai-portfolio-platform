@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
+from backend.api.endpoints.admin import router as admin_router
+from backend.api.endpoints.knowledge import router as knowledge_router
 from backend.vector_db.faiss_manager import faiss_manager
 
 import uvicorn
@@ -104,9 +106,11 @@ def startup_event():
 
 try:
     app.include_router(chat_router, prefix="/api")
-    logger.info("Chat router included successfully")
+    app.include_router(admin_router, prefix="/api")
+    app.include_router(knowledge_router, prefix="/api")
+    logger.info("Chat, Admin, and Knowledge routers included successfully")
 except Exception as e:
-    logger.error("Failed to include chat router", error=str(e))
+    logger.error("Failed to include routers", error=str(e))
     raise
 
 @app.get("/health")
