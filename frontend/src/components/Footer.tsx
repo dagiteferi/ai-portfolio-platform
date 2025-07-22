@@ -130,7 +130,7 @@ const Footer = () => {
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <span>© {currentYear} Dagmawi Teferi. Made with</span>
                 <Heart className="w-4 h-4 text-red-400 animate-pulse" />
-                <span>and lots of coffee</span>
+                <span></span>
               </div>
               
               <button
