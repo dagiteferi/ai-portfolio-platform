@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import logging
 import time
+import bleach
 from backend.ai_core.agent.graph import create_chatbot_graph
 
 # Configure logging
@@ -30,15 +31,17 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
     logger.info(f"Received chat request from user: {chat_request.user_name}")
     
     try:
-        # Create the chatbot graph
-        graph = create_chatbot_graph()
+        graph = request.app.state.graph
         if graph is None:
-            logger.error("Failed to create chatbot graph.")
-            raise HTTPException(status_code=500, detail="Chatbot initialization failed.")
+            logger.error("Chatbot graph not found in application state.")
+            raise HTTPException(status_code=500, detail="Chatbot is not available.")
+
+        # Sanitize the user's message to prevent prompt injection
+        sanitized_message = bleach.clean(chat_request.message)
 
         # Prepare the initial state for the graph
         initial_state = {
-            "input": chat_request.message,
+            "input": sanitized_message,
             "user_name": chat_request.user_name,
             "history": [hist.dict() for hist in chat_request.history], # Convert Pydantic models to dicts
             "profile": request.app.state.profile, # Pass the profile from the app state

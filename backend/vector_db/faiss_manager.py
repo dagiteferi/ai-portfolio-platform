@@ -31,7 +31,9 @@ class FAISSManager:
         logger.info("Updating vector store...")
         # Load all CSV files from the data directory
         csv_docs = []
-        data_dir = "/home/dagi/Documents/ai-portfolio-platform/backend/data"
+        data_dir = "backend/data"
+        os.makedirs(data_dir, exist_ok=True)
+        os.makedirs(data_dir, exist_ok=True)  # Ensure the data directory exists
         for filename in os.listdir(data_dir):
             if filename.endswith(".csv"):
                 csv_docs.extend(load_csv_data(os.path.join(data_dir, filename)))

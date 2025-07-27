@@ -7,6 +7,12 @@ services:
     ports:
       - "8000:8000"
     container_name: ai_portfolio_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - ALLOWED_ORIGINS=http://localhost
+      - ENV=production
     networks:
       - app-network
 
@@ -17,6 +23,7 @@ services:
     ports:
       - "80:80"
     container_name: ai_portfolio_frontend
+    restart: always
     depends_on:
       - backend
     networks:

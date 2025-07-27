@@ -1,4 +1,3 @@
-
 # Stage 1: Builder
 FROM python:3.12-slim as builder
 
@@ -20,11 +19,11 @@ RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 # Stage 2: Production image
 FROM python:3.12-slim
 
-# Set environment variables for Python
+# Set environment variables for Python and Hugging Face
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-# Add the project root to the python path
 ENV PYTHONPATH=/app
+ENV HF_HOME=/tmp/.cache/huggingface
 
 # Create a non-root user and group
 RUN groupadd -r appuser && useradd -r -g appuser appuser

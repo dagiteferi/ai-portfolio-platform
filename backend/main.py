@@ -94,6 +94,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.ai_core.agent.graph import create_chatbot_graph
+
 @app.on_event("startup")
 def startup_event():
     try:
@@ -101,8 +103,10 @@ def startup_event():
         logger.info("FAISS vector store updated at startup.")
         app.state.profile = faiss_manager.profile_data
         logger.info("Profile data loaded at startup.")
+        app.state.graph = create_chatbot_graph()
+        logger.info("Chatbot graph created and cached at startup.")
     except Exception as e:
-        logger.error("Failed to update FAISS at startup", error=str(e))
+        logger.error("Failed to complete startup tasks", error=str(e))
 
 try:
     app.include_router(chat_router, prefix="/api")

@@ -17,3 +17,5 @@ langchain-huggingface
 pandas
 structlog
 sentry-sdk[fastapi]
+bleach
+pip-tools
