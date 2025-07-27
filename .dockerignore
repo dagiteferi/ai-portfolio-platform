@@ -1,0 +1,78 @@
+# --- System & Editor Files ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# --- Python ---
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Pytest cache
+.pytest_cache/
+
+# --- Node.js ---
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/build/
+frontend/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development.local
+
+# --- Docker ---
+docker-compose.override.yml
+*.pid
+*.seed
+
+# --- Project-specific ---
+# Secrets & Environment
+.env
+
+# Logs
+logs/
+*.log
+
+# Databases
+*.sqlite3
+*.db
+
+# Data & Knowledge Base (DO NOT COMMIT SENSITIVE DATA)
+backend/data/
+github_knowledge_base.json
+personal_knowledge_base.json
+resume.pdf
+
+# Test reports
+coverage/
+
+# User-specific/temp
+description.md
+run backend.txt
+assets/
