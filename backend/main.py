@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
+from backend.api.endpoints.admin import router as admin_router
+from backend.api.endpoints.knowledge import router as knowledge_router
 from backend.vector_db.faiss_manager import faiss_manager
 
 import uvicorn
@@ -92,6 +94,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.ai_core.agent.graph import create_chatbot_graph
+
 @app.on_event("startup")
 def startup_event():
     try:
@@ -99,14 +103,18 @@ def startup_event():
         logger.info("FAISS vector store updated at startup.")
         app.state.profile = faiss_manager.profile_data
         logger.info("Profile data loaded at startup.")
+        app.state.graph = create_chatbot_graph()
+        logger.info("Chatbot graph created and cached at startup.")
     except Exception as e:
-        logger.error("Failed to update FAISS at startup", error=str(e))
+        logger.error("Failed to complete startup tasks", error=str(e))
 
 try:
     app.include_router(chat_router, prefix="/api")
-    logger.info("Chat router included successfully")
+    app.include_router(admin_router, prefix="/api")
+    app.include_router(knowledge_router, prefix="/api")
+    logger.info("Chat, Admin, and Knowledge routers included successfully")
 except Exception as e:
-    logger.error("Failed to include chat router", error=str(e))
+    logger.error("Failed to include routers", error=str(e))
     raise
 
 @app.get("/health")

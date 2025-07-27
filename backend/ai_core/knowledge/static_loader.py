@@ -13,7 +13,7 @@ def load_static_content() -> tuple[List[Document], Dict]:
     """
     documents = []
     profile_data = {}
-    knowledge_dir = "/home/dagi/Documents/ai-portfolio-platform/backend/ai_core/knowledge"
+    knowledge_dir = "backend/ai_core/knowledge"
 
     for filename in os.listdir(knowledge_dir):
         if filename.endswith(".json"):

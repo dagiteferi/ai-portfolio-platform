@@ -31,7 +31,7 @@ const isTransientError = (error: AxiosError): boolean => {
 
 // Create a single, configured axios instance for the entire application.
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.REACT_APP_BACKEND_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -49,15 +49,17 @@ apiClient.interceptors.request.use(
     // Store start time for response interceptor
     config.headers['x-request-start-time'] = startTime;
 
-    console.log(
-      JSON.stringify({
-        level: 'info',
-        message: `API Request Started: ${config.method?.toUpperCase()} ${config.url}`,
-        timestamp: new Date().toISOString(),
-        method: config.method?.toUpperCase(),
-        url: config.url,
-      })
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        JSON.stringify({
+          level: 'info',
+          message: `API Request Started: ${config.method?.toUpperCase()} ${config.url}`,
+          timestamp: new Date().toISOString(),
+          method: config.method?.toUpperCase(),
+          url: config.url,
+        })
+      );
+    }
     // For example, you could retrieve a token from localStorage here.
     // const token = localStorage.getItem('authToken');
     // if (token) {
@@ -66,15 +68,17 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error(
-      JSON.stringify({
-        level: 'error',
-        message: 'API Request Error',
-        timestamp: new Date().toISOString(),
-        error: error.message,
-        stack: error.stack,
-      })
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'API Request Error',
+          timestamp: new Date().toISOString(),
+          error: error.message,
+          stack: error.stack,
+        })
+      );
+    }
     return Promise.reject(error);
   }
 );
@@ -86,17 +90,19 @@ apiClient.interceptors.response.use(
     const startTime = response.config.headers['x-request-start-time'] as number;
     const duration = performance.now() - startTime;
 
-    console.log(
-      JSON.stringify({
-        level: 'info',
-        message: `API Request Succeeded: ${response.config.method?.toUpperCase()} ${response.config.url}`,
-        timestamp: new Date().toISOString(),
-        method: response.config.method?.toUpperCase(),
-        url: response.config.url,
-        status: response.status,
-        durationMs: duration.toFixed(2),
-      })
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        JSON.stringify({
+          level: 'info',
+          message: `API Request Succeeded: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+          timestamp: new Date().toISOString(),
+          method: response.config.method?.toUpperCase(),
+          url: response.config.url,
+          status: response.status,
+          durationMs: duration.toFixed(2),
+        })
+      );
+    }
     return response.data;
   },
   async (error: AxiosError<ErrorResponse>) => {
@@ -109,64 +115,74 @@ apiClient.interceptors.response.use(
     if (isTransientError(error) && config._retryCount < MAX_RETRIES) {
       config._retryCount++;
       const delayMs = RETRY_DELAY_MS * Math.pow(2, config._retryCount - 1); // Exponential backoff
-      console.warn(
-        JSON.stringify({
-          level: 'warn',
-          message: `Transient API Error: Retrying ${config.method?.toUpperCase()} ${config.url} (Attempt ${config._retryCount}/${MAX_RETRIES})`,
-          timestamp: new Date().toISOString(),
-          method: config.method?.toUpperCase(),
-          url: config.url,
-          status: error.response?.status,
-          error: error.message,
-          retryDelayMs: delayMs,
-        })
-      );
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          JSON.stringify({
+            level: 'warn',
+            message: `Transient API Error: Retrying ${config.method?.toUpperCase()} ${config.url} (Attempt ${config._retryCount}/${MAX_RETRIES})`,
+            timestamp: new Date().toISOString(),
+            method: config.method?.toUpperCase(),
+            url: config.url,
+            status: error.response?.status,
+            error: error.message,
+            retryDelayMs: delayMs,
+          })
+        );
+      }
       await delay(delayMs);
       return apiClient(config); // Retry the request
     }
 
     // Log final error after retries or for non-transient errors
+    if (process.env.NODE_ENV !== 'production') {
+      if (error.response) {
+        console.error(
+          JSON.stringify({
+            level: 'error',
+            message: 'API Error Response',
+            timestamp: new Date().toISOString(),
+            method: error.config?.method?.toUpperCase(),
+            url: error.config?.url,
+            status: error.response.status,
+            data: error.response.data,
+            durationMs: duration.toFixed(2),
+            error: error.message,
+            stack: error.stack,
+          })
+        );
+      } else if (error.request) {
+        console.error(
+          JSON.stringify({
+            level: 'error',
+            message: 'Network Error: No response received',
+            timestamp: new Date().toISOString(),
+            method: error.config?.method?.toUpperCase(),
+            url: error.config?.url,
+            durationMs: duration.toFixed(2),
+            error: error.message,
+            stack: error.stack,
+          })
+        );
+      } else {
+        console.error(
+          JSON.stringify({
+            level: 'error',
+            message: 'Error setting up request',
+            timestamp: new Date().toISOString(),
+            error: error.message,
+            stack: error.stack,
+          })
+        );
+      }
+    }
     if (error.response) {
-      console.error(
-        JSON.stringify({
-          level: 'error',
-          message: 'API Error Response',
-          timestamp: new Date().toISOString(),
-          method: error.config?.method?.toUpperCase(),
-          url: error.config?.url,
-          status: error.response.status,
-          data: error.response.data,
-          durationMs: duration.toFixed(2),
-          error: error.message,
-          stack: error.stack,
-        })
-      );
-      return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
-    } else if (error.request) {
-      console.error(
-        JSON.stringify({
-          level: 'error',
-          message: 'Network Error: No response received',
-          timestamp: new Date().toISOString(),
-          method: error.config?.method?.toUpperCase(),
-          url: error.config?.url,
-          durationMs: duration.toFixed(2),
-          error: error.message,
-          stack: error.stack,
-        })
-      );
-      return Promise.reject(new Error('Network error: Please check your connection.'));
-    } else {
-      console.error(
-        JSON.stringify({
-          level: 'error',
-          message: 'Error setting up request',
-          timestamp: new Date().toISOString(),
-          error: error.message,
-          stack: error.stack,
-        })
-      );
-      return Promise.reject(new Error(error.message));
+        return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
+    }
+     else if (error.request) {
+        return Promise.reject(new Error('Network error: Please check your connection.'));
+    }
+    else {
+        return Promise.reject(new Error(error.message));
     }
   }
 );

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Bot, User } from 'lucide-react';
+import { useSimulatedStream } from '../../hooks/useSimulatedStream';
 
 interface MessageBubbleProps {
   message: {
@@ -11,6 +12,16 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+  const { displayedText, start } = useSimulatedStream(message.text, 50);
+
+  useEffect(() => {
+    if (message.sender === 'bot') {
+      start();
+    }
+  }, [message.text, message.sender, start]);
+
+  const textToShow = message.sender === 'user' ? message.text : displayedText;
+
   return (
     <div
       key={message.id}
@@ -25,7 +36,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
         </div>
         <div className={`chat-bubble ${message.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-bot'}`}>
-          <p className="text-sm">{message.text}</p>
+          <p className="text-sm">{textToShow}</p>
           <span className="text-xs opacity-70 mt-1 block">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
