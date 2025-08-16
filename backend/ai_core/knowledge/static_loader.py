@@ -92,6 +92,9 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                     if "comment" in items:
                                         book_content += f" (Comment: {items['comment']})"
                                     documents.append(Document(page_content=book_content, metadata={"source": "personal_knowledge", "type": interest_type}))
+                                elif interest_type == "friends" and isinstance(items, list):
+                                    for friend in items:
+                                        documents.append(Document(page_content=f"Friend: {friend.get('name')}, Relationship: {friend.get('relationship')}", metadata={"source": "personal_knowledge", "type": "friend"}))
                                 elif isinstance(items, list):
                                     for item in items:
                                         documents.append(Document(page_content=f"Personal Interest ({interest_type}): {json.dumps(item)}", metadata={"source": "personal_knowledge", "type": interest_type}))
