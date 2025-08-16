@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Bot, User } from 'lucide-react';
 import { useSimulatedStream } from '../../hooks/useSimulatedStream';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageBubbleProps {
   message: {
@@ -36,7 +37,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
         </div>
         <div className={`chat-bubble ${message.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-bot'}`}>
-          <p className="text-sm">{textToShow}</p>
+          <ReactMarkdown className="text-sm">{textToShow}</ReactMarkdown>
           <span className="text-xs opacity-70 mt-1 block">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>

@@ -7,6 +7,13 @@ from backend.config import LLM_TEMPERATURE
 
 logger = logging.getLogger(__name__)
 
+def format_links(text: str) -> str:
+    """
+    Finds URLs in a string and formats them as Markdown links.
+    """
+    url_pattern = re.compile(r'(https?://[\S]+)')
+    return url_pattern.sub(r'[\1](\1)', text)
+
 def generate_ai_response(state: Dict) -> Dict:
     """
     Generates a response using the Gemini model based on the user's input, role, and retrieved context.
@@ -26,7 +33,7 @@ def generate_ai_response(state: Dict) -> Dict:
         gemini = GeminiClient(temperature=LLM_TEMPERATURE)
 
         response_text = gemini.generate_response(system_prompt, history, user_input)
-        state["response"] = response_text
+        state["response"] = format_links(response_text)
         
         logger.info(f"Generated response for {user_name}: {response_text[:100]}...")
 
