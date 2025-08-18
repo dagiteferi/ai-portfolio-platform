@@ -15,7 +15,7 @@ def generate_sub_queries(query: str) -> List[str]:
     Uses the LLM to decompose a complex query into a list of simpler sub-queries.
     """
     prompt = f"""
-    You are an expert at query decomposition. Your task is to break down a complex user question about a person named Dagmawi Teferi into 1 to 3 simple, self-contained search queries. These queries will be used to retrieve relevant documents from a vector database containing his professional and personal information. The output MUST be a JSON-formatted list of strings.
+    You are an expert at query decomposition. Your task is to break down a complex user question about a person named Dagmawi Teferi into 1 to 3 simple, self-contained search queries. These queries will be used to retrieve relevant documents from a vector database containing his professional and personal information, including details about his friends, family, and personal interests. The output MUST be a JSON-formatted list of strings.
 
     User Question: "{query}"
 
@@ -56,6 +56,8 @@ def get_metadata_filter(query: str) -> Optional[Dict]:
         return {"type": "skills"}
     if "experience" in query_lower or "job" in query_lower or "work" in query_lower or "role" in query_lower:
         return {"type": "experience"}
+    if "friend" in query_lower or "best friend" in query_lower or "friends" in query_lower or "relationship" in query_lower:
+        return {"type": "friend"}
     if "education" in query_lower or "degree" in query_lower or "university" in query_lower:
         return {"type": "education"}
     if "contact" in query_lower or "email" in query_lower or "reach out" in query_lower:
