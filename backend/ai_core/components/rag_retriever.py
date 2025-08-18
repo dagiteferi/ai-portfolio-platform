@@ -60,6 +60,10 @@ def get_metadata_filter(query: str) -> Optional[Dict]:
         return {"type": "friend"}
     if "education" in query_lower or "degree" in query_lower or "university" in query_lower:
         return {"type": "education"}
+    if "hobby" in query_lower or "hobbies" in query_lower or "interest" in query_lower or "interests" in query_lower:
+        return {"type": "hobbies"}
+    if "spiritual" in query_lower or "faith" in query_lower or "belief" in query_lower or "principles" in query_lower or "religion" in query_lower:
+        return {"type": "spiritual_beliefs"}
     if "contact" in query_lower or "email" in query_lower or "reach out" in query_lower:
         return {"type": "contact"}
     return None

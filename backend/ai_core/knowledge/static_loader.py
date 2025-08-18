@@ -95,12 +95,17 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                 elif interest_type == "friends" and isinstance(items, list):
                                     for friend in items:
                                         documents.append(Document(page_content=f"Friend: {friend.get('name')}, Relationship: {friend.get('relationship')}", metadata={"source": "personal_knowledge", "type": "friend"}))
-                                elif isinstance(items, list):
+                                elif isinstance(items, list): # This handles hobbies
                                     for item in items:
-                                        documents.append(Document(page_content=f"Personal Interest ({interest_type}): {json.dumps(item)}", metadata={"source": "personal_knowledge", "type": interest_type}))
-                                elif isinstance(items, dict):
+                                        documents.append(Document(page_content=f"Hobby: {item}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                elif isinstance(items, dict): # This handles spiritual_beliefs
                                     for sub_key, sub_value in items.items():
-                                        documents.append(Document(page_content=f"Personal Interest ({interest_type} - {sub_key}): {json.dumps(sub_value)}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                        # Special handling for core_principles which is a list
+                                        if sub_key == "core_principles" and isinstance(sub_value, list):
+                                            for principle in sub_value:
+                                                documents.append(Document(page_content=f"Spiritual Belief - Core Principle: {principle}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                        else:
+                                            documents.append(Document(page_content=f"Spiritual Belief - {sub_key}: {sub_value}", metadata={"source": "personal_knowledge", "type": interest_type}))
 
                         if "work_experience" in data:
                             for job in data["work_experience"]:
