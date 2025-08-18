@@ -45,7 +45,7 @@ def get_system_prompt(role: str, user_name: str = "there", retrieved_docs: List[
     if retrieved_docs:
         # Formatting the documents to be more readable for the LLM
         knowledge_base_content = "\n\n".join([
-            f"Source: {doc.metadata.get('source', 'N/A')} | Type: {doc.metadata.get('type', 'N/A')} | Is Current: {doc.metadata.get('is_current', False)}\nContent: {doc.page_content}"
+            f"--- Document Type: {doc.metadata.get('type', 'N/A')} ---\n{doc.page_content}"
             for doc in retrieved_docs
         ])
     
