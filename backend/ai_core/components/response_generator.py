@@ -33,6 +33,12 @@ def generate_ai_response(state: Dict) -> Dict:
         gemini = GeminiClient(temperature=LLM_TEMPERATURE)
 
         response_text = gemini.generate_response(system_prompt, history, user_input)
+        
+        if "[SEND_CV]" in response_text:
+            response_text = response_text.replace("[SEND_CV]", "").strip()
+            state["file_url"] = "/assets/Dagmawi Teferi's cv.pdf"
+            logger.info(f"CV request detected via token. Attaching CV url to response.")
+
         state["response"] = format_links(response_text)
         
         logger.info(f"Generated response for {user_name}: {response_text[:100]}...")

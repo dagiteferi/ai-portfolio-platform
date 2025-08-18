@@ -123,4 +123,5 @@ def load_static_content() -> tuple[List[Document], Dict]:
             except Exception as e:
                 logger.error(f"Error processing JSON file {filename}: {e}")
 
+    documents.append(Document(page_content="When user ask for my CV or resume, I will tell them that I am providing it and I will include the token [SEND_CV] in my response.", metadata={"source": "system_instruction", "type": "action"}))
     return documents, profile_data

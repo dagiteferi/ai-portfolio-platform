@@ -6,6 +6,7 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  file_url?: string;
 }
 
 // Define the structure for API error responses for consistent error handling.
@@ -200,6 +201,7 @@ export interface ChatRequestPayload {
 // Define the structure of the successful response from the chat endpoint.
 export interface ChatResponseData {
   response: string;
+  file_url?: string;
 }
 
 
