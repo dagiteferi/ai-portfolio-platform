@@ -9,19 +9,17 @@ logger = logging.getLogger(__name__)
 
 def format_links(text: str) -> str:
     """
-    Finds URLs in a string and formats them as Markdown links, avoiding URLs that are already part of a Markdown link.
+    Finds URLs and email addresses in a string and formats them as Markdown links.
     """
-    # This regex finds URLs that are not preceded by `](` (which would indicate they are already a link)
+    # Format URLs that are not already linked
     url_pattern = re.compile(r'(?<!\]\()https?://[\S]+')
-    
-    def replace_link(match):
-        url = match.group(0)
-        # Simple check to avoid double-linking
-        if f'[{url}]({url})' in text:
-            return url
-        return f'[{url}]({url})'
+    text = url_pattern.sub(r'[\g<0>](\g<0>)', text)
 
-    return url_pattern.sub(replace_link, text)
+    # Format email addresses that are not already linked
+    email_pattern = re.compile(r'(?<!\]\()[\w\.-]+@[\w\.-]+')
+    text = email_pattern.sub(r'[\g<0>](mailto:\g<0>)', text)
+    
+    return text
 
 def generate_ai_response(state: Dict) -> Dict:
     """
