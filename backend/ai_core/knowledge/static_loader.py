@@ -84,6 +84,11 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                 ))
 
                     elif filename == "personal_knowledge_base.json":
+                        if "contact" in data:
+                            contact_details = data["contact"]
+                            for medium, value in contact_details.items():
+                                documents.append(Document(page_content=f"Contact ({medium}): {value}", metadata={"source": "personal_knowledge", "type": "contact"}))
+
                         if "interests" in data:
                             for interest_type, items in data["interests"].items():
                                 if interest_type == "books" and isinstance(items, dict):
