@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react';
 import { Bot, User } from 'lucide-react';
 import { useSimulatedStream } from '../../hooks/useSimulatedStream';
+import ReactMarkdown from 'react-markdown';
+import { Message } from '../../services/api';
 
 interface MessageBubbleProps {
-  message: {
-    id: string;
-    text: string;
-    sender: 'user' | 'bot';
-    timestamp: Date;
-  };
+  message: Message;
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
@@ -36,7 +33,19 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
         </div>
         <div className={`chat-bubble ${message.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-bot'}`}>
-          <p className="text-sm">{textToShow}</p>
+          <ReactMarkdown className="text-sm">{textToShow}</ReactMarkdown>
+          {message.file_url && message.sender === 'bot' && (
+            <div className="mt-2">
+              <iframe
+                src={message.file_url}
+                title="CV"
+                className="w-full h-64 rounded-lg border"
+              ></iframe>
+              <a href={message.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline">
+                Open CV in new tab
+              </a>
+            </div>
+          )}
           <span className="text-xs opacity-70 mt-1 block">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>

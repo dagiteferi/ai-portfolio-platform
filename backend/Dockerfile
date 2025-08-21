@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY backend/requirements.txt .
 
 # Install Python dependencies
-RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt --timeout=600
 
 # Stage 2: Production image
 FROM python:3.12-slim
@@ -37,6 +37,7 @@ COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir /wheels/*
 
 # Copy the application code into a 'backend' subdirectory to preserve package structure
+COPY backend/gunicorn_config.py /app/
 COPY backend/ /app/backend/
 
 # Ensure correct permissions
@@ -44,8 +45,8 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Expose the port the FastAPI application will run on
-EXPOSE 8000
+EXPOSE 8001
 
 # Command to run the FastAPI application using Gunicorn with Uvicorn workers
 # We specify the module path for gunicorn, and run from /app
-CMD ["gunicorn", "backend.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "-c", "/app/gunicorn_config.py", "backend.main:app"]

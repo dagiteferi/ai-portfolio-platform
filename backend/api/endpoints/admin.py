@@ -44,7 +44,7 @@ async def post_content(content: str, authenticated: bool = Depends(authenticate_
 
 @router.get("/admin/logs")
 async def get_admin_logs(authenticated: bool = Depends(authenticate_admin)):
-    log_dir = "/home/dagi/Documents/ai-portfolio-platform/logs"
+    from backend.main import LOGS_DIR as log_dir
     log_files = []
     try:
         for filename in os.listdir(log_dir):

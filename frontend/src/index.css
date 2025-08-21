@@ -762,3 +762,8 @@
     scrollbar-width: none;  /* Firefox */
   }
 }
+
+.chat-bubble-bot a {
+  color: blue !important;
+  text-decoration: underline !important;
+}

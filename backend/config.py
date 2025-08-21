@@ -7,7 +7,7 @@ load_dotenv()
 
 # --- API Configuration ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-API_PORT = int(os.getenv("PORT", 8000))
+API_PORT = int(os.getenv("PORT", 8001))
 
 # --- LLM Configuration ---
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-2.0-flash")

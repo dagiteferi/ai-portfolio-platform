@@ -56,13 +56,18 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
 
         # Extract the final response
         final_response = response_state.get("response", "Sorry, I couldn't process your request.")
+        file_url = response_state.get("file_url")
         
         end_time = time.time()
         response_time = end_time - start_time
         logger.info(f"Response generated in {response_time:.2f} seconds.")
         logger.info(f"Sending response to user {chat_request.user_name}: {final_response[:100]}...")
         
-        return {"response": final_response}
+        response_payload = {"response": final_response}
+        if file_url:
+            response_payload["file_url"] = file_url
+
+        return response_payload
 
     except Exception as e:
         logger.error(f"An unexpected error occurred in the chat endpoint: {e}", exc_info=True)

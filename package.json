@@ -1,11 +1,14 @@
 {
   "devDependencies": {
-    "@types/react": "^19.1.8"
+    "@types/react": "^18.3.23"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.7.1",
     "tailwind-merge": "^3.3.1"
   }
 }

@@ -51,8 +51,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
     <div className="flex flex-col h-full bg-background">
       {/* Message List: This will grow and scroll */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <MessageBubble key={index} message={message} />
+        {messages.map((message) => (
+          <MessageBubble key={message.id} message={message} />
         ))}
         
         {isLoading && (
