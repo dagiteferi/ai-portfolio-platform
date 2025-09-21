@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, WebSocket
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 import json
+import asyncio
 from collections import defaultdict
 from typing import List, Dict, Any
 
@@ -103,3 +104,33 @@ async def get_log_file_content(
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading or parsing file: {str(e)}")
+
+@router.websocket("/admin/logs/stream/{filename}")
+async def stream_log_file(websocket: WebSocket, filename: str):
+    """
+    Streams the logs from a specific file in real-time.
+    Authentication should be handled via a token in a real-world scenario.
+    """
+    await websocket.accept()
+
+    from backend.main import LOGS_DIR as log_dir
+    file_path = os.path.join(log_dir, filename)
+
+    if not os.path.isfile(file_path):
+        await websocket.close(code=4004, reason="Log file not found")
+        return
+
+    try:
+        with open(file_path, 'r') as f:
+            # Go to the end of the file to only read new lines
+            f.seek(0, 2)
+            while True:
+                line = f.readline()
+                if not line:
+                    # No new line, wait a bit before trying again
+                    await asyncio.sleep(0.5)
+                    continue
+                await websocket.send_text(line)
+    except Exception:
+        # This will catch errors and client disconnects
+        pass # Silently close on disconnect
