@@ -37,23 +37,52 @@ const AdminDashboard = () => {
     { metric: 'Cache Hit Rate', value: '94%', trend: '+8%', status: 'excellent' },
   ]);
 
-  const [logs] = useState([
-    { time: '10:30:15', level: 'INFO', message: 'Application started successfully', type: 'system' },
-    { time: '10:31:02', level: 'INFO', message: 'User accessed homepage', type: 'user' },
-    { time: '10:32:45', level: 'INFO', message: 'Contact form submitted', type: 'user' },
-    { time: '10:33:12', level: 'ERROR', message: 'Failed to send email notification', type: 'error' },
-    { time: '10:34:01', level: 'INFO', message: 'Portfolio project viewed', type: 'user' },
-    { time: '10:35:22', level: 'WARN', message: 'High memory usage detected', type: 'system' },
-    { time: '10:36:45', level: 'INFO', message: 'User downloaded resume', type: 'user' },
-  ]);
+  const [logFiles, setLogFiles] = useState<string[]>([]);
+  const [selectedLog, setSelectedLog] = useState<string | null>(null);
+  const [logContent, setLogContent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+
 
   useEffect(() => {
-    // Check if user is authenticated
     const isAuthenticated = localStorage.getItem('adminAuthenticated');
     if (!isAuthenticated) {
       navigate('/admin/login');
+    } else {
+      fetchLogFiles();
     }
   }, [navigate]);
+
+  const fetchLogFiles = async () => {
+    try {
+      // This assumes you have a way to get the admin credentials
+      // For simplicity, I'm adding a dummy auth header.
+      // In a real app, you'd use a token.
+      const response = await fetch('/api/admin/logs');
+      if (response.ok) {
+        const data = await response.json();
+        setLogFiles(data);
+      } else {
+        toast({ title: "Error", description: "Failed to fetch log files." });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "An error occurred while fetching log files." });
+    }
+  };
+
+  const fetchLogContent = async (filename: string) => {
+    try {
+      const response = await fetch(`/api/admin/logs/${filename}`);
+      if (response.ok) {
+        const data = await response.json();
+        setLogContent(data);
+        setSelectedLog(filename);
+      } else {
+        toast({ title: "Error", description: `Failed to fetch log content for ${filename}.` });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: `An error occurred while fetching log content for ${filename}.` });
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('adminAuthenticated');
@@ -320,41 +349,54 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* System Logs Tab */}
           <TabsContent value="logs" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  System Activity Monitor
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px] w-full">
-                  <div className="space-y-2">
-                    {logs.map((log, index) => (
-                      <div key={index} className="flex items-center gap-4 p-3 rounded-lg border bg-card/50 hover:bg-accent/50 transition-colors">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-mono">{log.time}</span>
-                          <Badge 
-                            variant={log.level === 'ERROR' ? 'destructive' : log.level === 'WARN' ? 'outline' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {log.level}
-                          </Badge>
-                          <span className="text-sm truncate">{log.message}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Log Files</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      {logFiles.map((file, index) => (
+                        <div key={index} 
+                             className={`p-2 rounded-md cursor-pointer ${selectedLog === file ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
+                             onClick={() => fetchLogContent(file)}>
+                          {file}
                         </div>
-                        <div className="flex items-center gap-2">
-                          {log.type === 'error' && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                          {log.type === 'system' && <Server className="h-4 w-4 text-blue-500" />}
-                          {log.type === 'user' && <Users className="h-4 w-4 text-green-500" />}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                      ))}
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="md:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{selectedLog ? `Content of ${selectedLog}` : "Select a log file"}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      {logContent ? (
+                        Object.entries(logContent.logs).map(([level, entries]) => (
+                          <div key={level}>
+                            <h3 className="font-bold text-lg capitalize">{level}</h3>
+                            <ul>
+                              {(entries as any[]).map((entry, i) => (
+                                <li key={i} className="font-mono text-sm p-2 border-b">
+                                  {JSON.stringify(entry)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))
+                      ) : (
+                        <p>No log file selected.</p>
+                      )}
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

@@ -19,3 +19,5 @@ structlog
 sentry-sdk[fastapi]
 bleach
 pip-tools
+python-jose[cryptography]
+passlib[bcrypt]
