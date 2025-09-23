@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../ui/chart';
 import { Area, AreaChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Eye, Globe, Clock, Server, Activity } from 'lucide-react';
 

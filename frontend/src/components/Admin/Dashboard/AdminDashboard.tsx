@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Area, AreaChart, Bar, BarChart, Line, LineChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { LogOut, BarChart3, Users, Globe, Activity, TrendingUp, Eye, Clock, Shield, Server, Zap, AlertTriangle } from 'lucide-react';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import { useToast } from '../../../hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { LogOut, BarChart3, Users, TrendingUp, Shield, Zap } from 'lucide-react';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -86,10 +82,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('adminAuthenticated');
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    });
+    showToast("You have been successfully logged out", "success");
     navigate('/admin/login');
   };
 

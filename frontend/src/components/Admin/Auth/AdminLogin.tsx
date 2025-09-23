@@ -34,7 +34,7 @@ const AdminLogin = () => {
         toast({ title: "Error", description: "Invalid credentials." });
       }
     } catch (error) {
-      toast({ title: "Error", description: "An error occurred during login." });
+      showToast("An error occurred during login.", "error");
     }
   };
 

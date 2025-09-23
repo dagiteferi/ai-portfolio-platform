@@ -38,7 +38,7 @@ const LogsTab = () => {
         toast({ title: "Error", description: `Failed to fetch log content for ${filename}.` });
       }
     } catch (error) {
-      toast({ title: "Error", description: `An error occurred while fetching log content for ${filename}.` });
+      showToast(`An error occurred while fetching log content for ${filename}.`, "error");
     }
   };
 
