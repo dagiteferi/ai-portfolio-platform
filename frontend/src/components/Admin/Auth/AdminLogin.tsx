@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '../Button';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card';
+import { Input } from '../Input';
+import { useToast } from '../../../hooks/use-toast';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { showToast } = useToast();
 
   const handleLogin = async () => {
     try {
@@ -28,10 +28,10 @@ const AdminLogin = () => {
         if (data.token) {
           localStorage.setItem('adminToken', data.token);
         }
-        toast({ title: "Success", description: "Logged in successfully." });
+        showToast("Logged in successfully.", "success");
         navigate('/admin/dashboard');
       } else {
-        toast({ title: "Error", description: "Invalid credentials." });
+        showToast("Invalid credentials.", "error");
       }
     } catch (error) {
       showToast("An error occurred during login.", "error");
@@ -49,13 +49,13 @@ const AdminLogin = () => {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
           />
           <Input
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           />
           <Button onClick={handleLogin} className="w-full">Login</Button>
         </CardContent>

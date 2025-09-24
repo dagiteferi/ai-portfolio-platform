@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../../ui/card';
+import { Card, CardContent } from '../Card';
 
 const PerformanceTab = () => {
   const [performanceData] = useState([

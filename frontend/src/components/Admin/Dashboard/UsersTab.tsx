@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../ui/chart';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card';
+import { ChartContainer, ChartTooltipContent } from '../Chart';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip } from 'recharts';
 
 const UsersTab = () => {
   const [analyticsData] = useState([

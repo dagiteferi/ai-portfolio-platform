@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card';
+import { ScrollArea } from '../ScrollArea';
+import { useToast } from '../../../hooks/use-toast';
 
 const LogsTab = () => {
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [logFiles, setLogFiles] = useState<string[]>([]);
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [logContent, setLogContent] = useState<any>(null);
@@ -20,10 +20,10 @@ const LogsTab = () => {
         const data = await response.json();
         setLogFiles(data);
       } else {
-        toast({ title: "Error", description: "Failed to fetch log files." });
+        showToast("Failed to fetch log files.", "error");
       }
     } catch (error) {
-      toast({ title: "Error", description: "An error occurred while fetching log files." });
+      showToast("An error occurred while fetching log files.", "error");
     }
   };
 
@@ -35,7 +35,7 @@ const LogsTab = () => {
         setLogContent(data);
         setSelectedLog(filename);
       } else {
-        toast({ title: "Error", description: `Failed to fetch log content for ${filename}.` });
+        showToast(`Failed to fetch log content for ${filename}.`, "error");
       }
     } catch (error) {
       showToast(`An error occurred while fetching log content for ${filename}.`, "error");

@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../ui/button';
-import { Badge } from '../../ui/badge';
+import { Button } from '../Button';
+import { Badge } from '../Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs';
+import { ScrollArea } from '../ScrollArea';
+import { ChartContainer, ChartTooltipContent } from '../Chart';
 import { useToast } from '../../../hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { LogOut, BarChart3, Users, TrendingUp, Shield, Zap } from 'lucide-react';
+import { LogOut, BarChart3, Users, TrendingUp, Shield, Zap, Eye, Globe, Clock, Server, Activity } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, BarChart, Bar } from 'recharts';
+// PLACEHOLDER_CHART_IMPORT
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { showToast } = useToast();
   
   // Mock data for charts and analytics
   const [analyticsData] = useState([
@@ -58,10 +63,10 @@ const AdminDashboard = () => {
         const data = await response.json();
         setLogFiles(data);
       } else {
-        toast({ title: "Error", description: "Failed to fetch log files." });
+        showToast("Failed to fetch log files.", "error");
       }
     } catch (error) {
-      toast({ title: "Error", description: "An error occurred while fetching log files." });
+      showToast("An error occurred while fetching log files.", "error");
     }
   };
 
@@ -73,10 +78,10 @@ const AdminDashboard = () => {
         setLogContent(data);
         setSelectedLog(filename);
       } else {
-        toast({ title: "Error", description: `Failed to fetch log content for ${filename}.` });
+        showToast(`Failed to fetch log content for ${filename}.`, "error");
       }
     } catch (error) {
-      toast({ title: "Error", description: `An error occurred while fetching log content for ${filename}.` });
+      showToast(`An error occurred while fetching log content for ${filename}.`, "error");
     }
   };
 
@@ -252,7 +257,7 @@ const AdminDashboard = () => {
                           cy="50%"
                           outerRadius={80}
                           dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}%`}
+                          label={({ name, value }: { name: string; value: number }) => `${name}: ${value}%`}
                         >
                           {deviceData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />

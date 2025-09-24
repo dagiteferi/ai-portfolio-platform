@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../ui/chart';
-import { Area, AreaChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card';
+import { ChartContainer, ChartTooltipContent } from '../Chart';
+import { Area, AreaChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip } from 'recharts';
 import { Eye, Globe, Clock, Server, Activity } from 'lucide-react';
 
 const OverviewTab = () => {
