@@ -46,6 +46,7 @@
     "recharts": "^2.12.7",
     "tailwindcss": "3.3.0"
   },
+  "proxy": "http://localhost:8000",
   "browserslist": {
     "production": [
       ">0.2%",
