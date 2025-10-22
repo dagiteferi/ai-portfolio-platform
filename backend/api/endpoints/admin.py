@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, WebSocket
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
@@ -6,6 +7,7 @@ import json
 import asyncio
 from collections import defaultdict
 from typing import List, Dict, Any
+import uuid
 
 # Construct the path to the .env file in the project root
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env')
@@ -16,36 +18,59 @@ admin_password = os.getenv("ADMIN_PASSWORD")
 
 router = APIRouter()
 
+# In-memory store for active tokens (for simplicity; use a database in production)
+active_tokens: Dict[str, str] = {}
+
+# FastAPI security scheme for Bearer token
+security = HTTPBearer()
+
 class LoginRequest(BaseModel):
     username: str
     password: str
 
-def authenticate_admin(username: str, password: str):
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+def verify_admin_credentials(username: str, password: str):
     if username == admin_username and password == admin_password:
         return True
+    return False
+
+async def authenticate_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    if token in active_tokens and active_tokens[token] == admin_username: # Simple token validation
+        return True
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+@router.post("/admin/login", response_model=TokenResponse)
+async def admin_login(request: LoginRequest):
+    if verify_admin_credentials(request.username, request.password):
+        token = str(uuid.uuid4()) # Generate a simple UUID token
+        active_tokens[token] = request.username # Store token with username
+        return {"access_token": token, "token_type": "bearer"}
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-@router.post("/admin/login")
-async def admin_login(request: LoginRequest):
-    authenticate_admin(request.username, request.password)
-    return {"message": "Login successful"}
-
 @router.get("/admin/chats")
-async def get_chat_logs(authenticated: bool = Depends(authenticate_admin)):
+async def get_chat_logs(authenticated: bool = Depends(authenticate_admin_token)):
     # Placeholder for retrieving chat logs
     return {"message": "Chat logs endpoint (to be implemented)"}
 
 @router.post("/admin/content")
-async def post_content(content: str, authenticated: bool = Depends(authenticate_admin)):
+async def post_content(content: str, authenticated: bool = Depends(authenticate_admin_token)):
     # Placeholder for posting content to the website
     return {"message": f"Content '{content}' posted (to be implemented)"}
 
 @router.get("/admin/logs", response_model=List[str])
-async def list_log_files(authenticated: bool = Depends(authenticate_admin)):
+async def list_log_files(authenticated: bool = Depends(authenticate_admin_token)):
     """
     Lists all available log files.
     """
@@ -63,7 +88,7 @@ async def get_log_file_content(
     filename: str,
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    authenticated: bool = Depends(authenticate_admin)
+    authenticated: bool = Depends(authenticate_admin_token)
 ):
     """
     Retrieves content from a specific log file with pagination.
@@ -106,11 +131,17 @@ async def get_log_file_content(
         raise HTTPException(status_code=500, detail=f"Error reading or parsing file: {str(e)}")
 
 @router.websocket("/admin/logs/stream/{filename}")
-async def stream_log_file(websocket: WebSocket, filename: str):
+async def stream_log_file(websocket: WebSocket, filename: str, authenticated: bool = Depends(authenticate_admin_token)):
     """
     Streams the logs from a specific file in real-time.
     Authentication should be handled via a token in a real-world scenario.
     """
+    # The websocket connection itself doesn't directly use Depends for path operations,
+    # but we can still validate the token if passed as a query parameter or header.
+    # For simplicity, we'll assume the token is validated before establishing the connection
+    # or passed as a query param for initial validation if needed.
+    # For now, the 'authenticated' dependency is a placeholder for future robust websocket auth.
+    
     await websocket.accept()
 
     from backend.main import LOGS_DIR as log_dir

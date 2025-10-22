@@ -23,10 +23,9 @@ const AdminLogin = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('adminAuthenticated', 'true');
-        // Check if a token is returned and store it
-        if (data.token) {
-          localStorage.setItem('adminToken', data.token);
+        // Check if an access_token is returned and store it
+        if (data.access_token) {
+          localStorage.setItem('adminToken', data.access_token);
         }
         showToast("Logged in successfully.", "success");
         navigate('/admin/dashboard');

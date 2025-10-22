@@ -39,6 +39,9 @@ RUN pip install --no-cache-dir /wheels/*
 # Copy the application code into a 'backend' subdirectory to preserve package structure
 COPY backend/ /app/backend/
 
+# Create log directory so permissions can be set correctly
+RUN mkdir -p /app/logs
+
 # Ensure correct permissions
 RUN chown -R appuser:appuser /app
 USER appuser

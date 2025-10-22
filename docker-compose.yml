@@ -8,6 +8,8 @@ services:
       - "8000:8000"
     container_name: ai_portfolio_backend
     restart: always
+    volumes:
+      - log-data:/app/logs
     env_file:
       - .env
     environment:
@@ -32,3 +34,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  log-data:
