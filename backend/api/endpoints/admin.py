@@ -6,7 +6,7 @@ import os
 import json
 import asyncio
 from collections import defaultdict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import uuid
 
 # Construct the path to the .env file in the project root
@@ -325,6 +325,61 @@ async def delete_certificate(certificate_id: int, db: Session = Depends(get_db),
     return {"message": "Certificate deleted successfully"}
 
 # --- Memorable Moments ---
+# --- Memorable Moments ---
+from fastapi import Form
+from datetime import date, datetime
+
+@router.post("/admin/moments/upload", response_model=schemas.MemorableMomentResponse)
+async def upload_moment(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    date_str: Optional[str] = Form(None, alias="date"),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
+    supabase = get_supabase_client()
+    
+    # Generate a unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"moment_{uuid.uuid4()}.{file_ext}"
+    
+    # Read file content
+    content = await file.read()
+    
+    # Upload to Supabase Storage (bucket name "moments" or "images")
+    bucket_name = "images" # Assuming a generic images bucket, or specific one
+    try:
+        # Check if bucket exists, if not use a default or handle error
+        # For now assuming 'images' bucket exists. User might need to create it.
+        supabase.storage.from_(bucket_name).upload(
+            path=filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    # Parse date
+    parsed_date = None
+    if date_str:
+        try:
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            pass # Handle invalid date format if needed
+
+    db_moment = models.MemorableMoment(
+        title=title,
+        description=description,
+        date=parsed_date,
+        image_url=public_url
+    )
+    db.add(db_moment)
+    db.commit()
+    db.refresh(db_moment)
+    return db_moment
+
 @router.post("/admin/moments", response_model=schemas.MemorableMomentResponse)
 async def create_moment(moment: schemas.MemorableMomentCreate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
     db_moment = models.MemorableMoment(**moment.dict())
@@ -383,6 +438,53 @@ async def delete_experience(experience_id: int, db: Session = Depends(get_db), a
     return {"message": "Experience entry deleted successfully"}
 
 # --- Projects ---
+@router.post("/admin/projects/upload", response_model=schemas.ProjectResponse)
+async def upload_project(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    technologies: Optional[str] = Form(None),
+    project_url: Optional[str] = Form(None),
+    github_url: Optional[str] = Form(None),
+    is_featured: bool = Form(False),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
+    supabase = get_supabase_client()
+    
+    # Generate a unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"project_{uuid.uuid4()}.{file_ext}"
+    
+    # Read file content
+    content = await file.read()
+    
+    # Upload to Supabase Storage
+    bucket_name = "images" 
+    try:
+        supabase.storage.from_(bucket_name).upload(
+            path=filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    db_project = models.Project(
+        title=title,
+        description=description,
+        technologies=technologies,
+        project_url=project_url,
+        github_url=github_url,
+        is_featured=is_featured,
+        image_url=public_url
+    )
+    db.add(db_project)
+    db.commit()
+    db.refresh(db_project)
+    return db_project
+
 @router.post("/admin/projects", response_model=schemas.ProjectResponse)
 async def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
     db_project = models.Project(**project.dict())
@@ -410,3 +512,99 @@ async def delete_project(project_id: int, db: Session = Depends(get_db), authent
     db.delete(db_project)
     db.commit()
     return {"message": "Project deleted successfully"}
+
+# --- Certificates Upload ---
+@router.post("/admin/certificates/upload", response_model=schemas.CertificateResponse)
+async def upload_certificate(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    issuer: str = Form(...),
+    date_issued_str: Optional[str] = Form(None, alias="date_issued"),
+    description: Optional[str] = Form(None),
+    is_professional: bool = Form(False),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
+    supabase = get_supabase_client()
+    
+    # Generate a unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"cert_{uuid.uuid4()}.{file_ext}"
+    
+    # Read file content
+    content = await file.read()
+    
+    # Upload to Supabase Storage
+    bucket_name = "certificates" # Assuming a certificates bucket
+    try:
+        supabase.storage.from_(bucket_name).upload(
+            path=filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    # Parse date
+    parsed_date = None
+    if date_issued_str:
+        try:
+            parsed_date = datetime.strptime(date_issued_str, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+
+    db_certificate = models.Certificate(
+        title=title,
+        issuer=issuer,
+        date_issued=parsed_date,
+        description=description,
+        is_professional=is_professional,
+        url=public_url
+    )
+    db.add(db_certificate)
+    db.commit()
+    db.refresh(db_certificate)
+    return db_certificate
+
+# --- Skills Upload (Icon) ---
+@router.post("/admin/skills/upload", response_model=schemas.TechnicalSkillResponse)
+async def upload_skill(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    category: Optional[str] = Form(None),
+    proficiency: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
+    supabase = get_supabase_client()
+    
+    # Generate a unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"icon_{uuid.uuid4()}.{file_ext}"
+    
+    # Read file content
+    content = await file.read()
+    
+    # Upload to Supabase Storage
+    bucket_name = "images" 
+    try:
+        supabase.storage.from_(bucket_name).upload(
+            path=filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    db_skill = models.TechnicalSkill(
+        name=name,
+        category=category,
+        proficiency=proficiency,
+        icon=public_url
+    )
+    db.add(db_skill)
+    db.commit()
+    db.refresh(db_skill)
+    return db_skill
