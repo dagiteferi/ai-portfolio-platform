@@ -181,9 +181,42 @@ def get_object_or_404(db: Session, model, object_id: int):
     return obj
 
 # --- CV ---
-@router.post("/admin/cv", response_model=schemas.CVResponse)
-async def create_cv(cv: schemas.CVCreate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
-    db_cv = models.CV(**cv.dict())
+from fastapi import UploadFile, File
+from backend.utils.supabase_client import get_supabase_client
+
+@router.post("/admin/cv/upload", response_model=schemas.CVResponse)
+async def upload_cv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
+    supabase = get_supabase_client()
+    
+    # Generate a unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"cv_{uuid.uuid4()}.{file_ext}"
+    
+    # Read file content
+    content = await file.read()
+    
+    # Upload to Supabase Storage (bucket name "cvs")
+    # Note: Ensure the bucket "cvs" exists in your Supabase project
+    bucket_name = "cvs" 
+    try:
+        supabase.storage.from_(bucket_name).upload(
+            path=filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        # Get Public URL
+        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    # Save to Database
+    db_cv = models.CV(url=public_url)
     db.add(db_cv)
     db.commit()
     db.refresh(db_cv)
@@ -193,18 +226,13 @@ async def create_cv(cv: schemas.CVCreate, db: Session = Depends(get_db), authent
 async def get_cvs(db: Session = Depends(get_db)):
     return db.query(models.CV).all()
 
-@router.put("/admin/cv/{cv_id}", response_model=schemas.CVResponse)
-async def update_cv(cv_id: int, cv: schemas.CVUpdate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
-    db_cv = get_object_or_404(db, models.CV, cv_id)
-    for key, value in cv.dict(exclude_unset=True).items():
-        setattr(db_cv, key, value)
-    db.commit()
-    db.refresh(db_cv)
-    return db_cv
-
 @router.delete("/admin/cv/{cv_id}")
 async def delete_cv(cv_id: int, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
     db_cv = get_object_or_404(db, models.CV, cv_id)
+    
+    # Optional: Delete from Supabase Storage as well
+    # This would require parsing the filename from the URL
+    
     db.delete(db_cv)
     db.commit()
     return {"message": "CV deleted successfully"}

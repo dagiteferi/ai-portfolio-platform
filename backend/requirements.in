@@ -20,3 +20,5 @@ pip-tools
 pytest
 alembic
 psycopg2-binary
+python-multipart
+supabase
