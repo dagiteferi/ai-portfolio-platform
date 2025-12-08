@@ -199,18 +199,19 @@ async def upload_cv(
     # Read file content
     content = await file.read()
     
-    # Upload to Supabase Storage (bucket name "cvs")
-    # Note: Ensure the bucket "cvs" exists in your Supabase project
-    bucket_name = "cvs" 
+    # Upload to Supabase Storage (bucket name "documents")
+    bucket_name = "documents" 
     try:
+        # Upload with folder prefix
+        file_path = f"cvs/{filename}"
         supabase.storage.from_(bucket_name).upload(
-            path=filename,
+            path=file_path,
             file=content,
             file_options={"content-type": file.content_type}
         )
         
         # Get Public URL
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
@@ -327,14 +328,15 @@ async def update_certificate(
         file_ext = file.filename.split(".")[-1]
         filename = f"cert_{uuid.uuid4()}.{file_ext}"
         content = await file.read()
-        bucket_name = "certificates"
+        bucket_name = "documents"
         try:
+            file_path = f"certificates/{filename}"
             supabase.storage.from_(bucket_name).upload(
-                path=filename,
+                path=file_path,
                 file=content,
                 file_options={"content-type": file.content_type}
             )
-            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
             db_certificate.url = public_url
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
@@ -381,17 +383,16 @@ async def upload_moment(
     # Read file content
     content = await file.read()
     
-    # Upload to Supabase Storage (bucket name "moments" or "images")
-    bucket_name = "images" # Assuming a generic images bucket, or specific one
+    # Upload to Supabase Storage (bucket name "documents")
+    bucket_name = "documents"
     try:
-        # Check if bucket exists, if not use a default or handle error
-        # For now assuming 'images' bucket exists. User might need to create it.
+        file_path = f"images/{filename}"
         supabase.storage.from_(bucket_name).upload(
-            path=filename,
+            path=file_path,
             file=content,
             file_options={"content-type": file.content_type}
         )
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
 
@@ -443,14 +444,15 @@ async def update_moment(
         file_ext = file.filename.split(".")[-1]
         filename = f"moment_{uuid.uuid4()}.{file_ext}"
         content = await file.read()
-        bucket_name = "images"
+        bucket_name = "documents"
         try:
+            file_path = f"images/{filename}"
             supabase.storage.from_(bucket_name).upload(
-                path=filename,
+                path=file_path,
                 file=content,
                 file_options={"content-type": file.content_type}
             )
-            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
             db_moment.image_url = public_url
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
@@ -526,14 +528,15 @@ async def upload_project(
     content = await file.read()
     
     # Upload to Supabase Storage
-    bucket_name = "images" 
+    bucket_name = "documents" 
     try:
+        file_path = f"images/{filename}"
         supabase.storage.from_(bucket_name).upload(
-            path=filename,
+            path=file_path,
             file=content,
             file_options={"content-type": file.content_type}
         )
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
 
@@ -583,14 +586,15 @@ async def update_project(
         file_ext = file.filename.split(".")[-1]
         filename = f"project_{uuid.uuid4()}.{file_ext}"
         content = await file.read()
-        bucket_name = "images"
+        bucket_name = "documents"
         try:
+            file_path = f"images/{filename}"
             supabase.storage.from_(bucket_name).upload(
-                path=filename,
+                path=file_path,
                 file=content,
                 file_options={"content-type": file.content_type}
             )
-            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
             db_project.image_url = public_url
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
@@ -635,14 +639,15 @@ async def upload_certificate(
     content = await file.read()
     
     # Upload to Supabase Storage
-    bucket_name = "certificates" # Assuming a certificates bucket
+    bucket_name = "documents"
     try:
+        file_path = f"certificates/{filename}"
         supabase.storage.from_(bucket_name).upload(
-            path=filename,
+            path=file_path,
             file=content,
             file_options={"content-type": file.content_type}
         )
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
 
@@ -687,14 +692,15 @@ async def upload_skill(
     content = await file.read()
     
     # Upload to Supabase Storage
-    bucket_name = "images" 
+    bucket_name = "documents" 
     try:
+        file_path = f"images/{filename}"
         supabase.storage.from_(bucket_name).upload(
-            path=filename,
+            path=file_path,
             file=content,
             file_options={"content-type": file.content_type}
         )
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
 
