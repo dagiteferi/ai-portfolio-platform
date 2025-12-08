@@ -179,6 +179,7 @@ class WorkExperienceResponse(WorkExperienceBase):
 class ProjectBase(BaseModel):
     title: str
     description: Optional[str] = None
+    category: Optional[str] = None
     technologies: Optional[str] = None
     project_url: Optional[str] = None
     github_url: Optional[str] = None
@@ -192,6 +193,7 @@ class ProjectUpdate(BaseModel):
     """All fields optional for partial updates"""
     title: Optional[str] = None
     description: Optional[str] = None
+    category: Optional[str] = None
     technologies: Optional[str] = None
     project_url: Optional[str] = None
     github_url: Optional[str] = None

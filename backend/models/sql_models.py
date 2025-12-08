@@ -68,6 +68,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+    category = Column(String, nullable=True)  # AI/ML, Web Development, Mobile Apps, DSA, Data Solutions, Software Applications
     technologies = Column(String, nullable=True) # Comma-separated or JSON string
     project_url = Column(String, nullable=True)
     github_url = Column(String, nullable=True)

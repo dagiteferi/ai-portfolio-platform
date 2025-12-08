@@ -703,6 +703,7 @@ async def create_project(
 async def upload_project(
     file: UploadFile = File(...),
     title: str = Form(...),
+    category: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     technologies: Optional[str] = Form(None),
     project_url: Optional[str] = Form(None),
@@ -716,6 +717,7 @@ async def upload_project(
     
     db_project = models.Project(
         title=title,
+        category=category,
         description=description,
         technologies=technologies,
         project_url=project_url,
@@ -736,11 +738,75 @@ async def get_projects(db: Session = Depends(get_db)):
     return db.query(models.Project).all()
 
 
+@router.get("/admin/projects/stats")
+async def get_project_stats(db: Session = Depends(get_db)):
+    """
+    Get project statistics by category.
+    Returns total count and count per category.
+    """
+    from sqlalchemy import func
+    
+    # Get total count
+    total = db.query(func.count(models.Project.id)).scalar()
+    
+    # Get count by category
+    category_counts = db.query(
+        models.Project.category,
+        func.count(models.Project.id).label('count')
+    ).group_by(models.Project.category).all()
+    
+    # Format response
+    stats = {
+        "total": total,
+        "by_category": {}
+    }
+    
+    for category, count in category_counts:
+        category_name = category if category else "Uncategorized"
+        stats["by_category"][category_name] = count
+    
+    return stats
+
+
+@router.get("/admin/projects/category/{category}", response_model=List[schemas.ProjectResponse])
+async def get_projects_by_category(
+    category: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Get projects by category.
+    
+    Categories:
+    - AI/ML
+    - Web Development
+    - Mobile Apps
+    - DSA
+    - Data Solutions
+    - Software Applications
+    - All (returns all projects)
+    """
+    if category.lower() == "all":
+        return db.query(models.Project).all()
+    
+    return db.query(models.Project).filter(
+        models.Project.category == category
+    ).all()
+
+
+@router.get("/admin/projects/featured", response_model=List[schemas.ProjectResponse])
+async def get_featured_projects(db: Session = Depends(get_db)):
+    """Get only featured projects."""
+    return db.query(models.Project).filter(
+        models.Project.is_featured == True
+    ).all()
+
+
 @router.put("/admin/projects/{project_id}", response_model=schemas.ProjectResponse)
 async def update_project(
     project_id: int,
     file: Optional[UploadFile] = File(None),
     title: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     technologies: Optional[str] = Form(None),
     project_url: Optional[str] = Form(None),
@@ -771,6 +837,8 @@ async def update_project(
     # Update other fields only if they have meaningful values
     if should_update(title):
         db_project.title = title
+    if should_update(category):
+        db_project.category = category
     if should_update(description):
         db_project.description = description
     if should_update(technologies):
