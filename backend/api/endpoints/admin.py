@@ -453,20 +453,29 @@ async def update_certificate(
     """
     db_certificate = get_object_or_404(db, models.Certificate, certificate_id)
     
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+    
     # Upload new file if provided
     if file:
         db_certificate.url = await FileUploadService.upload_certificate(file)
     
-    # Update other fields
-    if title is not None:
+    # Update other fields only if they have meaningful values
+    if should_update(title):
         db_certificate.title = title
-    if issuer is not None:
+    if should_update(issuer):
         db_certificate.issuer = issuer
-    if description is not None:
+    if should_update(description):
         db_certificate.description = description
     if is_professional is not None:
         db_certificate.is_professional = is_professional
-    if date_issued_str is not None:
+    if should_update(date_issued_str):
         try:
             db_certificate.date_issued = datetime.strptime(date_issued_str, "%Y-%m-%d").date()
         except ValueError:
@@ -566,16 +575,25 @@ async def update_moment(
     """
     db_moment = get_object_or_404(db, models.MemorableMoment, moment_id)
     
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+    
     # Upload new image if provided
     if file:
         db_moment.image_url = await FileUploadService.upload_image(file, "moment_")
     
-    # Update other fields
-    if title is not None:
+    # Update other fields only if they have meaningful values
+    if should_update(title):
         db_moment.title = title
-    if description is not None:
+    if should_update(description):
         db_moment.description = description
-    if date_str is not None:
+    if should_update(date_str):
         try:
             db_moment.date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
@@ -737,20 +755,29 @@ async def update_project(
     """
     db_project = get_object_or_404(db, models.Project, project_id)
     
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+    
     # Upload new image if provided
     if file:
         db_project.image_url = await FileUploadService.upload_image(file, "project_")
     
-    # Update other fields
-    if title is not None:
+    # Update other fields only if they have meaningful values
+    if should_update(title):
         db_project.title = title
-    if description is not None:
+    if should_update(description):
         db_project.description = description
-    if technologies is not None:
+    if should_update(technologies):
         db_project.technologies = technologies
-    if project_url is not None:
+    if should_update(project_url):
         db_project.project_url = project_url
-    if github_url is not None:
+    if should_update(github_url):
         db_project.github_url = github_url
     if is_featured is not None:
         db_project.is_featured = is_featured
