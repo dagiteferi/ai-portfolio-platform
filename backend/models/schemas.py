@@ -2,15 +2,19 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 
-# Shared properties
+# ============================================================================
+# CV Schemas
+# ============================================================================
+
 class CVBase(BaseModel):
     url: str
 
 class CVCreate(CVBase):
     pass
 
-class CVUpdate(CVBase):
-    pass
+class CVUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    url: Optional[str] = None
 
 class CVResponse(CVBase):
     id: int
@@ -19,6 +23,11 @@ class CVResponse(CVBase):
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Technical Skill Schemas
+# ============================================================================
 
 class TechnicalSkillBase(BaseModel):
     name: str
@@ -29,14 +38,23 @@ class TechnicalSkillBase(BaseModel):
 class TechnicalSkillCreate(TechnicalSkillBase):
     pass
 
-class TechnicalSkillUpdate(TechnicalSkillBase):
-    pass
+class TechnicalSkillUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    name: Optional[str] = None
+    category: Optional[str] = None
+    proficiency: Optional[str] = None
+    icon: Optional[str] = None
 
 class TechnicalSkillResponse(TechnicalSkillBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Education Schemas
+# ============================================================================
 
 class EducationBase(BaseModel):
     degree: str
@@ -48,14 +66,24 @@ class EducationBase(BaseModel):
 class EducationCreate(EducationBase):
     pass
 
-class EducationUpdate(EducationBase):
-    pass
+class EducationUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    degree: Optional[str] = None
+    institution: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    description: Optional[str] = None
 
 class EducationResponse(EducationBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Certificate Schemas
+# ============================================================================
 
 class CertificateBase(BaseModel):
     title: str
@@ -68,14 +96,25 @@ class CertificateBase(BaseModel):
 class CertificateCreate(CertificateBase):
     pass
 
-class CertificateUpdate(CertificateBase):
-    pass
+class CertificateUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    title: Optional[str] = None
+    issuer: Optional[str] = None
+    date_issued: Optional[date] = None
+    url: Optional[str] = None
+    description: Optional[str] = None
+    is_professional: Optional[bool] = None
 
 class CertificateResponse(CertificateBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Memorable Moment Schemas
+# ============================================================================
 
 class MemorableMomentBase(BaseModel):
     title: str
@@ -86,14 +125,23 @@ class MemorableMomentBase(BaseModel):
 class MemorableMomentCreate(MemorableMomentBase):
     pass
 
-class MemorableMomentUpdate(MemorableMomentBase):
-    pass
+class MemorableMomentUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[date] = None
+    image_url: Optional[str] = None
 
 class MemorableMomentResponse(MemorableMomentBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Work Experience Schemas
+# ============================================================================
 
 class WorkExperienceBase(BaseModel):
     title: str
@@ -107,14 +155,26 @@ class WorkExperienceBase(BaseModel):
 class WorkExperienceCreate(WorkExperienceBase):
     pass
 
-class WorkExperienceUpdate(WorkExperienceBase):
-    pass
+class WorkExperienceUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    title: Optional[str] = None
+    company: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    is_current: Optional[bool] = None
+    description: Optional[str] = None
+    location: Optional[str] = None
 
 class WorkExperienceResponse(WorkExperienceBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Project Schemas
+# ============================================================================
 
 class ProjectBase(BaseModel):
     title: str
@@ -128,8 +188,15 @@ class ProjectBase(BaseModel):
 class ProjectCreate(ProjectBase):
     pass
 
-class ProjectUpdate(ProjectBase):
-    pass
+class ProjectUpdate(BaseModel):
+    """All fields optional for partial updates"""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    technologies: Optional[str] = None
+    project_url: Optional[str] = None
+    github_url: Optional[str] = None
+    image_url: Optional[str] = None
+    is_featured: Optional[bool] = None
 
 class ProjectResponse(ProjectBase):
     id: int
