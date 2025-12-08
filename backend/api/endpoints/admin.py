@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query, WebSocket
+from fastapi import APIRouter, Depends, HTTPException, status, Query, WebSocket, UploadFile, File, Form
+from datetime import date, datetime
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -181,7 +182,6 @@ def get_object_or_404(db: Session, model, object_id: int):
     return obj
 
 # --- CV ---
-from fastapi import UploadFile, File
 from backend.utils.supabase_client import get_supabase_client
 
 @router.post("/admin/cv/upload", response_model=schemas.CVResponse)
@@ -309,10 +309,46 @@ async def get_certificates(db: Session = Depends(get_db)):
     return db.query(models.Certificate).all()
 
 @router.put("/admin/certificates/{certificate_id}", response_model=schemas.CertificateResponse)
-async def update_certificate(certificate_id: int, certificate: schemas.CertificateUpdate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
+async def update_certificate(
+    certificate_id: int,
+    file: Optional[UploadFile] = File(None),
+    title: Optional[str] = Form(None),
+    issuer: Optional[str] = Form(None),
+    date_issued_str: Optional[str] = Form(None, alias="date_issued"),
+    description: Optional[str] = Form(None),
+    is_professional: Optional[bool] = Form(None),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
     db_certificate = get_object_or_404(db, models.Certificate, certificate_id)
-    for key, value in certificate.dict(exclude_unset=True).items():
-        setattr(db_certificate, key, value)
+    
+    if file:
+        supabase = get_supabase_client()
+        file_ext = file.filename.split(".")[-1]
+        filename = f"cert_{uuid.uuid4()}.{file_ext}"
+        content = await file.read()
+        bucket_name = "certificates"
+        try:
+            supabase.storage.from_(bucket_name).upload(
+                path=filename,
+                file=content,
+                file_options={"content-type": file.content_type}
+            )
+            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            db_certificate.url = public_url
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    if title is not None: db_certificate.title = title
+    if issuer is not None: db_certificate.issuer = issuer
+    if description is not None: db_certificate.description = description
+    if is_professional is not None: db_certificate.is_professional = is_professional
+    if date_issued_str is not None:
+        try:
+            db_certificate.date_issued = datetime.strptime(date_issued_str, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+
     db.commit()
     db.refresh(db_certificate)
     return db_certificate
@@ -326,8 +362,6 @@ async def delete_certificate(certificate_id: int, db: Session = Depends(get_db),
 
 # --- Memorable Moments ---
 # --- Memorable Moments ---
-from fastapi import Form
-from datetime import date, datetime
 
 @router.post("/admin/moments/upload", response_model=schemas.MemorableMomentResponse)
 async def upload_moment(
@@ -393,10 +427,42 @@ async def get_moments(db: Session = Depends(get_db)):
     return db.query(models.MemorableMoment).all()
 
 @router.put("/admin/moments/{moment_id}", response_model=schemas.MemorableMomentResponse)
-async def update_moment(moment_id: int, moment: schemas.MemorableMomentUpdate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
+async def update_moment(
+    moment_id: int,
+    file: Optional[UploadFile] = File(None),
+    title: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    date_str: Optional[str] = Form(None, alias="date"),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
     db_moment = get_object_or_404(db, models.MemorableMoment, moment_id)
-    for key, value in moment.dict(exclude_unset=True).items():
-        setattr(db_moment, key, value)
+    
+    if file:
+        supabase = get_supabase_client()
+        file_ext = file.filename.split(".")[-1]
+        filename = f"moment_{uuid.uuid4()}.{file_ext}"
+        content = await file.read()
+        bucket_name = "images"
+        try:
+            supabase.storage.from_(bucket_name).upload(
+                path=filename,
+                file=content,
+                file_options={"content-type": file.content_type}
+            )
+            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            db_moment.image_url = public_url
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    if title is not None: db_moment.title = title
+    if description is not None: db_moment.description = description
+    if date_str is not None:
+        try:
+            db_moment.date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+
     db.commit()
     db.refresh(db_moment)
     return db_moment
@@ -498,10 +564,44 @@ async def get_projects(db: Session = Depends(get_db)):
     return db.query(models.Project).all()
 
 @router.put("/admin/projects/{project_id}", response_model=schemas.ProjectResponse)
-async def update_project(project_id: int, project: schemas.ProjectUpdate, db: Session = Depends(get_db), authenticated: bool = Depends(authenticate_admin_token)):
+async def update_project(
+    project_id: int,
+    file: Optional[UploadFile] = File(None),
+    title: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    technologies: Optional[str] = Form(None),
+    project_url: Optional[str] = Form(None),
+    github_url: Optional[str] = Form(None),
+    is_featured: Optional[bool] = Form(None),
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(authenticate_admin_token)
+):
     db_project = get_object_or_404(db, models.Project, project_id)
-    for key, value in project.dict(exclude_unset=True).items():
-        setattr(db_project, key, value)
+    
+    if file:
+        supabase = get_supabase_client()
+        file_ext = file.filename.split(".")[-1]
+        filename = f"project_{uuid.uuid4()}.{file_ext}"
+        content = await file.read()
+        bucket_name = "images"
+        try:
+            supabase.storage.from_(bucket_name).upload(
+                path=filename,
+                file=content,
+                file_options={"content-type": file.content_type}
+            )
+            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            db_project.image_url = public_url
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload to Supabase: {str(e)}")
+
+    if title is not None: db_project.title = title
+    if description is not None: db_project.description = description
+    if technologies is not None: db_project.technologies = technologies
+    if project_url is not None: db_project.project_url = project_url
+    if github_url is not None: db_project.github_url = github_url
+    if is_featured is not None: db_project.is_featured = is_featured
+
     db.commit()
     db.refresh(db_project)
     return db_project
