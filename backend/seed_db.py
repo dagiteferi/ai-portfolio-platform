@@ -189,6 +189,7 @@ def seed_data():
     projects_data = [
         {
             "title": 'ai-portfolio-platform',
+            "category": 'AI/ML',
             "description": 'Advanced prompt engineering framework for optimizing LLM outputs with visual mapping of prompt components to techniques.',
             "technologies": 'Python, Gemini API, LangChain, React, fastapi, vector Db, redis',
             "image_url": '/assets/ai portifilo.png',
@@ -198,6 +199,7 @@ def seed_data():
         },
         {
             "title": 'RENT-MANAGMENT-SYSTEM',
+            "category": 'Web Development',
             "description": 'My final year project under development.',
             "technologies": 'Python, React, FastApi, PostgrewSql',
             "image_url": '/assets/rent managent .png',
@@ -207,6 +209,7 @@ def seed_data():
         },
         {
             "title": 'Credit scoring model',
+            "category": 'AI/ML',
             "description": 'leveraging data from an eCommerce platform to enable a buy-now-pay-later service for customers.',
             "technologies": 'Python, Scikit-learn, mlops, FastAPI',
             "image_url": '/assets/Credit Risk Analyzer.png',
@@ -215,6 +218,7 @@ def seed_data():
         },
         {
             "title": 'TimeSeries-Portfolio-Optimization',
+            "category": 'AI/ML',
             "description": 'predict stock prices (TSLA, BND, SPY) using ARIMA, SARIMA, and LSTM models. It optimizes portfolios to maximize returns, minimize risks, and provides actionable insights for data-driven investment decisions.',
             "technologies": 'ARIMA, SARIMA, LSTM, python',
             "image_url": '/assets/time seri.png',
@@ -223,6 +227,7 @@ def seed_data():
         },
         {
             "title": 'brent-price-change-analysis',
+            "category": 'AI/ML',
             "description": 'to analyze Brent oil price fluctuations by detecting change points and identifying their causes using statistical modeling. This includes Bayesian methods, ARIMA, GARCH, and interactive visualizations to provide insights for investors, policymakers, and analysts.',
             "technologies": 'GARCH, ARIMA, python',
             "image_url": '/assets/Brent Oil.png',
@@ -231,6 +236,7 @@ def seed_data():
         },
         {
             "title": 'TelegramBot',
+            "category": 'Software Applications',
             "description": 'React Native fitness app with AI-powered workout recommendations and progress tracking.',
             "technologies": 'React Native, Firebase, TensorFlow Lite, Redux',
             "github_url": 'https://github.com/dagiteferi/TelegramBot',
@@ -238,6 +244,7 @@ def seed_data():
         },
         {
             "title": 'fraud-detection-models',
+            "category": 'AI/ML',
             "description": 'develop the detection of fraudulent transactions in e-commerce using advanced machine learning techniques.It involves data analysis, preprocessing, feature engineering, model building, and deployment.The project includes API with Flask, containerization with Docker, and dashboards with Dash',
             "technologies": 'Python, LIME, Dash, Flask-Api, Docker',
             "image_url": '/assets/fround detaction.png',
@@ -246,6 +253,7 @@ def seed_data():
         },
         {
             "title": 'Ethiopian-Medical-DataWarehouse',
+            "category": 'Data Solutions',
             "description": 'data warehouse for Ethiopian medical businesses by scraping data from Telegram channels. The project integrates object detection using YOLO and provides CRUD operations via FastAPI to enable comprehensive data analysis and user interaction.',
             "technologies": 'Python, postgresql, Yolo, Dpt, FastAPI, Scrapy',
             "image_url": '/assets/medical data .png',
@@ -254,6 +262,7 @@ def seed_data():
         },
         {
             "title": 'EthioMart-Amharic-NERLLM-Model',
+            "category": 'AI/ML',
             "description": 'fine-tuning Named Entity Recognition (NER) models for the Amharic language, aimed at extracting key entities such as product names, prices, and locations from Ethiopian-based e-commerce Telegram channels.Dataset Source: Telegram e-commerce channels (e.g. @mertteka)',
             "technologies": 'Python, NLP, NER, amharic languch',
             "image_url": '/assets/LLM.png',
@@ -262,6 +271,7 @@ def seed_data():
         },
         {
             "title": 'User-Overview-Engagement-and-Experience-Analysis',
+            "category": 'Data Solutions',
             "description": 'analysis of TellCo, focusing on user behavior, engagement, experience, and satisfaction. Includes data preparation, exploratory analysis, dashboard development, and predictive modeling to provide actionable insights for growth opportunities.',
             "technologies": 'Python, behavior-analysis, sfaction-analysis, Notebook',
             "image_url": '/assets/useroverview.png',
@@ -270,6 +280,7 @@ def seed_data():
         },
         {
             "title": 'sales-Prediction-model',
+            "category": 'AI/ML',
             "description": 'An end-to-end machine learning solution for forecasting sales across all stores of Rossmann Pharmaceuticals in several cities, six weeks ahead. Accurate sales predictions will assist the finance team in better planning and decision-making',
             "technologies": 'Python, flask, ML, Xgboost, sales prediction',
             "image_url": '/assets/salxe prediction.png',
@@ -278,6 +289,7 @@ def seed_data():
         },
         {
             "title": 'Spiritual-Tracker',
+            "category": 'Mobile Apps',
             "description": 'Spiritual Tracker App for Ethiopian Gospel Believers Church Overview The Spiritual Tracker App supports the spiritual journey of the Ethiopian Gospel Believers Church community. It provides daily Bible verses and devotions, a platform for prayer requests, an event calendar, and access to sermon recordings.',
             "technologies": 'Dart, Flutter, Mysql, mobile-app',
             "image_url": '/assets/spritual tracer.jpg',
@@ -286,6 +298,7 @@ def seed_data():
         },
         {
             "title": 'insurance-risk-analytics',
+            "category": 'Data Solutions',
             "description": 'Comprehensive data analytics project to optimize car insurance strategies for AlphaCare Insurance Solutions. Includes EDA, statistical modeling, and A/B testing to identify low-risk clients and enhance marketing effectiveness using historical insurance claim data.',
             "technologies": 'python, notebook',
             "github_url": 'https://github.com/dagiteferi/insurance-risk-analytics',
@@ -293,6 +306,7 @@ def seed_data():
         },
         {
             "title": 'stu-infomation',
+            "category": 'Software Applications',
             "description": 'No description provided.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/stu-infomation',
@@ -300,6 +314,7 @@ def seed_data():
         },
         {
             "title": 'solar-farm-data_analysis',
+            "category": 'Data Solutions',
             "description": 'MoonLight Energy Solutions focuses on crafting a strategic approach to enhance operational efficiency and sustainability through targeted solar investments.',
             "technologies": 'Python, Pandas, Numpy, Matplotlib, Seaborn, Streamlit',
             "image_url": '/assets/solarfarm.png',
@@ -308,6 +323,7 @@ def seed_data():
         },
         {
             "title": 'registration-software',
+            "category": 'Software Applications',
             "description": 'No description provided.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/registration-software',
@@ -315,6 +331,7 @@ def seed_data():
         },
         {
             "title": 'Calculator',
+            "category": 'Mobile Apps',
             "description": 'No description provided.',
             "technologies": 'Dart, Flutter',
             "image_url": '/assets/flutter calculater.jpg',
@@ -323,6 +340,7 @@ def seed_data():
         },
         {
             "title": 'Attendance-System',
+            "category": 'Web Development',
             "description": 'No description provided.',
             "technologies": 'HTML, CSS, JavaScript, PHP, MySQL',
             "image_url": '/assets/qr attendace.png',
@@ -331,6 +349,7 @@ def seed_data():
         },
         {
             "title": 'BinarySearchTree',
+            "category": 'DSA',
             "description": 'No description provided.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/BinarySearchTree',
@@ -338,6 +357,7 @@ def seed_data():
         },
         {
             "title": 'AVL-Tree-Implementation',
+            "category": 'DSA',
             "description": 'No description provided.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/AVL-Tree-Implementation',
@@ -345,6 +365,7 @@ def seed_data():
         },
         {
             "title": 'FIRSR-IN-FIRST-OUT',
+            "category": 'DSA',
             "description": 'No description provided.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/FIFS',
@@ -352,6 +373,7 @@ def seed_data():
         },
         {
             "title": 'Anasimos',
+            "category": 'Web Development',
             "description": 'No description provided.',
             "technologies": 'Html, css, javascript',
             "image_url": '/assets/anasimoseproject.jpeg',
@@ -360,6 +382,7 @@ def seed_data():
         },
         {
             "title": 'Search-And-Sort-Algorithms-using-c-',
+            "category": 'DSA',
             "description": 'No description provided.',
             "technologies": 'C++',
             "image_url": '/assets/search sort.jpeg',
@@ -368,6 +391,7 @@ def seed_data():
         },
         {
             "title": 'library-managment-sysem',
+            "category": 'DSA',
             "description": 'the c++ program that store , update,delete data ,sort book by name ,ISBN number, it also store the data in database.txt file',
             "technologies": 'C++',
             "image_url": '/assets/lab managment.jpeg',
