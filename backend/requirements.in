@@ -21,4 +21,6 @@ pytest
 alembic
 psycopg2-binary
 python-multipart
+pyjwt
+python-jose[cryptography]
 supabase

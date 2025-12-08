@@ -19,8 +19,13 @@ admin_password = os.getenv("ADMIN_PASSWORD")
 
 router = APIRouter()
 
-# In-memory store for active tokens (for simplicity; use a database in production)
-active_tokens: Dict[str, str] = {}
+# JWT Configuration
+from jose import JWTError, jwt
+from datetime import timedelta
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-this-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_DAYS = 30  # Token lasts 30 days
 
 # FastAPI security scheme for Bearer token
 security = HTTPBearer()
@@ -38,22 +43,45 @@ def verify_admin_credentials(username: str, password: str):
         return True
     return False
 
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    """Create a JWT token with expiration"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 async def authenticate_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token"""
     token = credentials.credentials
-    if token in active_tokens and active_tokens[token] == admin_username: # Simple token validation
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None or username != admin_username:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         return True
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid or expired token",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 @router.post("/admin/login", response_model=TokenResponse)
 async def admin_login(request: LoginRequest):
     if verify_admin_credentials(request.username, request.password):
-        token = str(uuid.uuid4()) # Generate a simple UUID token
-        active_tokens[token] = request.username # Store token with username
-        return {"access_token": token, "token_type": "bearer"}
+        access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        access_token = create_access_token(
+            data={"sub": request.username}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid credentials",
