@@ -1,14 +1,12 @@
 
 
 title: AI Portfolio Platform
-emoji: 💻
+emoji: ⚡
 colorFrom: blue
-colorTo: green
+colorTo: red
 sdk: docker
-sdk_version: '1.0'
-app_file: app.main:app
-pinned: true
-short_description: a AI Portfolio Platform
+pinned: false
+short_description: AI Portfolio Platform
 
 
 # AI Portfolio Platform
