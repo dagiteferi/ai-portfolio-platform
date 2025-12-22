@@ -1,4 +1,3 @@
-metadata
 title: AI Portfolio Platform
 emoji: 💻
 colorFrom: blue
