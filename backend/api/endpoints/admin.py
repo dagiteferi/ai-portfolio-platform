@@ -289,8 +289,14 @@ async def update_skill(
     """
     db_skill = get_object_or_404(db, models.TechnicalSkill, skill_id)
     
-    for key, value in skill.dict(exclude_unset=True).items():
-        setattr(db_skill, key, value)
+    # Get only the fields that were explicitly set in the request
+    update_data = skill.model_dump(exclude_unset=True)
+    
+    # Apply updates, but skip None values (which came from placeholder cleaning)
+    # This ensures we don't accidentally overwrite existing data with null
+    for key, value in update_data.items():
+        if value is not None:  # Only update if value is meaningful
+            setattr(db_skill, key, value)
     
     db.commit()
     db.refresh(db_skill)

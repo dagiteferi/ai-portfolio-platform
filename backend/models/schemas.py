@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import date, datetime
 
@@ -31,12 +31,23 @@ class CVResponse(CVBase):
 
 class TechnicalSkillBase(BaseModel):
     name: str
+    proficiency: str
     category: Optional[str] = None
-    proficiency: Optional[str] = None
     icon: Optional[str] = None
 
 class TechnicalSkillCreate(TechnicalSkillBase):
-    pass
+    @field_validator('category', 'icon', mode='before')
+    @classmethod
+    def clean_optional_fields(cls, v):
+        """Convert placeholder or empty strings to None"""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+            # Convert common placeholder values to None
+            if v == "" or v.lower() in ["string", "null", "none"]:
+                return None
+        return v
 
 class TechnicalSkillUpdate(BaseModel):
     """All fields optional for partial updates"""
@@ -44,6 +55,19 @@ class TechnicalSkillUpdate(BaseModel):
     category: Optional[str] = None
     proficiency: Optional[str] = None
     icon: Optional[str] = None
+    
+    @field_validator('name', 'category', 'proficiency', 'icon', mode='before')
+    @classmethod
+    def clean_optional_fields(cls, v):
+        """Convert placeholder or empty strings to None"""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+            # Convert common placeholder values to None
+            if v == "" or v.lower() in ["string", "null", "none"]:
+                return None
+        return v
 
 class TechnicalSkillResponse(TechnicalSkillBase):
     id: int
