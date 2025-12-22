@@ -1,4 +1,13 @@
-
+metadata
+title: AI Portfolio Platform
+emoji: 💻
+colorFrom: blue
+colorTo: green
+sdk: docker
+sdk_version: '1.0'
+app_file: app.main:app
+pinned: true
+short_description: a AI Portfolio Platform
 # AI Portfolio Platform
 
 <p align="center">
