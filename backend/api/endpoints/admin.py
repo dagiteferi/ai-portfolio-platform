@@ -282,13 +282,21 @@ async def update_skill(
     """
     db_skill = get_object_or_404(db, models.TechnicalSkill, skill_id)
     
-    # Get only the fields that were explicitly set in the request
-    update_data = skill.model_dump(exclude_unset=True)
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
     
-    # Apply updates, but skip None values (which came from placeholder cleaning)
-    # This ensures we don't accidentally overwrite existing data with null
-    for key, value in update_data.items():
-        if value is not None:  # Only update if value is meaningful
+    # Update only fields with meaningful values
+    for key, value in skill.dict(exclude_unset=True).items():
+        if isinstance(value, str):
+            if should_update(value):
+                setattr(db_skill, key, value)
+        else:
             setattr(db_skill, key, value)
     
     db.commit()
@@ -348,8 +356,22 @@ async def update_education(
     """
     db_education = get_object_or_404(db, models.Education, education_id)
     
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+    
+    # Update only fields with meaningful values
     for key, value in education.dict(exclude_unset=True).items():
-        setattr(db_education, key, value)
+        if isinstance(value, str):
+            if should_update(value):
+                setattr(db_education, key, value)
+        else:
+            setattr(db_education, key, value)
     
     db.commit()
     db.refresh(db_education)
@@ -651,8 +673,24 @@ async def update_experience(
     """
     db_experience = get_object_or_404(db, models.WorkExperience, experience_id)
     
+    # Helper function to check if value should be updated
+    def should_update(value):
+        """Check if value is meaningful (not None, empty string, or 'string')"""
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+    
+    # Update only fields with meaningful values
     for key, value in experience.dict(exclude_unset=True).items():
-        setattr(db_experience, key, value)
+        # For string fields, check if they're meaningful
+        if isinstance(value, str):
+            if should_update(value):
+                setattr(db_experience, key, value)
+        else:
+            # For non-string fields (dates, booleans), update directly
+            setattr(db_experience, key, value)
     
     db.commit()
     db.refresh(db_experience)
