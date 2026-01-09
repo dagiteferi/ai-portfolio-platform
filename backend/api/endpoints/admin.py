@@ -3,7 +3,7 @@ Admin API endpoints.
 Provides authentication and CRUD operations for portfolio content management.
 """
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, UploadFile, File, Form
 from pydantic import BaseModel
@@ -41,7 +41,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
-@router.post("/admin/login", response_model=TokenResponse)
+@router.post("/admin/login", response_model=TokenResponse, tags=["Authentication"])
 async def admin_login(request: LoginRequest):
     """
     Authenticate admin and return JWT token.
@@ -65,13 +65,13 @@ async def admin_login(request: LoginRequest):
 #Legacy Endpoints (Chat Logs, Content)
 
 
-@router.get("/admin/chats")
+@router.get("/admin/chats", tags=["Legacy"])
 async def get_chat_logs(authenticated: bool = Depends(require_admin)):
     """Get chat logs (placeholder for future implementation)."""
     return {"message": "Chat logs endpoint (to be implemented)"}
 
 
-@router.post("/admin/content")
+@router.post("/admin/content", tags=["Legacy"])
 async def post_content(
     content: str,
     authenticated: bool = Depends(require_admin)
@@ -83,7 +83,7 @@ async def post_content(
 #Log File Management
 
 
-@router.get("/admin/logs", response_model=List[str])
+@router.get("/admin/logs", response_model=List[str], tags=["Logs"])
 async def list_log_files(authenticated: bool = Depends(require_admin)):
     """List all available log files."""
     from backend.main import LOGS_DIR as log_dir
@@ -100,7 +100,7 @@ async def list_log_files(authenticated: bool = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=f"Error listing log files: {e}")
 
 
-@router.get("/admin/logs/{filename}")
+@router.get("/admin/logs/{filename}", tags=["Logs"])
 async def get_log_file_content(
     filename: str,
     limit: int = Query(100, ge=1, le=1000),
@@ -183,7 +183,7 @@ async def stream_log_file(websocket: WebSocket, filename: str):
 # CV Management
 
 
-@router.post("/admin/cv/upload", response_model=schemas.CVResponse)
+@router.post("/admin/cv/upload", response_model=schemas.CVResponse, tags=["CV"])
 async def upload_cv(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -200,13 +200,13 @@ async def upload_cv(
     return db_cv
 
 
-@router.get("/admin/cv", response_model=List[schemas.CVResponse])
+@router.get("/admin/cv", response_model=List[schemas.CVResponse], tags=["CV"])
 async def get_cvs(db: Session = Depends(get_db)):
     """Get all CV records."""
     return db.query(models.CV).all()
 
 
-@router.delete("/admin/cv/{cv_id}")
+@router.delete("/admin/cv/{cv_id}", tags=["CV"])
 async def delete_cv(
     cv_id: int,
     db: Session = Depends(get_db),
@@ -223,7 +223,7 @@ async def delete_cv(
 #Technical Skills Management
 
 
-@router.post("/admin/skills", response_model=schemas.TechnicalSkillResponse)
+@router.post("/admin/skills", response_model=schemas.TechnicalSkillResponse, tags=["Technical Skills"])
 async def create_skill(
     skill: schemas.TechnicalSkillCreate,
     db: Session = Depends(get_db),
@@ -238,7 +238,7 @@ async def create_skill(
     return db_skill
 
 
-@router.post("/admin/skills/upload", response_model=schemas.TechnicalSkillResponse)
+@router.post("/admin/skills/upload", response_model=schemas.TechnicalSkillResponse, tags=["Technical Skills"])
 async def upload_skill(
     file: UploadFile = File(...),
     name: str = Form(...),
@@ -263,13 +263,13 @@ async def upload_skill(
     return db_skill
 
 
-@router.get("/admin/skills", response_model=List[schemas.TechnicalSkillResponse])
+@router.get("/admin/skills", response_model=List[schemas.TechnicalSkillResponse], tags=["Technical Skills"])
 async def get_skills(db: Session = Depends(get_db)):
     """Get all technical skills."""
     return db.query(models.TechnicalSkill).all()
 
 
-@router.put("/admin/skills/{skill_id}", response_model=schemas.TechnicalSkillResponse)
+@router.put("/admin/skills/{skill_id}", response_model=schemas.TechnicalSkillResponse, tags=["Technical Skills"])
 async def update_skill(
     skill_id: int,
     skill: schemas.TechnicalSkillUpdate,
@@ -297,7 +297,7 @@ async def update_skill(
     return db_skill
 
 
-@router.delete("/admin/skills/{skill_id}")
+@router.delete("/admin/skills/{skill_id}", tags=["Technical Skills"])
 async def delete_skill(
     skill_id: int,
     db: Session = Depends(get_db),
@@ -314,7 +314,7 @@ async def delete_skill(
 # Education Management
 
 
-@router.post("/admin/education", response_model=schemas.EducationResponse)
+@router.post("/admin/education", response_model=schemas.EducationResponse, tags=["Education"])
 async def create_education(
     education: schemas.EducationCreate,
     db: Session = Depends(get_db),
@@ -329,13 +329,13 @@ async def create_education(
     return db_education
 
 
-@router.get("/admin/education", response_model=List[schemas.EducationResponse])
+@router.get("/admin/education", response_model=List[schemas.EducationResponse], tags=["Education"])
 async def get_education(db: Session = Depends(get_db)):
     """Get all education entries."""
     return db.query(models.Education).all()
 
 
-@router.put("/admin/education/{education_id}", response_model=schemas.EducationResponse)
+@router.put("/admin/education/{education_id}", response_model=schemas.EducationResponse, tags=["Education"])
 async def update_education(
     education_id: int,
     education: schemas.EducationUpdate,
@@ -357,7 +357,7 @@ async def update_education(
     return db_education
 
 
-@router.delete("/admin/education/{education_id}")
+@router.delete("/admin/education/{education_id}", tags=["Education"])
 async def delete_education(
     education_id: int,
     db: Session = Depends(get_db),
@@ -373,7 +373,7 @@ async def delete_education(
 # Certificate Management
 
 
-@router.post("/admin/certificates", response_model=schemas.CertificateResponse)
+@router.post("/admin/certificates", response_model=schemas.CertificateResponse, tags=["Certificates"])
 async def create_certificate(
     certificate: schemas.CertificateCreate,
     db: Session = Depends(get_db),
@@ -388,7 +388,7 @@ async def create_certificate(
     return db_certificate
 
 
-@router.post("/admin/certificates/upload", response_model=schemas.CertificateResponse)
+@router.post("/admin/certificates/upload", response_model=schemas.CertificateResponse, tags=["Certificates"])
 async def upload_certificate(
     file: UploadFile = File(...),
     title: str = Form(...),
@@ -425,16 +425,16 @@ async def upload_certificate(
     return db_certificate
 
 
-@router.get("/admin/certificates", response_model=List[schemas.CertificateResponse])
+@router.get("/admin/certificates", response_model=List[schemas.CertificateResponse], tags=["Certificates"])
 async def get_certificates(db: Session = Depends(get_db)):
     """Get all certificates."""
     return db.query(models.Certificate).all()
 
 
-@router.put("/admin/certificates/{certificate_id}", response_model=schemas.CertificateResponse)
+@router.put("/admin/certificates/{certificate_id}", response_model=schemas.CertificateResponse, tags=["Certificates"])
 async def update_certificate(
     certificate_id: int,
-    file: Optional[UploadFile] = File(None),
+    file: Union[UploadFile, str, None] = File(None),
     title: Optional[str] = Form(None),
     issuer: Optional[str] = Form(None),
     date_issued_str: Optional[str] = Form(None, alias="date_issued"),
@@ -458,8 +458,8 @@ async def update_certificate(
             return False
         return True
     
-    # Upload new file if provided
-    if file:
+    # Upload new file if provided (handle empty string from Swagger)
+    if file and isinstance(file, UploadFile):
         db_certificate.url = await FileUploadService.upload_certificate(file)
     
     # Update other fields only if they have meaningful values
@@ -483,7 +483,7 @@ async def update_certificate(
     return db_certificate
 
 
-@router.delete("/admin/certificates/{certificate_id}")
+@router.delete("/admin/certificates/{certificate_id}", tags=["Certificates"])
 async def delete_certificate(
     certificate_id: int,
     db: Session = Depends(get_db),
@@ -500,7 +500,7 @@ async def delete_certificate(
 #Memorable Moments Management
 
 
-@router.post("/admin/moments", response_model=schemas.MemorableMomentResponse)
+@router.post("/admin/moments", response_model=schemas.MemorableMomentResponse, tags=["Memorable Moments"])
 async def create_moment(
     moment: schemas.MemorableMomentCreate,
     db: Session = Depends(get_db),
@@ -515,7 +515,7 @@ async def create_moment(
     return db_moment
 
 
-@router.post("/admin/moments/upload", response_model=schemas.MemorableMomentResponse)
+@router.post("/admin/moments/upload", response_model=schemas.MemorableMomentResponse, tags=["Memorable Moments"])
 async def upload_moment(
     file: UploadFile = File(...),
     title: str = Form(...),
@@ -548,16 +548,16 @@ async def upload_moment(
     return db_moment
 
 
-@router.get("/admin/moments", response_model=List[schemas.MemorableMomentResponse])
+@router.get("/admin/moments", response_model=List[schemas.MemorableMomentResponse], tags=["Memorable Moments"])
 async def get_moments(db: Session = Depends(get_db)):
     """Get all memorable moments."""
     return db.query(models.MemorableMoment).all()
 
 
-@router.put("/admin/moments/{moment_id}", response_model=schemas.MemorableMomentResponse)
+@router.put("/admin/moments/{moment_id}", response_model=schemas.MemorableMomentResponse, tags=["Memorable Moments"])
 async def update_moment(
     moment_id: int,
-    file: Optional[UploadFile] = File(None),
+    file: Union[UploadFile, str, None] = File(None),
     title: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     date_str: Optional[str] = Form(None, alias="date"),
@@ -579,8 +579,8 @@ async def update_moment(
             return False
         return True
     
-    # Upload new image if provided
-    if file:
+    # Upload new image if provided (handle empty string from Swagger)
+    if file and isinstance(file, UploadFile):
         db_moment.image_url = await FileUploadService.upload_image(file, "moment_")
     
     # Update other fields only if they have meaningful values
@@ -600,7 +600,7 @@ async def update_moment(
     return db_moment
 
 
-@router.delete("/admin/moments/{moment_id}")
+@router.delete("/admin/moments/{moment_id}", tags=["Memorable Moments"])
 async def delete_moment(
     moment_id: int,
     db: Session = Depends(get_db),
@@ -617,7 +617,7 @@ async def delete_moment(
 # Work Experience Management
 
 
-@router.post("/admin/experience", response_model=schemas.WorkExperienceResponse)
+@router.post("/admin/experience", response_model=schemas.WorkExperienceResponse, tags=["Work Experience"])
 async def create_experience(
     experience: schemas.WorkExperienceCreate,
     db: Session = Depends(get_db),
@@ -632,13 +632,13 @@ async def create_experience(
     return db_experience
 
 
-@router.get("/admin/experience", response_model=List[schemas.WorkExperienceResponse])
+@router.get("/admin/experience", response_model=List[schemas.WorkExperienceResponse], tags=["Work Experience"])
 async def get_experience(db: Session = Depends(get_db)):
     """Get all work experience entries."""
     return db.query(models.WorkExperience).all()
 
 
-@router.put("/admin/experience/{experience_id}", response_model=schemas.WorkExperienceResponse)
+@router.put("/admin/experience/{experience_id}", response_model=schemas.WorkExperienceResponse, tags=["Work Experience"])
 async def update_experience(
     experience_id: int,
     experience: schemas.WorkExperienceUpdate,
@@ -660,7 +660,7 @@ async def update_experience(
     return db_experience
 
 
-@router.delete("/admin/experience/{experience_id}")
+@router.delete("/admin/experience/{experience_id}", tags=["Work Experience"])
 async def delete_experience(
     experience_id: int,
     db: Session = Depends(get_db),
@@ -677,7 +677,7 @@ async def delete_experience(
 # Project Management
 
 
-@router.post("/admin/projects", response_model=schemas.ProjectResponse)
+@router.post("/admin/projects", response_model=schemas.ProjectResponse, tags=["Projects"])
 async def create_project(
     project: schemas.ProjectCreate,
     db: Session = Depends(get_db),
@@ -692,7 +692,7 @@ async def create_project(
     return db_project
 
 
-@router.post("/admin/projects/upload", response_model=schemas.ProjectResponse)
+@router.post("/admin/projects/upload", response_model=schemas.ProjectResponse, tags=["Projects"])
 async def upload_project(
     file: UploadFile = File(...),
     title: str = Form(...),
@@ -725,13 +725,13 @@ async def upload_project(
     return db_project
 
 
-@router.get("/admin/projects", response_model=List[schemas.ProjectResponse])
+@router.get("/admin/projects", response_model=List[schemas.ProjectResponse], tags=["Projects"])
 async def get_projects(db: Session = Depends(get_db)):
     """Get all projects."""
     return db.query(models.Project).all()
 
 
-@router.get("/admin/projects/stats")
+@router.get("/admin/projects/stats", tags=["Projects"])
 async def get_project_stats(db: Session = Depends(get_db)):
     """
     Get project statistics by category.
@@ -761,7 +761,7 @@ async def get_project_stats(db: Session = Depends(get_db)):
     return stats
 
 
-@router.get("/admin/projects/category/{category}", response_model=List[schemas.ProjectResponse])
+@router.get("/admin/projects/category/{category}", response_model=List[schemas.ProjectResponse], tags=["Projects"])
 async def get_projects_by_category(
     category: str,
     db: Session = Depends(get_db)
@@ -786,7 +786,7 @@ async def get_projects_by_category(
     ).all()
 
 
-@router.get("/admin/projects/featured", response_model=List[schemas.ProjectResponse])
+@router.get("/admin/projects/featured", response_model=List[schemas.ProjectResponse], tags=["Projects"])
 async def get_featured_projects(db: Session = Depends(get_db)):
     """Get only featured projects."""
     return db.query(models.Project).filter(
@@ -794,10 +794,10 @@ async def get_featured_projects(db: Session = Depends(get_db)):
     ).all()
 
 
-@router.put("/admin/projects/{project_id}", response_model=schemas.ProjectResponse)
+@router.put("/admin/projects/{project_id}", response_model=schemas.ProjectResponse, tags=["Projects"])
 async def update_project(
     project_id: int,
-    file: Optional[UploadFile] = File(None),
+    file: Union[UploadFile, str, None] = File(None),
     title: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
@@ -823,8 +823,8 @@ async def update_project(
             return False
         return True
     
-    # Upload new image if provided
-    if file:
+    # Upload new image if provided (handle empty string from Swagger)
+    if file and isinstance(file, UploadFile):
         db_project.image_url = await FileUploadService.upload_image(file, "project_")
     
     # Update other fields only if they have meaningful values
@@ -849,7 +849,7 @@ async def update_project(
     return db_project
 
 
-@router.delete("/admin/projects/{project_id}")
+@router.delete("/admin/projects/{project_id}", tags=["Projects"])
 async def delete_project(
     project_id: int,
     db: Session = Depends(get_db),
