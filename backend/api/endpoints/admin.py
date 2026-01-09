@@ -26,11 +26,8 @@ from backend.models import schemas
 from backend.services.file_upload import FileUploadService
 
 router = APIRouter()
+#Authentication Endpoints
 
-
-# ============================================================================
-# Authentication Endpoints
-# ============================================================================
 
 class LoginRequest(BaseModel):
     """Login request schema."""
@@ -65,9 +62,8 @@ async def admin_login(request: LoginRequest):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# ============================================================================
-# Legacy Endpoints (Chat Logs, Content)
-# ============================================================================
+#Legacy Endpoints (Chat Logs, Content)
+
 
 @router.get("/admin/chats")
 async def get_chat_logs(authenticated: bool = Depends(require_admin)):
@@ -84,9 +80,8 @@ async def post_content(
     return {"message": f"Content '{content}' posted (to be implemented)"}
 
 
-# ============================================================================
-# Log File Management
-# ============================================================================
+#Log File Management
+
 
 @router.get("/admin/logs", response_model=List[str])
 async def list_log_files(authenticated: bool = Depends(require_admin)):
@@ -185,9 +180,8 @@ async def stream_log_file(websocket: WebSocket, filename: str):
         pass  # Silently close on disconnect
 
 
-# ============================================================================
 # CV Management
-# ============================================================================
+
 
 @router.post("/admin/cv/upload", response_model=schemas.CVResponse)
 async def upload_cv(
@@ -226,9 +220,8 @@ async def delete_cv(
     return {"message": "CV deleted successfully"}
 
 
-# ============================================================================
-# Technical Skills Management
-# ============================================================================
+#Technical Skills Management
+
 
 @router.post("/admin/skills", response_model=schemas.TechnicalSkillResponse)
 async def create_skill(
@@ -318,9 +311,8 @@ async def delete_skill(
     return {"message": "Skill deleted successfully"}
 
 
-# ============================================================================
 # Education Management
-# ============================================================================
+
 
 @router.post("/admin/education", response_model=schemas.EducationResponse)
 async def create_education(
@@ -378,10 +370,8 @@ async def delete_education(
     
     return {"message": "Education entry deleted successfully"}
 
-
-# ============================================================================
 # Certificate Management
-# ============================================================================
+
 
 @router.post("/admin/certificates", response_model=schemas.CertificateResponse)
 async def create_certificate(
@@ -507,9 +497,8 @@ async def delete_certificate(
     return {"message": "Certificate deleted successfully"}
 
 
-# ============================================================================
-# Memorable Moments Management
-# ============================================================================
+#Memorable Moments Management
+
 
 @router.post("/admin/moments", response_model=schemas.MemorableMomentResponse)
 async def create_moment(
@@ -625,9 +614,8 @@ async def delete_moment(
     return {"message": "Moment deleted successfully"}
 
 
-# ============================================================================
 # Work Experience Management
-# ============================================================================
+
 
 @router.post("/admin/experience", response_model=schemas.WorkExperienceResponse)
 async def create_experience(
@@ -686,9 +674,8 @@ async def delete_experience(
     return {"message": "Experience entry deleted successfully"}
 
 
-# ============================================================================
 # Project Management
-# ============================================================================
+
 
 @router.post("/admin/projects", response_model=schemas.ProjectResponse)
 async def create_project(

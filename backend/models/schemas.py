@@ -2,9 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import date, datetime
 
-# ============================================================================
-# CV Schemas
-# ============================================================================
+#CV Schemas
 
 class CVBase(BaseModel):
     url: str
@@ -25,10 +23,7 @@ class CVResponse(CVBase):
         from_attributes = True
 
 
-# ============================================================================
-# Technical Skill Schemas
-# ============================================================================
-
+#Technical Skill Schemas
 class TechnicalSkillBase(BaseModel):
     name: str
     proficiency: str
@@ -76,9 +71,7 @@ class TechnicalSkillResponse(TechnicalSkillBase):
         from_attributes = True
 
 
-# ============================================================================
 # Education Schemas
-# ============================================================================
 
 class EducationBase(BaseModel):
     degree: str
@@ -105,9 +98,7 @@ class EducationResponse(EducationBase):
         from_attributes = True
 
 
-# ============================================================================
-# Certificate Schemas
-# ============================================================================
+#Certificate Schemas
 
 class CertificateBase(BaseModel):
     title: str
@@ -136,9 +127,7 @@ class CertificateResponse(CertificateBase):
         from_attributes = True
 
 
-# ============================================================================
 # Memorable Moment Schemas
-# ============================================================================
 
 class MemorableMomentBase(BaseModel):
     title: str
@@ -163,9 +152,7 @@ class MemorableMomentResponse(MemorableMomentBase):
         from_attributes = True
 
 
-# ============================================================================
 # Work Experience Schemas
-# ============================================================================
 
 class WorkExperienceBase(BaseModel):
     title: str
@@ -196,9 +183,7 @@ class WorkExperienceResponse(WorkExperienceBase):
         from_attributes = True
 
 
-# ============================================================================
 # Project Schemas
-# ============================================================================
 
 class ProjectBase(BaseModel):
     title: str
