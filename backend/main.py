@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.endpoints.chat import router as chat_router
 from backend.api.endpoints.admin import router as admin_router
 from backend.api.endpoints.knowledge import router as knowledge_router
+from backend.api.endpoints.health import router as health_router
 from backend.vector_db.faiss_manager import faiss_manager
 
 import uvicorn
@@ -11,6 +12,11 @@ import logging
 import structlog
 import sentry_sdk
 from backend.config import API_PORT
+
+# Rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Define the logs directory
 LOGS_DIR = "logs"
@@ -86,6 +92,11 @@ logger = structlog.get_logger(__name__)
 
 app = FastAPI(title="AI Portfolio Chatbot Backend")
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(","),
@@ -109,16 +120,11 @@ def startup_event():
         logger.error("Failed to complete startup tasks", error=str(e))
 
 try:
+    app.include_router(health_router, prefix="/api")
     app.include_router(chat_router, prefix="/api")
     app.include_router(admin_router, prefix="/api")
     app.include_router(knowledge_router, prefix="/api")
-    logger.info("Chat, Admin, and Knowledge routers included successfully")
+    logger.info("All routers included successfully")
 except Exception as e:
     logger.error("Failed to include routers", error=str(e))
     raise
-
-@app.get("/health")
-async def health_check():
-    logger.info("Health check requested")
-    return {"status": "healthy"}
-
