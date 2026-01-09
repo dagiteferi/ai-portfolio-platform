@@ -40,6 +40,9 @@ RUN pip install --no-cache-dir /wheels/*
 COPY backend/gunicorn_config.py /app/
 COPY backend/ /app/backend/
 
+# Create log directory so permissions can be set correctly
+RUN mkdir -p /app/logs
+
 # Ensure correct permissions
 RUN chown -R appuser:appuser /app
 USER appuser

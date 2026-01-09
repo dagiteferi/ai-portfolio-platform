@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Pages from './components/pages/Pages';
 import SkeletonLoader from './components/Splash/SkeletonLoader';
-import AdminDashboard from './components/Admin/AdminDashboard';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,9 @@ function App() {
       ) : (
         <Router>
           <Routes>
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
             <Route path="/*" element={<Pages />} />
           </Routes>
         </Router>

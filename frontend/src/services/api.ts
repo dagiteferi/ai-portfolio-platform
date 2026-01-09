@@ -62,10 +62,10 @@ apiClient.interceptors.request.use(
       );
     }
     // For example, you could retrieve a token from localStorage here.
-    // const token = localStorage.getItem('authToken');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
