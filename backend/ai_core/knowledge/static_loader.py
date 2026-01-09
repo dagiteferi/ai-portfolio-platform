@@ -84,6 +84,11 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                 ))
 
                     elif filename == "personal_knowledge_base.json":
+                        if "contact" in data:
+                            contact_details = data["contact"]
+                            for medium, value in contact_details.items():
+                                documents.append(Document(page_content=f"Contact ({medium}): {value}", metadata={"source": "personal_knowledge", "type": "contact"}))
+
                         if "interests" in data:
                             for interest_type, items in data["interests"].items():
                                 if interest_type == "books" and isinstance(items, dict):
@@ -92,12 +97,20 @@ def load_static_content() -> tuple[List[Document], Dict]:
                                     if "comment" in items:
                                         book_content += f" (Comment: {items['comment']})"
                                     documents.append(Document(page_content=book_content, metadata={"source": "personal_knowledge", "type": interest_type}))
-                                elif isinstance(items, list):
+                                elif interest_type == "friends" and isinstance(items, list):
+                                    for friend in items:
+                                        documents.append(Document(page_content=f"Friend: {friend.get('name')}, Relationship: {friend.get('relationship')}", metadata={"source": "personal_knowledge", "type": "friend"}))
+                                elif isinstance(items, list): # This handles hobbies
                                     for item in items:
-                                        documents.append(Document(page_content=f"Personal Interest ({interest_type}): {json.dumps(item)}", metadata={"source": "personal_knowledge", "type": interest_type}))
-                                elif isinstance(items, dict):
+                                        documents.append(Document(page_content=f"Hobby: {item}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                elif isinstance(items, dict): # This handles spiritual_beliefs
                                     for sub_key, sub_value in items.items():
-                                        documents.append(Document(page_content=f"Personal Interest ({interest_type} - {sub_key}): {json.dumps(sub_value)}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                        # Special handling for core_principles which is a list
+                                        if sub_key == "core_principles" and isinstance(sub_value, list):
+                                            for principle in sub_value:
+                                                documents.append(Document(page_content=f"Spiritual Belief - Core Principle: {principle}", metadata={"source": "personal_knowledge", "type": interest_type}))
+                                        else:
+                                            documents.append(Document(page_content=f"Spiritual Belief - {sub_key}: {sub_value}", metadata={"source": "personal_knowledge", "type": interest_type}))
 
                         if "work_experience" in data:
                             for job in data["work_experience"]:
@@ -115,4 +128,5 @@ def load_static_content() -> tuple[List[Document], Dict]:
             except Exception as e:
                 logger.error(f"Error processing JSON file {filename}: {e}")
 
+    documents.append(Document(page_content="When user ask for my CV or resume, I will tell them that I am providing it and I will include the token [SEND_CV] in my response.", metadata={"source": "system_instruction", "type": "action"}))
     return documents, profile_data

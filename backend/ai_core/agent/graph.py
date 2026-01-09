@@ -1,6 +1,6 @@
 
 from langgraph.graph import StateGraph, END
-from typing import TypedDict, List, Dict
+from typing import TypedDict, List, Dict, Optional
 from backend.ai_core.agent.nodes import (
     receive_user_input,
     infer_user_role,
@@ -20,6 +20,7 @@ class AgentState(TypedDict):
     response: str
     tokens_used_in_session: int
     profile: Dict[str, str]
+    file_url: Optional[str]
 
 def create_chatbot_graph():
     """

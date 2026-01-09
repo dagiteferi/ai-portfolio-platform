@@ -79,7 +79,7 @@ export const useChat = (): UseChatReturn => {
       };
 
       const response = await sendMessageToBackend(payload);
-      const botMessage: Message = { id: Date.now().toString() + '-bot', text: response.response, sender: 'bot', timestamp: new Date() };
+      const botMessage: Message = { id: Date.now().toString() + '-bot', text: response.response, sender: 'bot', timestamp: new Date(), file_url: response.file_url };
 
       // Add the bot's response to the active conversation.
       setConversations(prev =>

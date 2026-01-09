@@ -6,6 +6,7 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  file_url?: string;
 }
 
 // Define the structure for API error responses for consistent error handling.
@@ -31,7 +32,7 @@ const isTransientError = (error: AxiosError): boolean => {
 
 // Create a single, configured axios instance for the entire application.
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_API_URL || '/api',
+  baseURL: process.env.REACT_APP_BACKEND_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -200,6 +201,7 @@ export interface ChatRequestPayload {
 // Define the structure of the successful response from the chat endpoint.
 export interface ChatResponseData {
   response: string;
+  file_url?: string;
 }
 
 

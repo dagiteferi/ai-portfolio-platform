@@ -1,4 +1,14 @@
 
+
+title: AI Portfolio Platform
+emoji: ⚡
+colorFrom: blue
+colorTo: red
+sdk: docker
+pinned: false
+short_description: AI Portfolio Platform
+
+
 # AI Portfolio Platform
 
 <p align="center">
