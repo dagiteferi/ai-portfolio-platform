@@ -3,7 +3,8 @@ import { Button } from '../../Button';
 import { Card, CardContent } from '../../Card';
 import { Input } from '../../Input';
 import { ScrollArea } from '../../ScrollArea';
-import { Plus, Search, Edit2, Trash2, MoreVertical, Loader2 } from 'lucide-react';
+import { Skeleton } from '../../Skeleton';
+import { Plus, Search, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
 interface Column<T> {
@@ -33,6 +34,11 @@ const ManagementTable = <T extends { id: string | number }>({
 }: ManagementTableProps<T>) => {
     const [searchTerm, setSearchTerm] = React.useState('');
 
+    const filteredData = data.filter(item => {
+        const searchStr = JSON.stringify(item).toLowerCase();
+        return searchStr.includes(searchTerm.toLowerCase());
+    });
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -58,7 +64,7 @@ const ManagementTable = <T extends { id: string | number }>({
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground font-medium">
-                            Total: {data.length}
+                            Total: {isLoading ? '...' : filteredData.length}
                         </span>
                     </div>
                 </div>
@@ -86,22 +92,26 @@ const ManagementTable = <T extends { id: string | number }>({
                             </thead>
                             <tbody className="divide-y divide-border bg-transparent">
                                 {isLoading ? (
-                                    <tr>
-                                        <td colSpan={columns.length + 1} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                                <p className="text-sm text-muted-foreground">Loading data...</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : data.length === 0 ? (
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <tr key={i}>
+                                            {columns.map((_, idx) => (
+                                                <td key={idx} className="px-6 py-4">
+                                                    <Skeleton className="h-4 w-full" />
+                                                </td>
+                                            ))}
+                                            <td className="px-6 py-4">
+                                                <Skeleton className="h-8 w-16 ml-auto" />
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={columns.length + 1} className="px-6 py-12 text-center">
                                             <p className="text-sm text-muted-foreground">No items found.</p>
                                         </td>
                                     </tr>
                                 ) : (
-                                    data.map((item) => (
+                                    filteredData.map((item) => (
                                         <tr key={item.id} className="hover:bg-muted/30 transition-colors group">
                                             {columns.map((col, idx) => (
                                                 <td key={idx} className={cn("px-6 py-4 whitespace-nowrap", col.className)}>

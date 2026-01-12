@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,16 +9,28 @@ import { Image as ImageIcon, Upload, X, AlertCircle } from 'lucide-react';
 import { cn } from '../../../../../lib/utils';
 
 const projectSchema = z.object({
-    title: z.string().min(2, 'Title must be at least 2 characters'),
-    category: z.string().min(2, 'Category must be at least 2 characters'),
-    description: z.string().min(10, 'Description must be at least 10 characters'),
-    technologies: z.string().min(2, 'Technologies are required'),
-    project_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-    github_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-    is_featured: z.boolean().default(false),
+    title: z.string().min(2, { message: 'Title must be at least 2 characters' }),
+    category: z.string().min(2, { message: 'Category must be at least 2 characters' }),
+    description: z.string().min(10, { message: 'Description must be at least 10 characters' }),
+    technologies: z.string().min(2, { message: 'Technologies are required' }),
+    project_url: z.string().optional().refine((val) => !val || val === "" || /^(https?:\/\/)/.test(val), {
+        message: 'Must be a valid URL',
+    }),
+    github_url: z.string().optional().refine((val) => !val || val === "" || /^(https?:\/\/)/.test(val), {
+        message: 'Must be a valid URL',
+    }),
+    is_featured: z.boolean(),
 });
 
-type ProjectFormValues = z.infer<typeof projectSchema>;
+type ProjectFormValues = {
+    title: string;
+    category: string;
+    description: string;
+    technologies: string;
+    project_url?: string;
+    github_url?: string;
+    is_featured: boolean;
+};
 
 interface ProjectFormProps {
     project?: Project;
@@ -63,7 +75,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
     const onFormSubmit = async (values: ProjectFormValues) => {
         const data = new FormData();
         Object.entries(values).forEach(([key, value]) => {
-            data.append(key, String(value));
+            if (value !== undefined && value !== null) {
+                data.append(key, String(value));
+            }
         });
         if (file) {
             data.append('file', file);
@@ -83,9 +97,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                             className={cn(errors.title && "border-destructive focus-visible:ring-destructive")}
                         />
                         {errors.title && (
-                            <p className="text-[11px] text-destructive flex items-center gap-1">
-                                <AlertCircle className="h-3 w-3" /> {errors.title.message}
-                            </p>
+                            <div className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                <span>{errors.title.message}</span>
+                            </div>
                         )}
                     </div>
                     <div className="space-y-1.5">
@@ -96,9 +111,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                             className={cn(errors.category && "border-destructive focus-visible:ring-destructive")}
                         />
                         {errors.category && (
-                            <p className="text-[11px] text-destructive flex items-center gap-1">
-                                <AlertCircle className="h-3 w-3" /> {errors.category.message}
-                            </p>
+                            <div className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                <span>{errors.category.message}</span>
+                            </div>
                         )}
                     </div>
                     <div className="space-y-1.5">
@@ -109,9 +125,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                             className={cn(errors.technologies && "border-destructive focus-visible:ring-destructive")}
                         />
                         {errors.technologies && (
-                            <p className="text-[11px] text-destructive flex items-center gap-1">
-                                <AlertCircle className="h-3 w-3" /> {errors.technologies.message}
-                            </p>
+                            <div className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                <span>{errors.technologies.message}</span>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -159,9 +176,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                     placeholder="Describe your project..."
                 />
                 {errors.description && (
-                    <p className="text-[11px] text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" /> {errors.description.message}
-                    </p>
+                    <div className="text-[11px] text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{errors.description.message}</span>
+                    </div>
                 )}
             </div>
 
@@ -174,9 +192,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                         className={cn(errors.project_url && "border-destructive focus-visible:ring-destructive")}
                     />
                     {errors.project_url && (
-                        <p className="text-[11px] text-destructive flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" /> {errors.project_url.message}
-                        </p>
+                        <div className="text-[11px] text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>{errors.project_url.message}</span>
+                        </div>
                     )}
                 </div>
                 <div className="space-y-1.5">
@@ -187,9 +206,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                         className={cn(errors.github_url && "border-destructive focus-visible:ring-destructive")}
                     />
                     {errors.github_url && (
-                        <p className="text-[11px] text-destructive flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" /> {errors.github_url.message}
-                        </p>
+                        <div className="text-[11px] text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>{errors.github_url.message}</span>
+                        </div>
                     )}
                 </div>
             </div>
