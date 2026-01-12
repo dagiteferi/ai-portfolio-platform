@@ -20,6 +20,7 @@
   "author": "Dagmawi Teferi",
   "license": "ISC",
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
@@ -32,11 +33,13 @@
     "lucide-react": "^0.525.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.71.0",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^7.7.1",
     "react-scripts": "^5.0.1",
     "react-scroll": "^1.8.9",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Project } from '../../../../../services/api';
 import { Button } from '../../../Button';
 import { Input } from '../../../Input';
-import { Image as ImageIcon, Upload, X } from 'lucide-react';
+import { Image as ImageIcon, Upload, X, AlertCircle } from 'lucide-react';
+import { cn } from '../../../../../lib/utils';
+
+const projectSchema = z.object({
+    title: z.string().min(2, 'Title must be at least 2 characters'),
+    category: z.string().min(2, 'Category must be at least 2 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters'),
+    technologies: z.string().min(2, 'Technologies are required'),
+    project_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+    github_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+    is_featured: z.boolean().default(false),
+});
+
+type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface ProjectFormProps {
     project?: Project;
@@ -12,25 +28,29 @@ interface ProjectFormProps {
 }
 
 const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, isSubmitting }) => {
-    const [formData, setFormData] = useState({
-        title: project?.title || '',
-        category: project?.category || '',
-        description: project?.description || '',
-        technologies: project?.technologies || '',
-        project_url: project?.project_url || '',
-        github_url: project?.github_url || '',
-        is_featured: project?.is_featured || false,
-    });
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(project?.image_url || null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-        }));
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch
+    } = useForm<ProjectFormValues>({
+        resolver: zodResolver(projectSchema),
+        defaultValues: {
+            title: project?.title || '',
+            category: project?.category || '',
+            description: project?.description || '',
+            technologies: project?.technologies || '',
+            project_url: project?.project_url || '',
+            github_url: project?.github_url || '',
+            is_featured: project?.is_featured || false,
+        }
+    });
+
+    const isFeatured = watch('is_featured');
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -40,10 +60,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onFormSubmit = async (values: ProjectFormValues) => {
         const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
+        Object.entries(values).forEach(([key, value]) => {
             data.append(key, String(value));
         });
         if (file) {
@@ -53,41 +72,52 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                    <div>
-                        <label className="text-sm font-medium mb-1.5 block">Project Title</label>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium block">Project Title</label>
                         <Input
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
+                            {...register('title')}
                             placeholder="e.g. AI Portfolio Platform"
-                            required
+                            className={cn(errors.title && "border-destructive focus-visible:ring-destructive")}
                         />
+                        {errors.title && (
+                            <p className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> {errors.title.message}
+                            </p>
+                        )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium mb-1.5 block">Category</label>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium block">Category</label>
                         <Input
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
+                            {...register('category')}
                             placeholder="e.g. Web Development"
+                            className={cn(errors.category && "border-destructive focus-visible:ring-destructive")}
                         />
+                        {errors.category && (
+                            <p className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> {errors.category.message}
+                            </p>
+                        )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium mb-1.5 block">Technologies (comma separated)</label>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium block">Technologies</label>
                         <Input
-                            name="technologies"
-                            value={formData.technologies}
-                            onChange={handleChange}
+                            {...register('technologies')}
                             placeholder="e.g. React, FastAPI, PostgreSQL"
+                            className={cn(errors.technologies && "border-destructive focus-visible:ring-destructive")}
                         />
+                        {errors.technologies && (
+                            <p className="text-[11px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> {errors.technologies.message}
+                            </p>
+                        )}
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                    <label className="text-sm font-medium mb-1.5 block">Project Image</label>
+                    <label className="text-sm font-medium block">Project Image</label>
                     <div className="relative group aspect-video rounded-xl border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center overflow-hidden hover:border-primary/50 transition-colors bg-muted/5">
                         {previewUrl ? (
                             <>
@@ -117,51 +147,70 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel, 
                 </div>
             </div>
 
-            <div>
-                <label className="text-sm font-medium mb-1.5 block">Description</label>
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium block">Description</label>
                 <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
+                    {...register('description')}
                     rows={4}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={cn(
+                        "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        errors.description && "border-destructive focus-visible:ring-destructive"
+                    )}
                     placeholder="Describe your project..."
                 />
+                {errors.description && (
+                    <p className="text-[11px] text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> {errors.description.message}
+                    </p>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="text-sm font-medium mb-1.5 block">Project URL</label>
+                <div className="space-y-1.5">
+                    <label className="text-sm font-medium block">Project URL</label>
                     <Input
-                        name="project_url"
-                        value={formData.project_url}
-                        onChange={handleChange}
+                        {...register('project_url')}
                         placeholder="https://example.com"
+                        className={cn(errors.project_url && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {errors.project_url && (
+                        <p className="text-[11px] text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" /> {errors.project_url.message}
+                        </p>
+                    )}
                 </div>
-                <div>
-                    <label className="text-sm font-medium mb-1.5 block">GitHub URL</label>
+                <div className="space-y-1.5">
+                    <label className="text-sm font-medium block">GitHub URL</label>
                     <Input
-                        name="github_url"
-                        value={formData.github_url}
-                        onChange={handleChange}
+                        {...register('github_url')}
                         placeholder="https://github.com/username/repo"
+                        className={cn(errors.github_url && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {errors.github_url && (
+                        <p className="text-[11px] text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" /> {errors.github_url.message}
+                        </p>
+                    )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    id="is_featured"
-                    name="is_featured"
-                    checked={formData.is_featured}
-                    onChange={handleChange}
-                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <label htmlFor="is_featured" className="text-sm font-medium">
-                    Feature this project on the homepage
-                </label>
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30 border border-muted-foreground/10">
+                <div
+                    className={cn(
+                        "w-10 h-5 rounded-full relative cursor-pointer transition-colors duration-200",
+                        isFeatured ? "bg-primary" : "bg-muted-foreground/30"
+                    )}
+                    onClick={() => setValue('is_featured', !isFeatured)}
+                >
+                    <div className={cn(
+                        "absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200",
+                        isFeatured && "translate-x-5"
+                    )} />
+                </div>
+                <div className="flex-1">
+                    <label className="text-sm font-semibold block">Featured Project</label>
+                    <p className="text-[11px] text-muted-foreground">This project will be highlighted on your homepage.</p>
+                </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
