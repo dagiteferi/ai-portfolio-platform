@@ -13,7 +13,8 @@ import {
     ChevronRight,
     BarChart3,
     Users,
-    Activity
+    Activity,
+    LogOut
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -93,10 +94,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                 })}
             </nav>
 
-            <div className="p-4 border-t">
+            <div className="p-4 border-t space-y-1">
                 <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all">
                     <Settings className="h-4 w-4" />
                     <span className="text-sm font-medium">Settings</span>
+                </button>
+                <button
+                    onClick={() => {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('adminAuthenticated');
+                        window.location.href = '/admin/login';
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-all"
+                >
+                    <LogOut className="h-4 w-4" />
+                    <span className="text-sm font-medium">Logout</span>
                 </button>
             </div>
         </aside>

@@ -20,13 +20,6 @@ const AdminDashboard = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated');
-    if (!isAuthenticated) {
-      navigate('/admin/login');
-    }
-  }, [navigate]);
-
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
