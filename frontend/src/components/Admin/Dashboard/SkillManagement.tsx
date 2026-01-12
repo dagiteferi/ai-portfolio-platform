@@ -13,11 +13,21 @@ const SkillManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const { data: skills = [], isLoading } = useQuery({
+    const MOCK_SKILLS: TechnicalSkill[] = [
+        { id: 1, name: "React", category: "Frontend", proficiency: "Expert" },
+        { id: 2, name: "Python", category: "Backend", proficiency: "Expert" },
+        { id: 3, name: "TensorFlow", category: "AI/ML", proficiency: "Advanced" },
+        { id: 4, name: "PostgreSQL", category: "Database", proficiency: "Advanced" },
+        { id: 5, name: "Docker", category: "DevOps", proficiency: "Intermediate" }
+    ];
+
+    const { data: apiSkills, isLoading } = useQuery({
         queryKey: ['admin-skills'],
         queryFn: getAdminSkills,
         staleTime: 1000 * 60 * 5,
     });
+
+    const skills = apiSkills && apiSkills.length > 0 ? apiSkills : MOCK_SKILLS;
 
     const createMutation = useMutation({
         mutationFn: (data: FormData | Partial<TechnicalSkill>) => {

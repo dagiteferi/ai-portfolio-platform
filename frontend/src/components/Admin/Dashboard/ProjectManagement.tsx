@@ -14,12 +14,43 @@ const ProjectManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
+    const MOCK_PROJECTS: Project[] = [
+        {
+            id: 1,
+            title: "AI Portfolio Platform",
+            category: "Web Development",
+            description: "A professional portfolio platform for AI/ML engineers with real-time chat and admin control.",
+            is_featured: true,
+            technologies: "React, FastAPI, PostgreSQL",
+            github_url: "https://github.com",
+            project_url: "https://example.com"
+        },
+        {
+            id: 2,
+            title: "Neural Network Visualizer",
+            category: "Data Science",
+            description: "Interactive tool to visualize neural network architectures and activation maps.",
+            is_featured: true,
+            technologies: "Python, TensorFlow, D3.js"
+        },
+        {
+            id: 3,
+            title: "Autonomous Drone Navigator",
+            category: "Robotics",
+            description: "Computer vision based navigation system for indoor autonomous drones.",
+            is_featured: false,
+            technologies: "C++, OpenCV, ROS"
+        }
+    ];
+
     // Fetch projects with TanStack Query
-    const { data: projects = [], isLoading } = useQuery({
+    const { data: apiProjects, isLoading } = useQuery({
         queryKey: ['admin-projects'],
         queryFn: getAdminProjects,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
+
+    const projects = apiProjects && apiProjects.length > 0 ? apiProjects : MOCK_PROJECTS;
 
     // Create project mutation
     const createMutation = useMutation({

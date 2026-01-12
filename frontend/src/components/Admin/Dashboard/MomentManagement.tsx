@@ -13,11 +13,30 @@ const MomentManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const { data: moments = [], isLoading } = useQuery({
+    const MOCK_MOMENTS: MemorableMoment[] = [
+        {
+            id: 1,
+            title: "First AI Model Deployment",
+            description: "Successfully deployed my first production-grade computer vision model.",
+            date: "2021-03-15",
+            image_url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=100&h=100&fit=crop"
+        },
+        {
+            id: 2,
+            title: "Hackathon Winner",
+            description: "Won first place at the National AI Innovation Hackathon.",
+            date: "2022-08-20",
+            image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=100&h=100&fit=crop"
+        }
+    ];
+
+    const { data: apiMoments, isLoading } = useQuery({
         queryKey: ['admin-moments'],
         queryFn: getAdminMoments,
         staleTime: 1000 * 60 * 5,
     });
+
+    const moments = apiMoments && apiMoments.length > 0 ? apiMoments : MOCK_MOMENTS;
 
     const createMutation = useMutation({
         mutationFn: createMoment,

@@ -14,11 +14,35 @@ const ExperienceManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const { data: experiences = [], isLoading } = useQuery({
+    const MOCK_EXPERIENCES: WorkExperience[] = [
+        {
+            id: 1,
+            company: "Tech AI Solutions",
+            position: "Senior AI Engineer",
+            location: "San Francisco, CA",
+            start_date: "2022-01",
+            is_current: true,
+            description: "Leading the development of LLM-based applications."
+        },
+        {
+            id: 2,
+            company: "Data Systems Inc",
+            position: "Machine Learning Engineer",
+            location: "Remote",
+            start_date: "2020-06",
+            end_date: "2021-12",
+            is_current: false,
+            description: "Built scalable data pipelines and predictive models."
+        }
+    ];
+
+    const { data: apiExperiences, isLoading } = useQuery({
         queryKey: ['admin-experience'],
         queryFn: getAdminExperience,
         staleTime: 1000 * 60 * 5,
     });
+
+    const experiences = apiExperiences && apiExperiences.length > 0 ? apiExperiences : MOCK_EXPERIENCES;
 
     const createMutation = useMutation({
         mutationFn: createExperience,

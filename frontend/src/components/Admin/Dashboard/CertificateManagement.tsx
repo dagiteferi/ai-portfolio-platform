@@ -14,11 +14,32 @@ const CertificateManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const { data: certificates = [], isLoading } = useQuery({
+    const MOCK_CERTIFICATES: Certificate[] = [
+        {
+            id: 1,
+            title: "AWS Certified Machine Learning - Specialty",
+            issuer: "Amazon Web Services",
+            date_issued: "2023-05",
+            is_professional: true,
+            url: "https://aws.amazon.com"
+        },
+        {
+            id: 2,
+            title: "Deep Learning Specialization",
+            issuer: "Coursera (DeepLearning.AI)",
+            date_issued: "2022-11",
+            is_professional: true,
+            url: "https://coursera.org"
+        }
+    ];
+
+    const { data: apiCertificates, isLoading } = useQuery({
         queryKey: ['admin-certificates'],
         queryFn: getAdminCertificates,
         staleTime: 1000 * 60 * 5,
     });
+
+    const certificates = apiCertificates && apiCertificates.length > 0 ? apiCertificates : MOCK_CERTIFICATES;
 
     const createMutation = useMutation({
         mutationFn: createCertificate,
