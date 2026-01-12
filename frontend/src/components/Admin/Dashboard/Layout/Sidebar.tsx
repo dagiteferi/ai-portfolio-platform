@@ -10,7 +10,10 @@ import {
     FileText,
     Terminal,
     Settings,
-    ChevronRight
+    ChevronRight,
+    BarChart3,
+    Users,
+    Activity
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -35,6 +38,9 @@ const menuItems = [
     { id: 'certificates', label: 'Certificates', icon: Award, prefetch: getAdminCertificates, queryKey: 'admin-certificates' },
     { id: 'moments', label: 'Moments', icon: Camera, prefetch: getAdminMoments, queryKey: 'admin-moments' },
     { id: 'cvs', label: 'CVs', icon: FileText },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'logs', label: 'System Logs', icon: Terminal },
 ];
 

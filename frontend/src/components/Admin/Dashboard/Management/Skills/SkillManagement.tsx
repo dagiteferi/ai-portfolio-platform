@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '../../Shared';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
 import { getAdminSkills, deleteSkill, createSkill, updateSkill, TechnicalSkill } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/Admin/Badge';

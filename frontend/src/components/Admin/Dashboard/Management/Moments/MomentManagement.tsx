@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '../../Shared';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
 import { getAdminMoments, deleteMoment, createMoment, updateMoment, MemorableMoment } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Camera } from 'lucide-react';
@@ -16,17 +16,17 @@ const MomentManagement = () => {
     const MOCK_MOMENTS: MemorableMoment[] = [
         {
             id: 1,
-            title: "First AI Model Deployment",
-            description: "Successfully deployed my first production-grade computer vision model.",
-            date: "2021-03-15",
-            image_url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=100&h=100&fit=crop"
+            title: "Speaking at AI Summit",
+            description: "Presented our research on generative models.",
+            date: "2023-08-10",
+            image_url: "https://example.com/summit.jpg"
         },
         {
             id: 2,
             title: "Hackathon Winner",
-            description: "Won first place at the National AI Innovation Hackathon.",
-            date: "2022-08-20",
-            image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=100&h=100&fit=crop"
+            description: "Won first place in the Global AI Hackathon.",
+            date: "2022-12-05",
+            image_url: "https://example.com/hackathon.jpg"
         }
     ];
 
@@ -121,10 +121,10 @@ const MomentManagement = () => {
             accessor: (item: MemorableMoment) => (
                 <div className="flex items-center gap-3">
                     {item.image_url ? (
-                        <img src={item.image_url} alt={item.title} className="h-12 w-12 rounded-md object-cover border shadow-sm" />
+                        <img src={item.image_url} alt={item.title} className="h-10 w-10 rounded-md object-cover border shadow-sm" />
                     ) : (
-                        <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center border">
-                            <Camera className="h-5 w-5 text-muted-foreground" />
+                        <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center border">
+                            <Camera className="h-4 w-4 text-muted-foreground" />
                         </div>
                     )}
                     <div>
@@ -137,7 +137,7 @@ const MomentManagement = () => {
         {
             header: 'Date',
             accessor: (item: MemorableMoment) => (
-                <span className="text-[11px] text-muted-foreground">{item.date || 'N/A'}</span>
+                <span className="text-xs text-muted-foreground">{item.date}</span>
             )
         }
     ];

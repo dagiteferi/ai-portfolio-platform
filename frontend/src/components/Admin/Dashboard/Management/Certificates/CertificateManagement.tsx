@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '../../Shared';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
 import { getAdminCertificates, deleteCertificate, createCertificate, updateCertificate, Certificate } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/Admin/Badge';
@@ -17,18 +17,18 @@ const CertificateManagement = () => {
     const MOCK_CERTIFICATES: Certificate[] = [
         {
             id: 1,
-            title: "AWS Certified Machine Learning - Specialty",
+            title: "AWS Certified Solutions Architect",
             issuer: "Amazon Web Services",
-            date_issued: "2023-05",
+            date_issued: "2023-05-15",
             is_professional: true,
             url: "https://aws.amazon.com"
         },
         {
             id: 2,
             title: "Deep Learning Specialization",
-            issuer: "Coursera (DeepLearning.AI)",
-            date_issued: "2022-11",
-            is_professional: true,
+            issuer: "Coursera",
+            date_issued: "2022-11-20",
+            is_professional: false,
             url: "https://coursera.org"
         }
     ];
@@ -42,7 +42,15 @@ const CertificateManagement = () => {
     const certificates = apiCertificates && apiCertificates.length > 0 ? apiCertificates : MOCK_CERTIFICATES;
 
     const createMutation = useMutation({
-        mutationFn: createCertificate,
+        mutationFn: (data: any) => {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+            return createCertificate(formData);
+        },
         onSuccess: (newCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? [newCert, ...old] : [newCert];
@@ -56,7 +64,15 @@ const CertificateManagement = () => {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateCertificate(id, formData),
+        mutationFn: ({ id, data }: { id: number, data: any }) => {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+            return updateCertificate(id, formData);
+        },
         onSuccess: (updatedCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? old.map(c => c.id === updatedCert.id ? updatedCert : c) : [updatedCert];
@@ -110,11 +126,11 @@ const CertificateManagement = () => {
         }
     };
 
-    const handleSubmit = async (formData: FormData) => {
+    const handleSubmit = async (data: any) => {
         if (editingCertificate) {
-            updateMutation.mutate({ id: editingCertificate.id, formData });
+            updateMutation.mutate({ id: editingCertificate.id, data });
         } else {
-            createMutation.mutate(formData);
+            createMutation.mutate(data);
         }
     };
 
@@ -123,8 +139,8 @@ const CertificateManagement = () => {
             header: 'Certificate',
             accessor: (item: Certificate) => (
                 <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center shadow-sm">
-                        <Award className="h-4 w-4 text-amber-600" />
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Award className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                         <p className="font-medium text-sm">{item.title}</p>
@@ -139,25 +155,23 @@ const CertificateManagement = () => {
                 item.is_professional ? (
                     <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 text-[10px] px-2 py-0 h-5">Professional</Badge>
                 ) : (
-                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">Academic</Badge>
+                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">Course</Badge>
                 )
             )
         },
         {
-            header: 'Date Issued',
+            header: 'Issued',
             accessor: (item: Certificate) => (
-                <span className="text-[11px] text-muted-foreground">{item.date_issued || 'N/A'}</span>
+                <span className="text-xs text-muted-foreground">{item.date_issued}</span>
             )
         },
         {
             header: 'Link',
             accessor: (item: Certificate) => (
-                item.url ? (
+                item.url && (
                     <a href={item.url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                         <ExternalLink className="h-3.5 w-3.5" />
                     </a>
-                ) : (
-                    <span className="text-[11px] text-muted-foreground">No link</span>
                 )
             )
         }
@@ -192,4 +206,3 @@ const CertificateManagement = () => {
 };
 
 export default CertificateManagement;
-

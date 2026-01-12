@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '../../Shared';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
 import { getAdminExperience, deleteExperience, createExperience, updateExperience, WorkExperience } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/Admin/Badge';
@@ -14,35 +14,35 @@ const ExperienceManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_EXPERIENCES: WorkExperience[] = [
+    const MOCK_EXPERIENCE: WorkExperience[] = [
         {
             id: 1,
-            company: "Tech AI Solutions",
             position: "Senior AI Engineer",
+            company: "Tech Corp",
             location: "San Francisco, CA",
-            start_date: "2022-01",
+            start_date: "2021-01",
             is_current: true,
-            description: "Leading the development of LLM-based applications."
+            description: "Leading AI development team for core product features."
         },
         {
             id: 2,
-            company: "Data Systems Inc",
-            position: "Machine Learning Engineer",
+            position: "ML Researcher",
+            company: "AI Labs",
             location: "Remote",
-            start_date: "2020-06",
-            end_date: "2021-12",
+            start_date: "2019-06",
+            end_date: "2020-12",
             is_current: false,
-            description: "Built scalable data pipelines and predictive models."
+            description: "Published 3 papers on transformer architectures."
         }
     ];
 
-    const { data: apiExperiences, isLoading } = useQuery({
+    const { data: apiExperience, isLoading } = useQuery({
         queryKey: ['admin-experience'],
         queryFn: getAdminExperience,
         staleTime: 1000 * 60 * 5,
     });
 
-    const experiences = apiExperiences && apiExperiences.length > 0 ? apiExperiences : MOCK_EXPERIENCES;
+    const experience = apiExperience && apiExperience.length > 0 ? apiExperience : MOCK_EXPERIENCE;
 
     const createMutation = useMutation({
         mutationFn: createExperience,
@@ -59,7 +59,7 @@ const ExperienceManagement = () => {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => updateExperience(id, data),
+        mutationFn: ({ id, data }: { id: number, data: Partial<WorkExperience> }) => updateExperience(id, data),
         onSuccess: (updatedExp) => {
             queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
                 return old ? old.map(e => e.id === updatedExp.id ? updatedExp : e) : [updatedExp];
@@ -113,31 +113,33 @@ const ExperienceManagement = () => {
         }
     };
 
-    const handleSubmit = async (data: any) => {
+    const handleSubmit = async (data: Partial<WorkExperience>) => {
         if (editingExperience) {
             updateMutation.mutate({ id: editingExperience.id, data });
         } else {
-            createMutation.mutate(data);
+            createMutation.mutate(data as WorkExperience);
         }
     };
 
     const columns = [
         {
-            header: 'Role & Company',
+            header: 'Role',
             accessor: (item: WorkExperience) => (
-                <div>
-                    <p className="font-medium text-sm">{item.position}</p>
-                    <p className="text-[11px] text-muted-foreground">{item.company}</p>
+                <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Calendar className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-sm">{item.position}</p>
+                        <p className="text-[11px] text-muted-foreground">{item.company}</p>
+                    </div>
                 </div>
             )
         },
         {
-            header: 'Duration',
+            header: 'Location',
             accessor: (item: WorkExperience) => (
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>{item.start_date} - {item.is_current ? 'Present' : item.end_date || 'N/A'}</span>
-                </div>
+                <span className="text-xs text-muted-foreground">{item.location || 'Remote'}</span>
             )
         },
         {
@@ -146,14 +148,16 @@ const ExperienceManagement = () => {
                 item.is_current ? (
                     <Badge className="bg-green-500/10 text-green-600 border-green-200 text-[10px] px-2 py-0 h-5">Current</Badge>
                 ) : (
-                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">Past</Badge>
+                    <span className="text-muted-foreground text-[11px]">Past</span>
                 )
             )
         },
         {
-            header: 'Location',
+            header: 'Duration',
             accessor: (item: WorkExperience) => (
-                <span className="text-[11px] text-muted-foreground">{item.location || 'Remote'}</span>
+                <span className="text-[11px] text-muted-foreground">
+                    {item.start_date} - {item.is_current ? 'Present' : item.end_date}
+                </span>
             )
         }
     ];
@@ -162,7 +166,7 @@ const ExperienceManagement = () => {
         <>
             <ManagementTable
                 title="Work Experience"
-                data={experiences}
+                data={experience}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}
@@ -187,4 +191,3 @@ const ExperienceManagement = () => {
 };
 
 export default ExperienceManagement;
-

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '../../Shared';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
 import { getAdminProjects, deleteProject, createProject, updateProject, Project } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/Admin/Badge';
-import { ExternalLink, Github, Plus } from 'lucide-react';
+import { ExternalLink, Github } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Modal from '@/components/Admin/Modal';
 import ProjectForm from './ProjectForm';
@@ -43,20 +43,17 @@ const ProjectManagement = () => {
         }
     ];
 
-    // Fetch projects with TanStack Query
     const { data: apiProjects, isLoading } = useQuery({
         queryKey: ['admin-projects'],
         queryFn: getAdminProjects,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5,
     });
 
     const projects = apiProjects && apiProjects.length > 0 ? apiProjects : MOCK_PROJECTS;
 
-    // Create project mutation
     const createMutation = useMutation({
         mutationFn: createProject,
         onSuccess: (newProject) => {
-            // Update cache directly for instant feedback
             queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
                 return old ? [newProject, ...old] : [newProject];
             });
@@ -68,11 +65,9 @@ const ProjectManagement = () => {
         }
     });
 
-    // Update project mutation
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateProject(id, formData),
         onSuccess: (updatedProject) => {
-            // Update cache directly
             queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
                 return old ? old.map(p => p.id === updatedProject.id ? updatedProject : p) : [updatedProject];
             });
@@ -85,33 +80,23 @@ const ProjectManagement = () => {
         }
     });
 
-    // Delete project mutation with Optimistic Update
     const deleteMutation = useMutation({
         mutationFn: deleteProject,
         onMutate: async (projectId) => {
-            // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
             await queryClient.cancelQueries({ queryKey: ['admin-projects'] });
-
-            // Snapshot the previous value
             const previousProjects = queryClient.getQueryData(['admin-projects']);
-
-            // Optimistically update to the new value
             queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
                 return old ? old.filter(p => p.id !== projectId) : [];
             });
-
-            // Return a context object with the snapshotted value
             return { previousProjects };
         },
         onError: (err, projectId, context) => {
-            // If the mutation fails, use the context returned from onMutate to roll back
             if (context?.previousProjects) {
                 queryClient.setQueryData(['admin-projects'], context.previousProjects);
             }
             showToast("Failed to delete project", "error");
         },
         onSettled: () => {
-            // Always refetch after error or success to ensure we are in sync with the server
             queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
         },
         onSuccess: () => {
@@ -228,4 +213,3 @@ const ProjectManagement = () => {
 };
 
 export default ProjectManagement;
-

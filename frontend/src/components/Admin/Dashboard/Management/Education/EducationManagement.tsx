@@ -1,11 +1,15 @@
-import React from 'react';
-import { ManagementTable } from '../../Shared';
-import { getAdminEducation, deleteEducation, Education } from '@/services/api';
+import React, { useState } from 'react';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
+import { getAdminEducation, deleteEducation, createEducation, updateEducation, Education } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { GraduationCap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '@/components/Admin/Modal';
+import EducationForm from './EducationForm';
 
 const EducationManagement = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingEducation, setEditingEducation] = useState<Education | undefined>(undefined);
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
@@ -38,6 +42,35 @@ const EducationManagement = () => {
 
     const education = apiEducation && apiEducation.length > 0 ? apiEducation : MOCK_EDUCATION;
 
+    const createMutation = useMutation({
+        mutationFn: createEducation,
+        onSuccess: (newEdu) => {
+            queryClient.setQueryData(['admin-education'], (old: Education[] | undefined) => {
+                return old ? [newEdu, ...old] : [newEdu];
+            });
+            showToast("Education created successfully", "success");
+            setIsModalOpen(false);
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to create education", "error");
+        }
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number, data: Partial<Education> }) => updateEducation(id, data),
+        onSuccess: (updatedEdu) => {
+            queryClient.setQueryData(['admin-education'], (old: Education[] | undefined) => {
+                return old ? old.map(e => e.id === updatedEdu.id ? updatedEdu : e) : [updatedEdu];
+            });
+            showToast("Education updated successfully", "success");
+            setIsModalOpen(false);
+            setEditingEducation(undefined);
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to update education", "error");
+        }
+    });
+
     const deleteMutation = useMutation({
         mutationFn: deleteEducation,
         onMutate: async (eduId) => {
@@ -63,16 +96,26 @@ const EducationManagement = () => {
     });
 
     const handleAdd = () => {
-        showToast("Add education modal would open here", "info");
+        setEditingEducation(undefined);
+        setIsModalOpen(true);
     };
 
     const handleEdit = (edu: Education) => {
-        showToast(`Editing education at ${edu.institution}`, "info");
+        setEditingEducation(edu);
+        setIsModalOpen(true);
     };
 
     const handleDelete = async (edu: Education) => {
         if (window.confirm(`Are you sure you want to delete education at "${edu.institution}"?`)) {
             deleteMutation.mutate(edu.id);
+        }
+    };
+
+    const handleSubmit = async (data: Partial<Education>) => {
+        if (editingEducation) {
+            updateMutation.mutate({ id: editingEducation.id, data });
+        } else {
+            createMutation.mutate(data as Education);
         }
     };
 
@@ -85,8 +128,8 @@ const EducationManagement = () => {
                         <GraduationCap className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                        <p className="font-medium">{item.institution}</p>
-                        <p className="text-xs text-muted-foreground">{item.degree} in {item.field_of_study}</p>
+                        <p className="font-medium text-sm">{item.institution}</p>
+                        <p className="text-[11px] text-muted-foreground">{item.degree} in {item.field_of_study}</p>
                     </div>
                 </div>
             )
@@ -100,21 +143,36 @@ const EducationManagement = () => {
         {
             header: 'Description',
             accessor: (item: Education) => (
-                <p className="text-xs text-muted-foreground line-clamp-1 max-w-[300px]">{item.description || 'No description'}</p>
+                <p className="text-[11px] text-muted-foreground line-clamp-1 max-w-[300px]">{item.description || 'No description'}</p>
             )
         }
     ];
 
     return (
-        <ManagementTable
-            title="Education"
-            data={education}
-            columns={columns}
-            onAdd={handleAdd}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-        />
+        <>
+            <ManagementTable
+                title="Education"
+                data={education}
+                columns={columns}
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={editingEducation ? 'Edit Education' : 'Add New Education'}
+            >
+                <EducationForm
+                    education={editingEducation}
+                    onSubmit={handleSubmit}
+                    onCancel={() => setIsModalOpen(false)}
+                    isSubmitting={createMutation.isPending || updateMutation.isPending}
+                />
+            </Modal>
+        </>
     );
 };
 

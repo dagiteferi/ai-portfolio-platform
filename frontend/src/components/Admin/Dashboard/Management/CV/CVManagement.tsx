@@ -1,12 +1,15 @@
-import React from 'react';
-import { ManagementTable } from '../../Shared';
-import { getAdminCVs, deleteCV, CV } from '@/services/api';
+import React, { useState } from 'react';
+import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
+import { getAdminCVs, deleteCV, uploadCV, CV } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, ExternalLink, Download } from 'lucide-react';
 import { Button } from '@/components/Admin/Button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '@/components/Admin/Modal';
+import CVUploadForm from './CVUploadForm';
 
 const CVManagement = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
@@ -25,6 +28,20 @@ const CVManagement = () => {
     });
 
     const cvs = apiCVs && apiCVs.length > 0 ? apiCVs : MOCK_CVS;
+
+    const uploadMutation = useMutation({
+        mutationFn: uploadCV,
+        onSuccess: (newCV) => {
+            queryClient.setQueryData(['admin-cvs'], (old: CV[] | undefined) => {
+                return old ? [newCV, ...old] : [newCV];
+            });
+            showToast("CV uploaded successfully", "success");
+            setIsModalOpen(false);
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to upload CV", "error");
+        }
+    });
 
     const deleteMutation = useMutation({
         mutationFn: deleteCV,
@@ -51,17 +68,21 @@ const CVManagement = () => {
     });
 
     const handleAdd = () => {
-        showToast("Upload CV modal would open here", "info");
+        setIsModalOpen(true);
     };
 
     const handleEdit = (cv: CV) => {
-        showToast(`Viewing CV uploaded at ${cv.uploaded_at}`, "info");
+        window.open(cv.url, '_blank');
     };
 
     const handleDelete = async (cv: CV) => {
         if (window.confirm(`Are you sure you want to delete this CV?`)) {
             deleteMutation.mutate(cv.id);
         }
+    };
+
+    const handleUpload = async (formData: FormData) => {
+        uploadMutation.mutate(formData);
     };
 
     const columns = [
@@ -99,15 +120,29 @@ const CVManagement = () => {
     ];
 
     return (
-        <ManagementTable
-            title="CV Management"
-            data={cvs}
-            columns={columns}
-            onAdd={handleAdd}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-        />
+        <>
+            <ManagementTable
+                title="CV Management"
+                data={cvs}
+                columns={columns}
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title="Upload New CV"
+            >
+                <CVUploadForm
+                    onSubmit={handleUpload}
+                    onCancel={() => setIsModalOpen(false)}
+                    isSubmitting={uploadMutation.isPending}
+                />
+            </Modal>
+        </>
     );
 };
 
