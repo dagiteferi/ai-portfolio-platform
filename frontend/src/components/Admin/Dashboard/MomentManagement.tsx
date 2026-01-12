@@ -40,8 +40,10 @@ const MomentManagement = () => {
 
     const createMutation = useMutation({
         mutationFn: createMoment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+        onSuccess: (newMoment) => {
+            queryClient.setQueryData(['admin-moments'], (old: MemorableMoment[] | undefined) => {
+                return old ? [newMoment, ...old] : [newMoment];
+            });
             showToast("Moment created successfully", "success");
             setIsModalOpen(false);
         },
@@ -52,8 +54,10 @@ const MomentManagement = () => {
 
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateMoment(id, formData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+        onSuccess: (updatedMoment) => {
+            queryClient.setQueryData(['admin-moments'], (old: MemorableMoment[] | undefined) => {
+                return old ? old.map(m => m.id === updatedMoment.id ? updatedMoment : m) : [updatedMoment];
+            });
             showToast("Moment updated successfully", "success");
             setIsModalOpen(false);
             setEditingMoment(undefined);
@@ -65,12 +69,25 @@ const MomentManagement = () => {
 
     const deleteMutation = useMutation({
         mutationFn: deleteMoment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
-            showToast("Moment deleted successfully", "success");
+        onMutate: async (momentId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-moments'] });
+            const previousMoments = queryClient.getQueryData(['admin-moments']);
+            queryClient.setQueryData(['admin-moments'], (old: MemorableMoment[] | undefined) => {
+                return old ? old.filter(m => m.id !== momentId) : [];
+            });
+            return { previousMoments };
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to delete moment", "error");
+        onError: (err, momentId, context) => {
+            if (context?.previousMoments) {
+                queryClient.setQueryData(['admin-moments'], context.previousMoments);
+            }
+            showToast("Failed to delete moment", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+        },
+        onSuccess: () => {
+            showToast("Moment deleted successfully", "success");
         }
     });
 

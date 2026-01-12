@@ -40,8 +40,10 @@ const SkillManagement = () => {
             });
             return createSkill(formData);
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
+        onSuccess: (newSkill) => {
+            queryClient.setQueryData(['admin-skills'], (old: TechnicalSkill[] | undefined) => {
+                return old ? [newSkill, ...old] : [newSkill];
+            });
             showToast("Skill created successfully", "success");
             setIsModalOpen(false);
         },
@@ -54,8 +56,10 @@ const SkillManagement = () => {
         mutationFn: ({ id, data }: { id: number, data: FormData | Partial<TechnicalSkill> }) => {
             return updateSkill(id, data as Partial<TechnicalSkill>);
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
+        onSuccess: (updatedSkill) => {
+            queryClient.setQueryData(['admin-skills'], (old: TechnicalSkill[] | undefined) => {
+                return old ? old.map(s => s.id === updatedSkill.id ? updatedSkill : s) : [updatedSkill];
+            });
             showToast("Skill updated successfully", "success");
             setIsModalOpen(false);
             setEditingSkill(undefined);
@@ -67,12 +71,25 @@ const SkillManagement = () => {
 
     const deleteMutation = useMutation({
         mutationFn: deleteSkill,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
-            showToast("Skill deleted successfully", "success");
+        onMutate: async (skillId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-skills'] });
+            const previousSkills = queryClient.getQueryData(['admin-skills']);
+            queryClient.setQueryData(['admin-skills'], (old: TechnicalSkill[] | undefined) => {
+                return old ? old.filter(s => s.id !== skillId) : [];
+            });
+            return { previousSkills };
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to delete skill", "error");
+        onError: (err, skillId, context) => {
+            if (context?.previousSkills) {
+                queryClient.setQueryData(['admin-skills'], context.previousSkills);
+            }
+            showToast("Failed to delete skill", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
+        },
+        onSuccess: () => {
+            showToast("Skill deleted successfully", "success");
         }
     });
 

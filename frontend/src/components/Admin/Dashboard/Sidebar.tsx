@@ -12,6 +12,14 @@ import {
     Settings,
     ChevronRight
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+    getAdminProjects,
+    getAdminSkills,
+    getAdminExperience,
+    getAdminCertificates,
+    getAdminMoments
+} from '../../../services/api';
 
 interface SidebarProps {
     activeTab: string;
@@ -20,17 +28,29 @@ interface SidebarProps {
 
 const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'projects', label: 'Projects', icon: Briefcase },
-    { id: 'skills', label: 'Skills', icon: Wrench },
-    { id: 'experience', label: 'Experience', icon: Briefcase },
+    { id: 'projects', label: 'Projects', icon: Briefcase, prefetch: getAdminProjects, queryKey: 'admin-projects' },
+    { id: 'skills', label: 'Skills', icon: Wrench, prefetch: getAdminSkills, queryKey: 'admin-skills' },
+    { id: 'experience', label: 'Experience', icon: Briefcase, prefetch: getAdminExperience, queryKey: 'admin-experience' },
     { id: 'education', label: 'Education', icon: GraduationCap },
-    { id: 'certificates', label: 'Certificates', icon: Award },
-    { id: 'moments', label: 'Moments', icon: Camera },
+    { id: 'certificates', label: 'Certificates', icon: Award, prefetch: getAdminCertificates, queryKey: 'admin-certificates' },
+    { id: 'moments', label: 'Moments', icon: Camera, prefetch: getAdminMoments, queryKey: 'admin-moments' },
     { id: 'cvs', label: 'CVs', icon: FileText },
     { id: 'logs', label: 'System Logs', icon: Terminal },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+    const queryClient = useQueryClient();
+
+    const handlePrefetch = (item: any) => {
+        if (item.prefetch && item.queryKey) {
+            queryClient.prefetchQuery({
+                queryKey: [item.queryKey],
+                queryFn: item.prefetch,
+                staleTime: 1000 * 60 * 5,
+            });
+        }
+    };
+
     return (
         <aside className="w-64 bg-card border-r flex flex-col h-screen sticky top-0">
             <div className="p-6">
@@ -49,6 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
+                            onMouseEnter={() => handlePrefetch(item)}
                             className={cn(
                                 "w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group",
                                 isActive
@@ -77,3 +98,4 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 };
 
 export default Sidebar;
+

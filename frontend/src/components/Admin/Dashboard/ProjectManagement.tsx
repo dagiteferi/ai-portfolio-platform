@@ -55,8 +55,11 @@ const ProjectManagement = () => {
     // Create project mutation
     const createMutation = useMutation({
         mutationFn: createProject,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
+        onSuccess: (newProject) => {
+            // Update cache directly for instant feedback
+            queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
+                return old ? [newProject, ...old] : [newProject];
+            });
             showToast("Project created successfully", "success");
             setIsModalOpen(false);
         },
@@ -68,8 +71,11 @@ const ProjectManagement = () => {
     // Update project mutation
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateProject(id, formData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
+        onSuccess: (updatedProject) => {
+            // Update cache directly
+            queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
+                return old ? old.map(p => p.id === updatedProject.id ? updatedProject : p) : [updatedProject];
+            });
             showToast("Project updated successfully", "success");
             setIsModalOpen(false);
             setEditingProject(undefined);
@@ -79,15 +85,37 @@ const ProjectManagement = () => {
         }
     });
 
-    // Delete project mutation
+    // Delete project mutation with Optimistic Update
     const deleteMutation = useMutation({
         mutationFn: deleteProject,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
-            showToast("Project deleted successfully", "success");
+        onMutate: async (projectId) => {
+            // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries({ queryKey: ['admin-projects'] });
+
+            // Snapshot the previous value
+            const previousProjects = queryClient.getQueryData(['admin-projects']);
+
+            // Optimistically update to the new value
+            queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
+                return old ? old.filter(p => p.id !== projectId) : [];
+            });
+
+            // Return a context object with the snapshotted value
+            return { previousProjects };
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to delete project", "error");
+        onError: (err, projectId, context) => {
+            // If the mutation fails, use the context returned from onMutate to roll back
+            if (context?.previousProjects) {
+                queryClient.setQueryData(['admin-projects'], context.previousProjects);
+            }
+            showToast("Failed to delete project", "error");
+        },
+        onSettled: () => {
+            // Always refetch after error or success to ensure we are in sync with the server
+            queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
+        },
+        onSuccess: () => {
+            showToast("Project deleted successfully", "success");
         }
     });
 

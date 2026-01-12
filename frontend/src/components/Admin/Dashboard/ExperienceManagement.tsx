@@ -46,8 +46,10 @@ const ExperienceManagement = () => {
 
     const createMutation = useMutation({
         mutationFn: createExperience,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+        onSuccess: (newExp) => {
+            queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
+                return old ? [newExp, ...old] : [newExp];
+            });
             showToast("Experience created successfully", "success");
             setIsModalOpen(false);
         },
@@ -58,8 +60,10 @@ const ExperienceManagement = () => {
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => updateExperience(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+        onSuccess: (updatedExp) => {
+            queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
+                return old ? old.map(e => e.id === updatedExp.id ? updatedExp : e) : [updatedExp];
+            });
             showToast("Experience updated successfully", "success");
             setIsModalOpen(false);
             setEditingExperience(undefined);
@@ -71,12 +75,25 @@ const ExperienceManagement = () => {
 
     const deleteMutation = useMutation({
         mutationFn: deleteExperience,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
-            showToast("Experience deleted successfully", "success");
+        onMutate: async (expId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-experience'] });
+            const previousExp = queryClient.getQueryData(['admin-experience']);
+            queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
+                return old ? old.filter(e => e.id !== expId) : [];
+            });
+            return { previousExp };
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to delete experience", "error");
+        onError: (err, expId, context) => {
+            if (context?.previousExp) {
+                queryClient.setQueryData(['admin-experience'], context.previousExp);
+            }
+            showToast("Failed to delete experience", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+        },
+        onSuccess: () => {
+            showToast("Experience deleted successfully", "success");
         }
     });
 

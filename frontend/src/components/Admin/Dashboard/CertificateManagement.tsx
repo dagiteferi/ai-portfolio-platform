@@ -43,8 +43,10 @@ const CertificateManagement = () => {
 
     const createMutation = useMutation({
         mutationFn: createCertificate,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
+        onSuccess: (newCert) => {
+            queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
+                return old ? [newCert, ...old] : [newCert];
+            });
             showToast("Certificate created successfully", "success");
             setIsModalOpen(false);
         },
@@ -55,8 +57,10 @@ const CertificateManagement = () => {
 
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateCertificate(id, formData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
+        onSuccess: (updatedCert) => {
+            queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
+                return old ? old.map(c => c.id === updatedCert.id ? updatedCert : c) : [updatedCert];
+            });
             showToast("Certificate updated successfully", "success");
             setIsModalOpen(false);
             setEditingCertificate(undefined);
@@ -68,12 +72,25 @@ const CertificateManagement = () => {
 
     const deleteMutation = useMutation({
         mutationFn: deleteCertificate,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
-            showToast("Certificate deleted successfully", "success");
+        onMutate: async (certId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-certificates'] });
+            const previousCerts = queryClient.getQueryData(['admin-certificates']);
+            queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
+                return old ? old.filter(c => c.id !== certId) : [];
+            });
+            return { previousCerts };
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to delete certificate", "error");
+        onError: (err, certId, context) => {
+            if (context?.previousCerts) {
+                queryClient.setQueryData(['admin-certificates'], context.previousCerts);
+            }
+            showToast("Failed to delete certificate", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
+        },
+        onSuccess: () => {
+            showToast("Certificate deleted successfully", "success");
         }
     });
 
