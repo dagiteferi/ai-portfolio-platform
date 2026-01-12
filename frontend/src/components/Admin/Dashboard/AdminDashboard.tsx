@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import TopBar from './TopBar';
-import OverviewTab from './OverviewTab';
-import ProjectManagement from './ProjectManagement';
-import SkillManagement from './SkillManagement';
-import ExperienceManagement from './ExperienceManagement';
-import EducationManagement from './EducationManagement';
-import CertificateManagement from './CertificateManagement';
-import MomentManagement from './MomentManagement';
-import CVManagement from './CVManagement';
-import LogsTab from './LogsTab';
+import { Sidebar, TopBar } from './Layout';
+import { OverviewTab } from './Tabs/Overview';
+import { ProjectManagement } from './Management/Projects';
+import { SkillManagement } from './Management/Skills';
+import { ExperienceManagement } from './Management/Experience';
+import { EducationManagement } from './Management/Education';
+import { CertificateManagement } from './Management/Certificates';
+import { MomentManagement } from './Management/Moments';
+import { CVManagement } from './Management/CV';
+import { LogsTab } from './Tabs/Logs';
 import { useToast } from '../../../hooks/use-toast';
 
 const AdminDashboard = () => {

@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import ManagementTable from './ManagementTable';
-import { getAdminCVs, deleteCV, CV } from '../../../services/api';
-import { useToast } from '../../../hooks/use-toast';
+import React from 'react';
+import { ManagementTable } from '../../Shared';
+import { getAdminCVs, deleteCV, CV } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 import { FileText, ExternalLink, Download } from 'lucide-react';
-import { Button } from '../Button';
+import { Button } from '@/components/Admin/Button';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CVManagement = () => {
-    const [cvs, setCvs] = useState<CV[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const { showToast } = useToast();
+    const queryClient = useQueryClient();
 
     const MOCK_CVS: CV[] = [
         {
@@ -18,26 +18,37 @@ const CVManagement = () => {
         }
     ];
 
-    const fetchCVs = async () => {
-        try {
-            setIsLoading(true);
-            const data = await getAdminCVs();
-            if (data && data.length > 0) {
-                setCvs(data);
-            } else {
-                setCvs(MOCK_CVS);
-            }
-        } catch (error) {
-            console.error("API Error, using mock data:", error);
-            setCvs(MOCK_CVS);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { data: apiCVs, isLoading } = useQuery({
+        queryKey: ['admin-cvs'],
+        queryFn: getAdminCVs,
+        staleTime: 1000 * 60 * 5,
+    });
 
-    useEffect(() => {
-        fetchCVs();
-    }, []);
+    const cvs = apiCVs && apiCVs.length > 0 ? apiCVs : MOCK_CVS;
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteCV,
+        onMutate: async (cvId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-cvs'] });
+            const previousCVs = queryClient.getQueryData(['admin-cvs']);
+            queryClient.setQueryData(['admin-cvs'], (old: CV[] | undefined) => {
+                return old ? old.filter(cv => cv.id !== cvId) : [];
+            });
+            return { previousCVs };
+        },
+        onError: (err, cvId, context) => {
+            if (context?.previousCVs) {
+                queryClient.setQueryData(['admin-cvs'], context.previousCVs);
+            }
+            showToast("Failed to delete CV", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-cvs'] });
+        },
+        onSuccess: () => {
+            showToast("CV deleted successfully", "success");
+        }
+    });
 
     const handleAdd = () => {
         showToast("Upload CV modal would open here", "info");
@@ -49,13 +60,7 @@ const CVManagement = () => {
 
     const handleDelete = async (cv: CV) => {
         if (window.confirm(`Are you sure you want to delete this CV?`)) {
-            try {
-                await deleteCV(cv.id);
-                showToast("CV deleted successfully", "success");
-                fetchCVs();
-            } catch (error) {
-                showToast("Failed to delete CV", "error");
-            }
+            deleteMutation.mutate(cv.id);
         }
     };
 

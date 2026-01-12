@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import ManagementTable from './ManagementTable';
-import { getAdminEducation, deleteEducation, Education } from '../../../services/api';
-import { useToast } from '../../../hooks/use-toast';
+import React from 'react';
+import { ManagementTable } from '../../Shared';
+import { getAdminEducation, deleteEducation, Education } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 import { GraduationCap } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const EducationManagement = () => {
-    const [education, setEducation] = useState<Education[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const { showToast } = useToast();
+    const queryClient = useQueryClient();
 
     const MOCK_EDUCATION: Education[] = [
         {
@@ -30,26 +30,37 @@ const EducationManagement = () => {
         }
     ];
 
-    const fetchEducation = async () => {
-        try {
-            setIsLoading(true);
-            const data = await getAdminEducation();
-            if (data && data.length > 0) {
-                setEducation(data);
-            } else {
-                setEducation(MOCK_EDUCATION);
-            }
-        } catch (error) {
-            console.error("API Error, using mock data:", error);
-            setEducation(MOCK_EDUCATION);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { data: apiEducation, isLoading } = useQuery({
+        queryKey: ['admin-education'],
+        queryFn: getAdminEducation,
+        staleTime: 1000 * 60 * 5,
+    });
 
-    useEffect(() => {
-        fetchEducation();
-    }, []);
+    const education = apiEducation && apiEducation.length > 0 ? apiEducation : MOCK_EDUCATION;
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteEducation,
+        onMutate: async (eduId) => {
+            await queryClient.cancelQueries({ queryKey: ['admin-education'] });
+            const previousEdu = queryClient.getQueryData(['admin-education']);
+            queryClient.setQueryData(['admin-education'], (old: Education[] | undefined) => {
+                return old ? old.filter(edu => edu.id !== eduId) : [];
+            });
+            return { previousEdu };
+        },
+        onError: (err, eduId, context) => {
+            if (context?.previousEdu) {
+                queryClient.setQueryData(['admin-education'], context.previousEdu);
+            }
+            showToast("Failed to delete education entry", "error");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-education'] });
+        },
+        onSuccess: () => {
+            showToast("Education entry deleted successfully", "success");
+        }
+    });
 
     const handleAdd = () => {
         showToast("Add education modal would open here", "info");
@@ -61,13 +72,7 @@ const EducationManagement = () => {
 
     const handleDelete = async (edu: Education) => {
         if (window.confirm(`Are you sure you want to delete education at "${edu.institution}"?`)) {
-            try {
-                await deleteEducation(edu.id);
-                showToast("Education entry deleted successfully", "success");
-                fetchEducation();
-            } catch (error) {
-                showToast("Failed to delete education entry", "error");
-            }
+            deleteMutation.mutate(edu.id);
         }
     };
 

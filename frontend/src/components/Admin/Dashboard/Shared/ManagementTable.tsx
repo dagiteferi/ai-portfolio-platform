@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card';
-import { Button } from '../Button';
-import { Plus, Search, MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import { Input } from '../Input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/Admin/Card';
+import { Button } from '@/components/Admin/Button';
+import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Input } from '@/components/Admin/Input';
 
 interface Column<T> {
     header: string;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { TechnicalSkill } from '../../../services/api';
-import { Button } from '../Button';
-import { Input } from '../Input';
+import { TechnicalSkill } from '@/services/api';
+import { Button } from '@/components/Admin/Button';
+import { Input } from '@/components/Admin/Input';
 import { Image as ImageIcon, Upload, X } from 'lucide-react';
 
 interface SkillFormProps {
@@ -12,10 +12,22 @@ interface SkillFormProps {
 }
 
 const SkillForm: React.FC<SkillFormProps> = ({ skill, onSubmit, onCancel, isSubmitting }) => {
+    // Helper to convert descriptive proficiency to percentage
+    const getInitialProficiency = (p?: string) => {
+        if (!p) return 50;
+        if (p === 'Expert') return 100;
+        if (p === 'Advanced') return 75;
+        if (p === 'Intermediate') return 50;
+        if (p === 'Beginner') return 25;
+        // If it's already a number string (e.g. "85"), parse it
+        const num = parseInt(p);
+        return isNaN(num) ? 50 : num;
+    };
+
     const [formData, setFormData] = useState({
         name: skill?.name || '',
         category: skill?.category || '',
-        proficiency: skill?.proficiency || 'Intermediate',
+        proficiency: String(getInitialProficiency(skill?.proficiency)),
     });
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(skill?.icon || null);
@@ -36,7 +48,6 @@ const SkillForm: React.FC<SkillFormProps> = ({ skill, onSubmit, onCancel, isSubm
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // If there's a file, we must use FormData
         if (file) {
             const data = new FormData();
             data.append('name', formData.name);
@@ -45,7 +56,6 @@ const SkillForm: React.FC<SkillFormProps> = ({ skill, onSubmit, onCancel, isSubm
             data.append('file', file);
             await onSubmit(data);
         } else {
-            // Otherwise we can just send JSON (or still FormData if preferred)
             await onSubmit(formData);
         }
     };
@@ -74,18 +84,26 @@ const SkillForm: React.FC<SkillFormProps> = ({ skill, onSubmit, onCancel, isSubm
                         />
                     </div>
                     <div>
-                        <label className="text-sm font-medium mb-1.5 block">Proficiency</label>
-                        <select
+                        <div className="flex justify-between items-center mb-1.5">
+                            <label className="text-sm font-medium block">Proficiency</label>
+                            <span className="text-xs font-bold text-primary">{formData.proficiency}%</span>
+                        </div>
+                        <input
+                            type="range"
                             name="proficiency"
+                            min="0"
+                            max="100"
+                            step="5"
                             value={formData.proficiency}
                             onChange={handleChange}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        >
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                            <option value="Expert">Expert</option>
-                        </select>
+                            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
+                            <span>Beginner</span>
+                            <span>Intermediate</span>
+                            <span>Advanced</span>
+                            <span>Expert</span>
+                        </div>
                     </div>
                 </div>
 

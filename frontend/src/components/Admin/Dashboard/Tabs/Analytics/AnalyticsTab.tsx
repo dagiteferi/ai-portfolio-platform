@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card';
-import { ChartContainer, ChartTooltipContent } from '../Chart';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/Admin/Card';
+import { ChartContainer, ChartTooltipContent } from '@/components/Admin/Chart';
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip } from 'recharts';
 
 const AnalyticsTab = () => {
@@ -15,7 +15,7 @@ const AnalyticsTab = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-none shadow-sm">
         <CardHeader>
           <CardTitle>Revenue & Conversion Analytics</CardTitle>
         </CardHeader>

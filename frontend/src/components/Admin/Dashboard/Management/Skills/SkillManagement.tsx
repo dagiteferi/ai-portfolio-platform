@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import ManagementTable from './ManagementTable';
-import { getAdminSkills, deleteSkill, createSkill, updateSkill, TechnicalSkill } from '../../../services/api';
-import { useToast } from '../../../hooks/use-toast';
-import { Badge } from '../Badge';
+import { ManagementTable } from '../../Shared';
+import { getAdminSkills, deleteSkill, createSkill, updateSkill, TechnicalSkill } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/Admin/Badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '../Modal';
+import Modal from '@/components/Admin/Modal';
 import SkillForm from './SkillForm';
 
 const SkillManagement = () => {
@@ -143,17 +143,36 @@ const SkillManagement = () => {
         },
         {
             header: 'Proficiency',
-            accessor: (item: TechnicalSkill) => (
-                <div className="flex items-center gap-2">
-                    <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-primary"
-                            style={{ width: item.proficiency === 'Expert' ? '100%' : item.proficiency === 'Advanced' ? '75%' : item.proficiency === 'Intermediate' ? '50%' : '25%' }}
-                        />
+            accessor: (item: TechnicalSkill) => {
+                const getWidth = (p?: string) => {
+                    if (!p) return '0%';
+                    if (p === 'Expert') return '100%';
+                    if (p === 'Advanced') return '75%';
+                    if (p === 'Intermediate') return '50%';
+                    if (p === 'Beginner') return '25%';
+                    const num = parseInt(p);
+                    return isNaN(num) ? '0%' : `${num}%`;
+                };
+
+                const getLabel = (p?: string) => {
+                    if (!p) return '0%';
+                    if (['Expert', 'Advanced', 'Intermediate', 'Beginner'].includes(p)) return p;
+                    const num = parseInt(p);
+                    return isNaN(num) ? '0%' : `${num}%`;
+                };
+
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-primary"
+                                style={{ width: getWidth(item.proficiency) }}
+                            />
+                        </div>
+                        <span className="text-[11px] text-muted-foreground">{getLabel(item.proficiency)}</span>
                     </div>
-                    <span className="text-[11px] text-muted-foreground">{item.proficiency || 'Beginner'}</span>
-                </div>
-            )
+                );
+            }
         }
     ];
 
@@ -186,4 +205,3 @@ const SkillManagement = () => {
 };
 
 export default SkillManagement;
-

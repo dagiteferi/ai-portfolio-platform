@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button } from '../Button';
+import { Button } from '@/components/Admin/Button';
 import { LogOut, User, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '../../../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface TopBarProps {
     title: string;

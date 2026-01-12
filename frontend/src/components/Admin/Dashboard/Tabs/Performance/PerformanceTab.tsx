@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../Card';
+import { Card, CardContent } from '@/components/Admin/Card';
 
 const PerformanceTab = () => {
   const [performanceData] = useState([
@@ -12,7 +12,7 @@ const PerformanceTab = () => {
   return (
     <div className="grid gap-4">
       {performanceData.map((item, index) => (
-        <Card key={index}>
+        <Card key={index} className="border-none shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

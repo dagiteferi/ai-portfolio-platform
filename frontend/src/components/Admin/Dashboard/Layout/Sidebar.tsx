@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../../lib/utils';
+import { cn } from '@/lib/utils';
 import {
     LayoutDashboard,
     Briefcase,
@@ -19,7 +19,7 @@ import {
     getAdminExperience,
     getAdminCertificates,
     getAdminMoments
-} from '../../../services/api';
+} from '@/services/api';
 
 interface SidebarProps {
     activeTab: string;
@@ -98,4 +98,3 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 };
 
 export default Sidebar;
-

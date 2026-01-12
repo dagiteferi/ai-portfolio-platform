@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Certificate } from '../../../services/api';
-import { Button } from '../Button';
-import { Input } from '../Input';
+import { Certificate } from '@/services/api';
+import { Button } from '@/components/Admin/Button';
+import { Input } from '@/components/Admin/Input';
 import { FileText, Upload, X } from 'lucide-react';
 
 interface CertificateFormProps {
