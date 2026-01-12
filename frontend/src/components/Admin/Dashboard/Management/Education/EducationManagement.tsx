@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminEducation, deleteEducation, createEducation, updateEducation, Education } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+import { ManagementTable } from '../../Shared';
+import { getAdminEducation, deleteEducation, createEducation, updateEducation, Education } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
 import { GraduationCap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import EducationForm from './EducationForm';
 
 const EducationManagement = () => {

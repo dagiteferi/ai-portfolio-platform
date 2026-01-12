@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { WorkExperience } from '@/services/api';
-import { Button } from '@/components/Admin/Button';
-import { Input } from '@/components/Admin/Input';
+import { WorkExperience } from '../../../../../services/api';
+import { Button } from '../../../Button';
+import { Input } from '../../../Input';
 
 interface ExperienceFormProps {
     experience?: WorkExperience;

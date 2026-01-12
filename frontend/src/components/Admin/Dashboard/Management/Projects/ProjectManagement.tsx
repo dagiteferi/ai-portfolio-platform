@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminProjects, deleteProject, createProject, updateProject, Project } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/Admin/Badge';
+import { ManagementTable } from '../../Shared';
+import { getAdminProjects, deleteProject, createProject, updateProject, Project } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
+import { Badge } from '../../../Badge';
 import { ExternalLink, Github } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import ProjectForm from './ProjectForm';
 
 const ProjectManagement = () => {

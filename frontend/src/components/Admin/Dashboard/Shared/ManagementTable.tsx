@@ -1,12 +1,15 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Admin/Card';
-import { Button } from '@/components/Admin/Button';
-import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
-import { Input } from '@/components/Admin/Input';
+import { Button } from '../../Button';
+import { Card, CardContent } from '../../Card';
+import { Input } from '../../Input';
+import { ScrollArea } from '../../ScrollArea';
+import { Plus, Search, Edit2, Trash2, MoreVertical, Loader2 } from 'lucide-react';
+import { cn } from '../../../../lib/utils';
 
 interface Column<T> {
     header: string;
-    accessor: keyof T | ((item: T) => React.ReactNode);
+    accessor: (item: T) => React.ReactNode;
+    className?: string;
 }
 
 interface ManagementTableProps<T> {
@@ -19,116 +22,125 @@ interface ManagementTableProps<T> {
     isLoading?: boolean;
 }
 
-function ManagementTable<T extends { id: number | string }>({
+const ManagementTable = <T extends { id: string | number }>({
     title,
     data,
     columns,
     onAdd,
     onEdit,
     onDelete,
-    isLoading
-}: ManagementTableProps<T>) {
+    isLoading = false
+}: ManagementTableProps<T>) => {
     const [searchTerm, setSearchTerm] = React.useState('');
 
-    const filteredData = data.filter(item =>
-        Object.values(item).some(val =>
-            String(val).toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
-
     return (
-        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Manage your {title.toLowerCase()} and content.
-                    </p>
+                    <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+                    <p className="text-sm text-muted-foreground">Manage your portfolio {title.toLowerCase()} here.</p>
                 </div>
                 <Button onClick={onAdd} className="shadow-lg shadow-primary/20">
-                    <Plus className="mr-2 h-4 w-4" /> Add New
+                    <Plus className="h-4 w-4 mr-2" /> Add New
                 </Button>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center mb-6">
+            </div>
+
+            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
+                <div className="p-4 border-b bg-muted/30 flex items-center justify-between gap-4">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search..."
+                            placeholder={`Search ${title.toLowerCase()}...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 bg-background/50"
+                            className="pl-9 bg-background/50 border-none focus-visible:ring-1 h-9"
                         />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground font-medium">
+                            Total: {data.length}
+                        </span>
                     </div>
                 </div>
 
-                <div className="rounded-xl border bg-background/50 overflow-hidden">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-muted/50 border-b transition-colors">
-                                {columns.map((col, i) => (
-                                    <th key={i} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                                        {col.header}
+                <ScrollArea className="h-[calc(100vh-350px)]">
+                    <div className="min-w-full inline-block align-middle">
+                        <table className="min-w-full divide-y divide-border">
+                            <thead className="bg-muted/50 sticky top-0 z-10">
+                                <tr>
+                                    {columns.map((col, idx) => (
+                                        <th
+                                            key={idx}
+                                            className={cn(
+                                                "px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider",
+                                                col.className
+                                            )}
+                                        >
+                                            {col.header}
+                                        </th>
+                                    ))}
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Actions
                                     </th>
-                                ))}
-                                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={columns.length + 1} className="h-24 text-center">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                                            Loading...
-                                        </div>
-                                    </td>
                                 </tr>
-                            ) : filteredData.length === 0 ? (
-                                <tr>
-                                    <td colSpan={columns.length + 1} className="h-24 text-center text-muted-foreground">
-                                        No results found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredData.map((item) => (
-                                    <tr key={item.id} className="hover:bg-muted/30 transition-colors group">
-                                        {columns.map((col, i) => (
-                                            <td key={i} className="p-4 align-middle">
-                                                {typeof col.accessor === 'function'
-                                                    ? col.accessor(item)
-                                                    : (item[col.accessor] as React.ReactNode)}
-                                            </td>
-                                        ))}
-                                        <td className="p-4 align-middle text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => onEdit(item)}
-                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                                >
-                                                    <Edit2 className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => onDelete(item)}
-                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                            </thead>
+                            <tbody className="divide-y divide-border bg-transparent">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={columns.length + 1} className="px-6 py-12 text-center">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                                <p className="text-sm text-muted-foreground">Loading data...</p>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </CardContent>
-        </Card>
+                                ) : data.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={columns.length + 1} className="px-6 py-12 text-center">
+                                            <p className="text-sm text-muted-foreground">No items found.</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    data.map((item) => (
+                                        <tr key={item.id} className="hover:bg-muted/30 transition-colors group">
+                                            {columns.map((col, idx) => (
+                                                <td key={idx} className={cn("px-6 py-4 whitespace-nowrap", col.className)}>
+                                                    {col.accessor(item)}
+                                                </td>
+                                            ))}
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => onEdit(item)}
+                                                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                                    >
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => onDelete(item)}
+                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                                <div className="group-hover:hidden">
+                                                    <MoreVertical className="h-4 w-4 text-muted-foreground ml-auto" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </ScrollArea>
+            </Card>
+        </div>
     );
-}
+};
 
 export default ManagementTable;

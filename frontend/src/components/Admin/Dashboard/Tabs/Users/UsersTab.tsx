@@ -1,40 +1,33 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/Admin/Card';
-import { ChartContainer, ChartTooltipContent } from '@/components/Admin/Chart';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip } from 'recharts';
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../Card';
+import { Chart } from '../../../Chart';
 
 const UsersTab = () => {
-  const [analyticsData] = useState([
-    { name: 'Jan', visitors: 4000, pageViews: 2400, revenue: 2400 },
-    { name: 'Feb', visitors: 3000, pageViews: 1398, revenue: 2210 },
-    { name: 'Mar', visitors: 2000, pageViews: 9800, revenue: 2290 },
-    { name: 'Apr', visitors: 2780, pageViews: 3908, revenue: 2000 },
-    { name: 'May', visitors: 1890, pageViews: 4800, revenue: 2181 },
-    { name: 'Jun', visitors: 2390, pageViews: 3800, revenue: 2500 },
-  ]);
-
   return (
-    <div className="space-y-6">
-      <Card className="border-none shadow-sm">
-        <CardHeader>
-          <CardTitle>User Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={{
-            visitors: { label: "Visitors", color: "hsl(var(--primary))" }
-          }} className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analyticsData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="fill-muted-foreground" />
-                <YAxis className="fill-muted-foreground" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="visitors" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>User Growth</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <Chart type="line" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>User Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <Chart type="bar" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

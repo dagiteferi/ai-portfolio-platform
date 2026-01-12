@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminCVs, deleteCV, uploadCV, CV } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+import { ManagementTable } from '../../Shared';
+import { getAdminCVs, deleteCV, uploadCV, CV } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
 import { FileText, ExternalLink, Download } from 'lucide-react';
-import { Button } from '@/components/Admin/Button';
+import { Button } from '../../../Button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import CVUploadForm from './CVUploadForm';
 
 const CVManagement = () => {

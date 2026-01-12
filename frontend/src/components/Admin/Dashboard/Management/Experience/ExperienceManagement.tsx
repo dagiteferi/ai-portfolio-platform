@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminExperience, deleteExperience, createExperience, updateExperience, WorkExperience } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/Admin/Badge';
+import { ManagementTable } from '../../Shared';
+import { getAdminExperience, deleteExperience, createExperience, updateExperience, WorkExperience } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
+import { Badge } from '../../../Badge';
 import { Calendar } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import ExperienceForm from './ExperienceForm';
 
 const ExperienceManagement = () => {
@@ -76,7 +76,7 @@ const ExperienceManagement = () => {
     const deleteMutation = useMutation({
         mutationFn: deleteExperience,
         onMutate: async (expId) => {
-            await queryClient.cancelQueries({ queryKey: ['admin-experience'] });
+            await queryClient.cancelQueries({ queryKey: ['admin-skills'] });
             const previousExp = queryClient.getQueryData(['admin-experience']);
             queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
                 return old ? old.filter(e => e.id !== expId) : [];

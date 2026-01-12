@@ -1,91 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/Admin/Card';
-import { ScrollArea } from '@/components/Admin/ScrollArea';
-import { useToast } from '@/hooks/use-toast';
-import { getLogFiles, getLogContent } from '@/services/api';
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../Card';
+import { ScrollArea } from '../../../ScrollArea';
+import { Badge } from '../../../Badge';
+import { getLogFiles, getLogContent } from '../../../../../services/api';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '../../../../../hooks/use-toast';
+import { Terminal, FileText, RefreshCw, Search } from 'lucide-react';
 
 const LogsTab = () => {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { showToast } = useToast();
-  const [logFiles, setLogFiles] = useState<string[]>([]);
-  const [selectedLog, setSelectedLog] = useState<string | null>(null);
-  const [logContent, setLogContent] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchFiles();
-  }, []);
+  const { data: logFiles, isLoading: filesLoading } = useQuery({
+    queryKey: ['admin-log-files'],
+    queryFn: getLogFiles,
+  });
 
-  const fetchFiles = async () => {
-    try {
-      const data = await getLogFiles();
-      setLogFiles(data);
-    } catch (error) {
-      showToast("Failed to fetch log files.", "error");
-    }
-  };
-
-  const fetchContent = async (filename: string) => {
-    try {
-      setIsLoading(true);
-      const data = await getLogContent(filename);
-      setLogContent(data);
-      setSelectedLog(filename);
-    } catch (error) {
-      showToast(`Failed to fetch log content for ${filename}.`, "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: logContent, isLoading: contentLoading } = useQuery({
+    queryKey: ['admin-log-content', selectedFile],
+    queryFn: () => selectedFile ? getLogContent(selectedFile) : null,
+    enabled: !!selectedFile,
+  });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-1">
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle>Log Files</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px]">
-              {logFiles.map((file, index) => (
-                <div key={index}
-                  className={`p-2 rounded-md cursor-pointer transition-colors ${selectedLog === file ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
-                  onClick={() => fetchContent(file)}>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-200px)]">
+      <Card className="lg:col-span-1 border-none shadow-xl bg-card/50 backdrop-blur-sm flex flex-col">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            Log Files
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <ScrollArea className="h-full px-4 pb-4">
+            <div className="space-y-1">
+              {logFiles?.map((file) => (
+                <button
+                  key={file}
+                  onClick={() => setSelectedFile(file)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs transition-colors ${selectedFile === file
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                    }`}
+                >
                   {file}
-                </div>
+                </button>
               ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="md:col-span-2">
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle>{selectedLog ? `Content of ${selectedLog}` : "Select a log file"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px]">
-              {logContent ? (
-                Object.entries(logContent.logs).map(([level, entries]) => (
-                  <div key={level} className="mb-6 last:mb-0">
-                    <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground mb-2">{level}</h3>
-                    <div className="space-y-1">
-                      {(entries as any[]).map((entry, i) => (
-                        <div key={i} className="font-mono text-[11px] p-2 rounded bg-muted/30 border border-border/50 break-all">
-                          {JSON.stringify(entry)}
-                        </div>
-                      ))}
-                    </div>
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <Card className="lg:col-span-3 border-none shadow-xl bg-card/50 backdrop-blur-sm flex flex-col overflow-hidden">
+        <CardHeader className="pb-4 border-b bg-muted/30 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Terminal className="h-5 w-5 text-primary" />
+            <div>
+              <CardTitle className="text-sm font-semibold">
+                {selectedFile || 'Select a log file'}
+              </CardTitle>
+              {selectedFile && <p className="text-[10px] text-muted-foreground">Real-time system logs</p>}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] h-5">Live</Badge>
+            <button className="p-1.5 hover:bg-background rounded-md transition-colors">
+              <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 p-0 bg-black/5 font-mono">
+          <ScrollArea className="h-full p-6">
+            {selectedFile ? (
+              <div className="space-y-2">
+                {logContent ? (
+                  <pre className="text-xs text-muted-foreground leading-relaxed">
+                    {typeof logContent === 'string' ? logContent : JSON.stringify(logContent, null, 2)}
+                  </pre>
+                ) : contentLoading ? (
+                  <div className="flex items-center justify-center h-40">
+                    <RefreshCw className="h-6 w-6 animate-spin text-primary/40" />
                   </div>
-                ))
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground italic text-sm">
-                  No log file selected.
-                </div>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No content found in this log file.</p>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-40 py-20">
+                <Search className="h-12 w-12 mb-4" />
+                <p className="text-sm">Select a file from the sidebar to view logs</p>
+              </div>
+            )}
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </div>
   );
 };

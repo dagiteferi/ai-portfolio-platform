@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminSkills, deleteSkill, createSkill, updateSkill, TechnicalSkill } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/Admin/Badge';
+import { ManagementTable } from '../../Shared';
+import { getAdminSkills, deleteSkill, createSkill, updateSkill, TechnicalSkill } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
+import { Badge } from '../../../Badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import SkillForm from './SkillForm';
 
 const SkillManagement = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Project } from '@/services/api';
-import { Button } from '@/components/Admin/Button';
-import { Input } from '@/components/Admin/Input';
+import { Project } from '../../../../../services/api';
+import { Button } from '../../../Button';
+import { Input } from '../../../Input';
 import { Image as ImageIcon, Upload, X } from 'lucide-react';
 
 interface ProjectFormProps {

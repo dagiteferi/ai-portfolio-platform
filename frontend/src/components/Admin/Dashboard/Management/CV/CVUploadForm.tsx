@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/Admin/Button';
+import { Button } from '../../../Button';
 import { Upload, FileText, X, Loader2 } from 'lucide-react';
 
 interface CVUploadFormProps {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { TechnicalSkill } from '@/services/api';
-import { Button } from '@/components/Admin/Button';
-import { Input } from '@/components/Admin/Input';
+import { TechnicalSkill } from '../../../../../services/api';
+import { Button } from '../../../Button';
+import { Input } from '../../../Input';
 import { Image as ImageIcon, Upload, X } from 'lucide-react';
 
 interface SkillFormProps {

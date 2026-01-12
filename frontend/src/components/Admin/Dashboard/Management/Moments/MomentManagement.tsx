@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ManagementTable } from '@/components/Admin/Dashboard/Shared';
-import { getAdminMoments, deleteMoment, createMoment, updateMoment, MemorableMoment } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+import { ManagementTable } from '../../Shared';
+import { getAdminMoments, deleteMoment, createMoment, updateMoment, MemorableMoment } from '../../../../../services/api';
+import { useToast } from '../../../../../hooks/use-toast';
 import { Camera } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Modal from '@/components/Admin/Modal';
+import Modal from '../../../Modal';
 import MomentForm from './MomentForm';
 
 const MomentManagement = () => {

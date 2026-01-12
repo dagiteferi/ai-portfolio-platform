@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar, TopBar } from '@/components/Admin/Dashboard/Layout';
-import { OverviewTab } from '@/components/Admin/Dashboard/Tabs/Overview';
-import { ProjectManagement } from '@/components/Admin/Dashboard/Management/Projects';
-import { SkillManagement } from '@/components/Admin/Dashboard/Management/Skills';
-import { ExperienceManagement } from '@/components/Admin/Dashboard/Management/Experience';
-import { EducationManagement } from '@/components/Admin/Dashboard/Management/Education';
-import { CertificateManagement } from '@/components/Admin/Dashboard/Management/Certificates';
-import { MomentManagement } from '@/components/Admin/Dashboard/Management/Moments';
-import { CVManagement } from '@/components/Admin/Dashboard/Management/CV';
-import { LogsTab } from '@/components/Admin/Dashboard/Tabs/Logs';
-import { AnalyticsTab } from '@/components/Admin/Dashboard/Tabs/Analytics';
-import { UsersTab } from '@/components/Admin/Dashboard/Tabs/Users';
-import { PerformanceTab } from '@/components/Admin/Dashboard/Tabs/Performance';
-import { useToast } from '@/hooks/use-toast';
+import { Sidebar, TopBar } from './Layout';
+import { OverviewTab } from './Tabs/Overview';
+import { ProjectManagement } from './Management/Projects';
+import { SkillManagement } from './Management/Skills';
+import { ExperienceManagement } from './Management/Experience';
+import { EducationManagement } from './Management/Education';
+import { CertificateManagement } from './Management/Certificates';
+import { MomentManagement } from './Management/Moments';
+import { CVManagement } from './Management/CV';
+import { LogsTab } from './Tabs/Logs';
+import { AnalyticsTab } from './Tabs/Analytics';
+import { UsersTab } from './Tabs/Users';
+import { PerformanceTab } from './Tabs/Performance';
+import { useToast } from '../../../hooks/use-toast';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

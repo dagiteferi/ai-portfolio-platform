@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/Admin/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/Admin/Card';
-import { Input } from '@/components/Admin/Input';
-import { useToast } from '@/hooks/use-toast';
-import { adminLogin } from '@/services/api';
+import { Button } from '../Button';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card';
+import { Input } from '../Input';
+import { useToast } from '../../../hooks/use-toast';
+import { adminLogin } from '../../../services/api';
 import { Lock, User, Loader2 } from 'lucide-react';
 
 const AdminLogin = () => {
