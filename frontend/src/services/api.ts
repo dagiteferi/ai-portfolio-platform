@@ -177,13 +177,13 @@ apiClient.interceptors.response.use(
       }
     }
     if (error.response) {
-        return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
+      return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
     }
-     else if (error.request) {
-        return Promise.reject(new Error('Network error: Please check your connection.'));
+    else if (error.request) {
+      return Promise.reject(new Error('Network error: Please check your connection.'));
     }
     else {
-        return Promise.reject(new Error(error.message));
+      return Promise.reject(new Error(error.message));
     }
   }
 );
@@ -223,21 +223,231 @@ export const sendMessageToBackend = async (payload: ChatRequestPayload): Promise
   }
 };
 
-// You can add other type-safe API functions here. For example:
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
+// --- Admin API Contracts ---
+
+export interface AdminLoginRequest {
+  username: string;
+  password: string;
 }
 
-export const getProjects = async (): Promise<Project[]> => {
-  try {
-    const data: Project[] = await apiClient.get('/projects');
-    return data;
-  } catch (error) {
-    throw error;
-  }
+export interface AdminTokenResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface TechnicalSkill {
+  id: number;
+  name: string;
+  category?: string;
+  proficiency?: string;
+  icon?: string;
+}
+
+export interface Project {
+  id: number;
+  title: string;
+  category?: string;
+  description?: string;
+  technologies?: string;
+  image_url?: string;
+  project_url?: string;
+  github_url?: string;
+  is_featured: boolean;
+}
+
+export interface WorkExperience {
+  id: number;
+  company: string;
+  position: string;
+  location?: string;
+  start_date: string;
+  end_date?: string;
+  description?: string;
+  is_current: boolean;
+}
+
+export interface Education {
+  id: number;
+  institution: string;
+  degree: string;
+  field_of_study?: string;
+  start_date: string;
+  end_date?: string;
+  description?: string;
+}
+
+export interface Certificate {
+  id: number;
+  title: string;
+  issuer: string;
+  date_issued?: string;
+  url?: string;
+  description?: string;
+  is_professional: boolean;
+}
+
+export interface MemorableMoment {
+  id: number;
+  title: string;
+  description?: string;
+  date?: string;
+  image_url?: string;
+}
+
+export interface CV {
+  id: number;
+  url: string;
+  uploaded_at: string;
+}
+
+// --- Admin API Service Functions ---
+
+export const adminLogin = async (payload: AdminLoginRequest): Promise<AdminTokenResponse> => {
+  const response = await apiClient.post('/admin/login', payload);
+  return response.data;
 };
 
-export {};
+// Projects
+export const getAdminProjects = async (): Promise<Project[]> => {
+  return apiClient.get('/admin/projects');
+};
+
+export const createProject = async (formData: FormData): Promise<Project> => {
+  return apiClient.post('/admin/projects/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const updateProject = async (id: number, formData: FormData): Promise<Project> => {
+  return apiClient.put(`/admin/projects/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const deleteProject = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/projects/${id}`);
+};
+
+// Skills
+export const getAdminSkills = async (): Promise<TechnicalSkill[]> => {
+  return apiClient.get('/admin/skills');
+};
+
+export const createSkill = async (formData: FormData): Promise<TechnicalSkill> => {
+  return apiClient.post('/admin/skills/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const updateSkill = async (id: number, skill: Partial<TechnicalSkill>): Promise<TechnicalSkill> => {
+  return apiClient.put(`/admin/skills/${id}`, skill);
+};
+
+export const deleteSkill = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/skills/${id}`);
+};
+
+// Experience
+export const getAdminExperience = async (): Promise<WorkExperience[]> => {
+  return apiClient.get('/admin/experience');
+};
+
+export const createExperience = async (experience: any): Promise<WorkExperience> => {
+  return apiClient.post('/admin/experience', experience);
+};
+
+export const updateExperience = async (id: number, experience: any): Promise<WorkExperience> => {
+  return apiClient.put(`/admin/experience/${id}`, experience);
+};
+
+export const deleteExperience = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/experience/${id}`);
+};
+
+// Education
+export const getAdminEducation = async (): Promise<Education[]> => {
+  return apiClient.get('/admin/education');
+};
+
+export const createEducation = async (education: any): Promise<Education> => {
+  return apiClient.post('/admin/education', education);
+};
+
+export const updateEducation = async (id: number, education: any): Promise<Education> => {
+  return apiClient.put(`/admin/education/${id}`, education);
+};
+
+export const deleteEducation = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/education/${id}`);
+};
+
+// Certificates
+export const getAdminCertificates = async (): Promise<Certificate[]> => {
+  return apiClient.get('/admin/certificates');
+};
+
+export const createCertificate = async (formData: FormData): Promise<Certificate> => {
+  return apiClient.post('/admin/certificates/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const updateCertificate = async (id: number, formData: FormData): Promise<Certificate> => {
+  return apiClient.put(`/admin/certificates/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const deleteCertificate = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/certificates/${id}`);
+};
+
+// Moments
+export const getAdminMoments = async (): Promise<MemorableMoment[]> => {
+  return apiClient.get('/admin/moments');
+};
+
+export const createMoment = async (formData: FormData): Promise<MemorableMoment> => {
+  return apiClient.post('/admin/moments/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const updateMoment = async (id: number, formData: FormData): Promise<MemorableMoment> => {
+  return apiClient.put(`/admin/moments/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const deleteMoment = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/moments/${id}`);
+};
+
+// CV
+export const getAdminCVs = async (): Promise<CV[]> => {
+  return apiClient.get('/admin/cv');
+};
+
+export const uploadCV = async (formData: FormData): Promise<CV> => {
+  return apiClient.post('/admin/cv/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const deleteCV = async (id: number): Promise<void> => {
+  return apiClient.delete(`/admin/cv/${id}`);
+};
+
+// Logs
+export const getLogFiles = async (): Promise<string[]> => {
+  return apiClient.get('/admin/logs');
+};
+
+export const getLogContent = async (filename: string, limit = 100, offset = 0): Promise<any> => {
+  return apiClient.get(`/admin/logs/${filename}`, {
+    params: { limit, offset }
+  });
+};
+
+export { };
 
