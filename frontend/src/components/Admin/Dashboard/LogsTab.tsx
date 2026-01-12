@@ -2,43 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../Card';
 import { ScrollArea } from '../ScrollArea';
 import { useToast } from '../../../hooks/use-toast';
+import { getLogFiles, getLogContent } from '../../../services/api';
 
 const LogsTab = () => {
   const { showToast } = useToast();
   const [logFiles, setLogFiles] = useState<string[]>([]);
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [logContent, setLogContent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchLogFiles();
+    fetchFiles();
   }, []);
 
-  const fetchLogFiles = async () => {
+  const fetchFiles = async () => {
     try {
-      const response = await fetch('/api/admin/logs');
-      if (response.ok) {
-        const data = await response.json();
-        setLogFiles(data);
-      } else {
-        showToast("Failed to fetch log files.", "error");
-      }
+      const data = await getLogFiles();
+      setLogFiles(data);
     } catch (error) {
-      showToast("An error occurred while fetching log files.", "error");
+      showToast("Failed to fetch log files.", "error");
     }
   };
 
-  const fetchLogContent = async (filename: string) => {
+  const fetchContent = async (filename: string) => {
     try {
-      const response = await fetch(`/api/admin/logs/${filename}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLogContent(data);
-        setSelectedLog(filename);
-      } else {
-        showToast(`Failed to fetch log content for ${filename}.`, "error");
-      }
+      setIsLoading(true);
+      const data = await getLogContent(filename);
+      setLogContent(data);
+      setSelectedLog(filename);
     } catch (error) {
-      showToast(`An error occurred while fetching log content for ${filename}.`, "error");
+      showToast(`Failed to fetch log content for ${filename}.`, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,9 +47,9 @@ const LogsTab = () => {
           <CardContent>
             <ScrollArea className="h-[400px]">
               {logFiles.map((file, index) => (
-                <div key={index} 
-                     className={`p-2 rounded-md cursor-pointer ${selectedLog === file ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
-                     onClick={() => fetchLogContent(file)}>
+                <div key={index}
+                  className={`p-2 rounded-md cursor-pointer ${selectedLog === file ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
+                  onClick={() => fetchContent(file)}>
                   {file}
                 </div>
               ))}
