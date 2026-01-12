@@ -1,69 +1,81 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import ManagementTable from './ManagementTable';
-import { getAdminMoments, deleteMoment, MemorableMoment } from '../../../services/api';
+import { getAdminMoments, deleteMoment, createMoment, updateMoment, MemorableMoment } from '../../../services/api';
 import { useToast } from '../../../hooks/use-toast';
 import { Camera } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '../Modal';
+import MomentForm from './MomentForm';
 
 const MomentManagement = () => {
-    const [moments, setMoments] = useState<MemorableMoment[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingMoment, setEditingMoment] = useState<MemorableMoment | undefined>(undefined);
     const { showToast } = useToast();
+    const queryClient = useQueryClient();
 
-    const MOCK_MOMENTS: MemorableMoment[] = [
-        {
-            id: 1,
-            title: "First AI Model Deployment",
-            description: "Successfully deployed my first production-grade computer vision model.",
-            date: "2021-03-15",
-            image_url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=100&h=100&fit=crop"
+    const { data: moments = [], isLoading } = useQuery({
+        queryKey: ['admin-moments'],
+        queryFn: getAdminMoments,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const createMutation = useMutation({
+        mutationFn: createMoment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+            showToast("Moment created successfully", "success");
+            setIsModalOpen(false);
         },
-        {
-            id: 2,
-            title: "Hackathon Winner",
-            description: "Won first place at the National AI Innovation Hackathon.",
-            date: "2022-08-20",
-            image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=100&h=100&fit=crop"
+        onError: (error: any) => {
+            showToast(error.message || "Failed to create moment", "error");
         }
-    ];
+    });
 
-    const fetchMoments = async () => {
-        try {
-            setIsLoading(true);
-            const data = await getAdminMoments();
-            if (data && data.length > 0) {
-                setMoments(data);
-            } else {
-                setMoments(MOCK_MOMENTS);
-            }
-        } catch (error) {
-            console.error("API Error, using mock data:", error);
-            setMoments(MOCK_MOMENTS);
-        } finally {
-            setIsLoading(false);
+    const updateMutation = useMutation({
+        mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateMoment(id, formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+            showToast("Moment updated successfully", "success");
+            setIsModalOpen(false);
+            setEditingMoment(undefined);
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to update moment", "error");
         }
-    };
+    });
 
-    useEffect(() => {
-        fetchMoments();
-    }, []);
+    const deleteMutation = useMutation({
+        mutationFn: deleteMoment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+            showToast("Moment deleted successfully", "success");
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to delete moment", "error");
+        }
+    });
 
     const handleAdd = () => {
-        showToast("Add moment modal would open here", "info");
+        setEditingMoment(undefined);
+        setIsModalOpen(true);
     };
 
     const handleEdit = (moment: MemorableMoment) => {
-        showToast(`Editing moment: ${moment.title}`, "info");
+        setEditingMoment(moment);
+        setIsModalOpen(true);
     };
 
     const handleDelete = async (moment: MemorableMoment) => {
         if (window.confirm(`Are you sure you want to delete "${moment.title}"?`)) {
-            try {
-                await deleteMoment(moment.id);
-                showToast("Moment deleted successfully", "success");
-                fetchMoments();
-            } catch (error) {
-                showToast("Failed to delete moment", "error");
-            }
+            deleteMutation.mutate(moment.id);
+        }
+    };
+
+    const handleSubmit = async (formData: FormData) => {
+        if (editingMoment) {
+            updateMutation.mutate({ id: editingMoment.id, formData });
+        } else {
+            createMutation.mutate(formData);
         }
     };
 
@@ -73,15 +85,15 @@ const MomentManagement = () => {
             accessor: (item: MemorableMoment) => (
                 <div className="flex items-center gap-3">
                     {item.image_url ? (
-                        <img src={item.image_url} alt={item.title} className="h-12 w-12 rounded-md object-cover border" />
+                        <img src={item.image_url} alt={item.title} className="h-12 w-12 rounded-md object-cover border shadow-sm" />
                     ) : (
                         <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center border">
                             <Camera className="h-5 w-5 text-muted-foreground" />
                         </div>
                     )}
                     <div>
-                        <p className="font-medium">{item.title}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">{item.description}</p>
+                        <p className="font-medium text-sm">{item.title}</p>
+                        <p className="text-[11px] text-muted-foreground line-clamp-1 max-w-[200px]">{item.description}</p>
                     </div>
                 </div>
             )
@@ -89,21 +101,36 @@ const MomentManagement = () => {
         {
             header: 'Date',
             accessor: (item: MemorableMoment) => (
-                <span className="text-xs text-muted-foreground">{item.date || 'N/A'}</span>
+                <span className="text-[11px] text-muted-foreground">{item.date || 'N/A'}</span>
             )
         }
     ];
 
     return (
-        <ManagementTable
-            title="Memorable Moments"
-            data={moments}
-            columns={columns}
-            onAdd={handleAdd}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-        />
+        <>
+            <ManagementTable
+                title="Memorable Moments"
+                data={moments}
+                columns={columns}
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={editingMoment ? 'Edit Moment' : 'Add New Moment'}
+            >
+                <MomentForm
+                    moment={editingMoment}
+                    onSubmit={handleSubmit}
+                    onCancel={() => setIsModalOpen(false)}
+                    isSubmitting={createMutation.isPending || updateMutation.isPending}
+                />
+            </Modal>
+        </>
     );
 };
 

@@ -1,75 +1,82 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import ManagementTable from './ManagementTable';
-import { getAdminExperience, deleteExperience, WorkExperience } from '../../../services/api';
+import { getAdminExperience, deleteExperience, createExperience, updateExperience, WorkExperience } from '../../../services/api';
 import { useToast } from '../../../hooks/use-toast';
 import { Badge } from '../Badge';
 import { Calendar } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '../Modal';
+import ExperienceForm from './ExperienceForm';
 
 const ExperienceManagement = () => {
-    const [experiences, setExperiences] = useState<WorkExperience[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingExperience, setEditingExperience] = useState<WorkExperience | undefined>(undefined);
     const { showToast } = useToast();
+    const queryClient = useQueryClient();
 
-    const MOCK_EXPERIENCES: WorkExperience[] = [
-        {
-            id: 1,
-            company: "Tech AI Solutions",
-            position: "Senior AI Engineer",
-            location: "San Francisco, CA",
-            start_date: "2022-01",
-            is_current: true,
-            description: "Leading the development of LLM-based applications."
+    const { data: experiences = [], isLoading } = useQuery({
+        queryKey: ['admin-experience'],
+        queryFn: getAdminExperience,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const createMutation = useMutation({
+        mutationFn: createExperience,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+            showToast("Experience created successfully", "success");
+            setIsModalOpen(false);
         },
-        {
-            id: 2,
-            company: "Data Systems Inc",
-            position: "Machine Learning Engineer",
-            location: "Remote",
-            start_date: "2020-06",
-            end_date: "2021-12",
-            is_current: false,
-            description: "Built scalable data pipelines and predictive models."
+        onError: (error: any) => {
+            showToast(error.message || "Failed to create experience", "error");
         }
-    ];
+    });
 
-    const fetchExperiences = async () => {
-        try {
-            setIsLoading(true);
-            const data = await getAdminExperience();
-            if (data && data.length > 0) {
-                setExperiences(data);
-            } else {
-                setExperiences(MOCK_EXPERIENCES);
-            }
-        } catch (error) {
-            console.error("API Error, using mock data:", error);
-            setExperiences(MOCK_EXPERIENCES);
-        } finally {
-            setIsLoading(false);
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number, data: any }) => updateExperience(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+            showToast("Experience updated successfully", "success");
+            setIsModalOpen(false);
+            setEditingExperience(undefined);
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to update experience", "error");
         }
-    };
+    });
 
-    useEffect(() => {
-        fetchExperiences();
-    }, []);
+    const deleteMutation = useMutation({
+        mutationFn: deleteExperience,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+            showToast("Experience deleted successfully", "success");
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to delete experience", "error");
+        }
+    });
 
     const handleAdd = () => {
-        showToast("Add experience modal would open here", "info");
+        setEditingExperience(undefined);
+        setIsModalOpen(true);
     };
 
     const handleEdit = (exp: WorkExperience) => {
-        showToast(`Editing experience at ${exp.company}`, "info");
+        setEditingExperience(exp);
+        setIsModalOpen(true);
     };
 
     const handleDelete = async (exp: WorkExperience) => {
         if (window.confirm(`Are you sure you want to delete experience at "${exp.company}"?`)) {
-            try {
-                await deleteExperience(exp.id);
-                showToast("Experience deleted successfully", "success");
-                fetchExperiences();
-            } catch (error) {
-                showToast("Failed to delete experience", "error");
-            }
+            deleteMutation.mutate(exp.id);
+        }
+    };
+
+    const handleSubmit = async (data: any) => {
+        if (editingExperience) {
+            updateMutation.mutate({ id: editingExperience.id, data });
+        } else {
+            createMutation.mutate(data);
         }
     };
 
@@ -78,17 +85,17 @@ const ExperienceManagement = () => {
             header: 'Role & Company',
             accessor: (item: WorkExperience) => (
                 <div>
-                    <p className="font-medium">{item.position}</p>
-                    <p className="text-xs text-muted-foreground">{item.company}</p>
+                    <p className="font-medium text-sm">{item.position}</p>
+                    <p className="text-[11px] text-muted-foreground">{item.company}</p>
                 </div>
             )
         },
         {
             header: 'Duration',
             accessor: (item: WorkExperience) => (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                     <Calendar className="h-3 w-3" />
-                    <span>{item.start_date} - {item.is_current ? 'Present' : item.end_date}</span>
+                    <span>{item.start_date} - {item.is_current ? 'Present' : item.end_date || 'N/A'}</span>
                 </div>
             )
         },
@@ -96,31 +103,47 @@ const ExperienceManagement = () => {
             header: 'Status',
             accessor: (item: WorkExperience) => (
                 item.is_current ? (
-                    <Badge className="bg-green-500/10 text-green-600 border-green-200">Current</Badge>
+                    <Badge className="bg-green-500/10 text-green-600 border-green-200 text-[10px] px-2 py-0 h-5">Current</Badge>
                 ) : (
-                    <Badge variant="outline">Past</Badge>
+                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">Past</Badge>
                 )
             )
         },
         {
             header: 'Location',
             accessor: (item: WorkExperience) => (
-                <span className="text-xs">{item.location || 'Remote'}</span>
+                <span className="text-[11px] text-muted-foreground">{item.location || 'Remote'}</span>
             )
         }
     ];
 
     return (
-        <ManagementTable
-            title="Work Experience"
-            data={experiences}
-            columns={columns}
-            onAdd={handleAdd}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-        />
+        <>
+            <ManagementTable
+                title="Work Experience"
+                data={experiences}
+                columns={columns}
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={editingExperience ? 'Edit Experience' : 'Add New Experience'}
+            >
+                <ExperienceForm
+                    experience={editingExperience}
+                    onSubmit={handleSubmit}
+                    onCancel={() => setIsModalOpen(false)}
+                    isSubmitting={createMutation.isPending || updateMutation.isPending}
+                />
+            </Modal>
+        </>
     );
 };
 
 export default ExperienceManagement;
+
