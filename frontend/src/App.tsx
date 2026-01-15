@@ -16,6 +16,8 @@ const queryClient = new QueryClient({
   },
 });
 
+import ProtectedRoute from './components/Admin/Auth/ProtectedRoute';
+
 function App() {
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +38,14 @@ function App() {
           <Router>
             <Routes>
               <Route path="/admin/login" element={<AdminLoginPage />} />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
               <Route path="/*" element={<Pages />} />
             </Routes>

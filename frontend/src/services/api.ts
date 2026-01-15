@@ -303,8 +303,7 @@ export interface CV {
 // --- Admin API Service Functions ---
 
 export const adminLogin = async (payload: AdminLoginRequest): Promise<AdminTokenResponse> => {
-  const response = await apiClient.post('/admin/login', payload);
-  return response.data;
+  return apiClient.post('/admin/login', payload);
 };
 
 // Projects
