@@ -1,80 +1,101 @@
-# 🚀 AI Portfolio Platform
+# AI Portfolio Platform
 
-<p align="center">
-  <img src="./frontend/public/assets/ai-portfolio.png" alt="AI Portfolio Platform" width="800"/>
-</p>
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-[![LangChain](https://img.shields.io/badge/LangChain-white?style=flat&logo=chainlink)](https://www.langchain.com/)
-
-An enterprise-grade, open-source AI Portfolio Platform designed to showcase your professional journey with an intelligent, context-aware chatbot. This platform integrates a modern React frontend with a powerful FastAPI backend, leveraging advanced RAG (Retrieval-Augmented Generation) and LangGraph for sophisticated AI interactions.
+An enterprise-grade, open-source platform designed to showcase professional achievements through an intelligent, context-aware AI interface. This system integrates a modern React frontend with a high-performance FastAPI backend, leveraging advanced Retrieval-Augmented Generation (RAG) and LangGraph for sophisticated agentic interactions.
 
 ---
 
-## 🌟 Key Features
+## Table of Contents
 
-- **🤖 Intelligent AI Chatbot:** Powered by **LangGraph** and **Google Gemini**, providing context-aware responses based on your professional data.
-- **📚 Advanced RAG Pipeline:** Uses **FAISS** for vector storage and **HuggingFace Embeddings** to retrieve relevant information from your resume and projects.
-- **🛠️ Admin Dashboard:** A comprehensive CRUD interface to manage your Skills, Projects, Education, Experience, and Memorable Moments.
-- **📁 Supabase Integration:** Seamless file and image uploads for your CV, project screenshots, and certificates.
-- **🔒 Secure Authentication:** JWT-based security for the admin panel with environment-driven configuration.
-- **🚀 Containerized Deployment:** Fully orchestrated with **Docker Compose** for easy setup and scaling.
-- **📈 Real-time Analytics & Logs:** Integrated logging with **structlog** and real-time log streaming via WebSockets.
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [AI Integration Flow](#ai-integration-flow)
+- [Database Schema](#database-schema)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Configuration](#environment-configuration)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [Contact & Support](#contact--support)
+- [License](#license)
 
 ---
 
-## 🏗️ System Architecture
+## Overview
+
+The AI Portfolio Platform is a full-stack solution I developed for developers and AI engineers to demonstrate their expertise. Unlike static portfolios, this platform features a dynamic AI agent that "knows" my professional history, projects, and skills, providing recruiters and collaborators with an interactive, data-driven experience.
+
+---
+
+## Key Features
+
+- **Agentic AI Interface:** Powered by LangGraph and Google Gemini, providing context-aware, non-linear conversational experiences.
+- **Advanced RAG Pipeline:** Implements FAISS for high-density vector storage and HuggingFace embeddings for semantic retrieval of professional data.
+- **Enterprise Admin Suite:** A secure, JWT-authenticated dashboard for comprehensive management of projects, education, and work history.
+- **Cloud-Native Storage:** Seamless integration with Supabase for resilient asset management and file hosting.
+- **Observability & Logging:** Structured logging via `structlog` with real-time WebSocket streaming for system monitoring.
+- **Containerized Orchestration:** Production-ready Docker Compose configuration for consistent deployment across environments.
+
+---
+
+## System Architecture
+
+The following diagram illustrates the high-level architecture and data flow between the platform's core components.
 
 ```mermaid
 graph TD
     User((User)) -->|HTTPS| Nginx[Nginx Reverse Proxy]
-    Nginx -->|Static Files| Frontend[React Frontend]
+    Nginx -->|Static Assets| Frontend[React Frontend]
     Nginx -->|API Requests| Backend[FastAPI Backend]
     
-    subgraph "Backend Services"
-        Backend -->|Auth| JWT[JWT Auth]
-        Backend -->|CRUD| Postgres[(PostgreSQL)]
-        Backend -->|Vector Search| FAISS[(FAISS Vector DB)]
-        Backend -->|AI Logic| LangGraph[LangGraph Engine]
-        LangGraph -->|LLM| Gemini[Google Gemini API]
+    subgraph "Application Layer"
+        Backend -->|Auth| JWT[JWT Authentication]
+        Backend -->|Logic| LangGraph[LangGraph Engine]
     end
     
-    subgraph "Storage"
-        Backend -->|Uploads| Supabase[Supabase Storage]
+    subgraph "Data Layer"
+        Backend -->|Relational| Postgres[(PostgreSQL)]
+        Backend -->|Vector| FAISS[(FAISS Vector DB)]
+        LangGraph -->|Inference| Gemini[Google Gemini API]
+    end
+    
+    subgraph "External Services"
+        Backend -->|Storage| Supabase[Supabase Storage]
     end
 ```
 
 ---
 
-## 🧠 AI Integration Flow
+## AI Integration Flow
 
-The chatbot uses a sophisticated multi-step process to ensure accurate and helpful responses.
+The AI agent follows a multi-stage reasoning process to synthesize responses from the knowledge base.
 
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant A as API (FastAPI)
-    participant G as LangGraph
-    participant V as FAISS (RAG)
+    participant A as FastAPI
+    participant G as LangGraph Agent
+    participant V as FAISS Vector Store
     participant L as LLM (Gemini)
 
-    U->>A: Send Message
-    A->>G: Process Request
-    G->>G: Analyze User Intent
-    G->>V: Retrieve Relevant Context
-    V-->>G: Context (Resume/Projects)
-    G->>L: Generate Response (Context + History)
-    L-->>G: Final AI Response
-    G-->>A: Return Payload
-    A-->>U: Display Chat Bubble
+    U->>A: Submit Query
+    A->>G: Initialize Agent State
+    G->>V: Semantic Search (Resume/Projects)
+    V-->>G: Relevant Context Chunks
+    G->>L: Augment Prompt with Context
+    L-->>G: Synthesized Response
+    G-->>A: Final State Update
+    A-->>U: Render Response
 ```
 
 ---
 
-## 📊 Database Schema
+## Database Schema
+
+The relational schema is designed for extensibility and efficient querying of professional metadata.
 
 ```mermaid
 erDiagram
@@ -83,156 +104,124 @@ erDiagram
         string name
         string category
         string proficiency
-        string icon_url
     }
     PROJECT {
         int id
         string title
         string description
         string technologies
-        string image_url
-        string github_url
-        string project_url
         boolean is_featured
     }
     WORK_EXPERIENCE {
         int id
         string title
         string company
-        string location
         date start_date
-        date end_date
         boolean is_current
-        text description
     }
     EDUCATION {
         int id
         string degree
         string institution
-        date start_date
         date end_date
-        text description
     }
     CERTIFICATE {
         int id
         string title
         string issuer
-        date date_issued
         string url
     }
 ```
 
 ---
 
-## 🚀 Deployment Workflow
-
-```mermaid
-graph LR
-    Code[Local Code] -->|Build| Docker[Docker Images]
-    Docker -->|Compose| Services[Backend / Frontend / Nginx]
-    Services -->|Deploy| Cloud[Cloud Provider / VPS]
-```
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```text
 ai-portfolio-platform/
-├── backend/                # FastAPI Application
-│   ├── ai_core/           # LangGraph & RAG Logic
-│   ├── api/               # API Endpoints & Auth
-│   ├── models/            # SQLAlchemy Models
-│   └── services/          # Business Logic (File Uploads, etc.)
-├── frontend/               # React Application (Vite)
+├── backend/                # FastAPI Microservice
+│   ├── ai_core/           # LangGraph Agents & RAG Logic
+│   ├── api/               # REST Endpoints & Middleware
+│   ├── models/            # SQLAlchemy Data Models
+│   └── services/          # External Service Integrations
+├── frontend/               # React SPA (Vite + TypeScript)
 │   ├── src/
-│   │   ├── components/    # UI Components (Chat, Admin, Portfolio)
-│   │   ├── pages/         # Page Views
-│   │   └── services/      # API Integration
-├── infrastructure/         # Deployment Configs
-└── docker-compose.yml      # Orchestration
+│   │   ├── components/    # Atomic UI Components
+│   │   ├── pages/         # View Containers
+│   │   └── services/      # API Clients
+├── infrastructure/         # Nginx & Environment Configs
+└── docker-compose.yml      # Service Orchestration
 ```
-
-## 🛠️ Tech Stack
-
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React, TypeScript, Tailwind CSS, Vite, Lucide Icons |
-| **Backend** | FastAPI, Python 3.12, Gunicorn, SQLAlchemy |
-| **AI Core** | LangChain, LangGraph, Google Gemini, FAISS, HuggingFace |
-| **Database** | PostgreSQL, Redis (Rate Limiting) |
-| **Storage** | Supabase Storage |
-| **DevOps** | Docker, Docker Compose, Nginx, Sentry |
 
 ---
 
-## 🚦 Getting Started
+## Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 18, TypeScript, Tailwind CSS, Vite |
+| **Backend** | FastAPI, Python 3.12, SQLAlchemy, Pydantic |
+| **AI/ML** | LangChain, LangGraph, Google Gemini, FAISS, HuggingFace |
+| **Database** | PostgreSQL, Redis |
+| **Infrastructure** | Docker, Nginx, Supabase, Sentry |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- Docker & Docker Compose
+
+- Docker Engine 24.0+ and Docker Compose
 - Google Gemini API Key
-- Supabase Account (for storage)
+- Supabase Project (URL and Service Key)
 
 ### Installation
 
-1. **Clone the Repo**
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/dagiteferi/ai-portfolio-platform.git
    cd ai-portfolio-platform
    ```
 
-2. **Configure Environment**
-   Create a `.env` file in the root:
-   ```env
-   # Database
-   DATABASE_URL=postgresql://user:pass@db:5432/portfolio
-   
-   # AI
-   GOOGLE_API_KEY=your_gemini_key
-   
-   # Supabase
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_KEY=your_supabase_key
-   
-   # Admin
-   JWT_SECRET_KEY=your_secret
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=secure_password
-   ```
+2. **Configure environment variables:**
+   Create a `.env` file in the root directory. Refer to `.env.example` for the required schema.
 
-3. **Launch with Docker**
+3. **Initialize services:**
    ```bash
    docker-compose up --build
    ```
-   Access the app at `http://localhost:80`.
+
+The application will be accessible at `http://localhost`.
 
 ---
 
-## 🤝 Contributing
+## Deployment
 
-Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The platform is designed for containerized deployment. For production environments, it is recommended to:
+- Use a managed PostgreSQL instance (e.g., RDS, Supabase DB).
+- Configure SSL/TLS termination at the Nginx level.
+- Implement a CI/CD pipeline for automated testing and deployment.
 
 ---
 
-## 📬 Contact & Support
+## Contributing
 
-**Dagmawi Teferi** - AI/ML Engineer
-
-- **📧 Email:** [dagiteferi2011@gmail.com](mailto:dagiteferi2011@gmail.com)
-- **🔗 LinkedIn:** [dagmawi-teferi](https://www.linkedin.com/in/dagmawi-teferi)
-- **✈️ Telegram:** [@dagiteferi](https://t.me/dagiteferi)
-- **🐙 GitHub:** [@dagiteferi](https://github.com/dagiteferi)
-
-Project Link: [https://github.com/dagiteferi/ai-portfolio-platform](https://github.com/dagiteferi/ai-portfolio-platform)
+As the sole developer of this project, I welcome feedback and suggestions. If you would like to contribute or report an issue, please follow the standard fork-and-pull request workflow. I will review all submissions to ensure they align with the project's technical standards.
 
 ---
 
-<p align="center">
-  Made with ❤️ by Dagmawi Teferi
-</p>
+## Contact & Support
+
+**Dagmawi Teferi**  
+Sole Developer & Architect
+
+- **Email:** [dagiteferi2011@gmail.com](mailto:dagiteferi2011@gmail.com)
+- **LinkedIn:** [dagmawi-teferi](https://www.linkedin.com/in/dagmawi-teferi)
+- **Telegram:** [@dagiteferi](https://t.me/dagiteferi)
+- **GitHub:** [@dagiteferi](https://github.com/dagiteferi)
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
