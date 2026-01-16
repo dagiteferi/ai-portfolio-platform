@@ -417,3 +417,11 @@ yarl==1.20.1
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
+
+alembic
+psycopg2-binary
+python-multipart
+pyjwt
+python-jose[cryptography]
+supabase
+slowapi

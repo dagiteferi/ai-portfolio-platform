@@ -24,3 +24,4 @@ python-multipart
 pyjwt
 python-jose[cryptography]
 supabase
+slowapi
