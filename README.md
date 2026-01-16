@@ -99,6 +99,19 @@ The relational schema is designed for extensibility and efficient querying of pr
 
 ```mermaid
 erDiagram
+    USER_PROFILE ||--o{ TECHNICAL_SKILL : possesses
+    USER_PROFILE ||--o{ PROJECT : develops
+    USER_PROFILE ||--o{ WORK_EXPERIENCE : performs
+    USER_PROFILE ||--o{ EDUCATION : completes
+    USER_PROFILE ||--o{ CERTIFICATE : earns
+    USER_PROFILE ||--o{ MEMORABLE_MOMENT : experiences
+    USER_PROFILE ||--o{ CV : provides
+
+    USER_PROFILE {
+        string name
+        string role
+        string contact_email
+    }
     TECHNICAL_SKILL {
         int id
         string name
@@ -130,6 +143,11 @@ erDiagram
         string title
         string issuer
         string url
+    }
+    CV {
+        int id
+        string url
+        datetime created_at
     }
 ```
 
@@ -213,7 +231,7 @@ As the sole developer of this project, I welcome feedback and suggestions. If yo
 ## Contact & Support
 
 **Dagmawi Teferi**  
-Sole Developer & Architect
+Sole Developer & Architect of the project 
 
 - **Email:** [dagiteferi2011@gmail.com](mailto:dagiteferi2011@gmail.com)
 - **LinkedIn:** [dagmawi-teferi](https://www.linkedin.com/in/dagmawi-teferi)
