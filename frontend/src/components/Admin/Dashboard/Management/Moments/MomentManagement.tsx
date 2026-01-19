@@ -44,6 +44,8 @@ const MomentManagement = () => {
             queryClient.setQueryData(['admin-moments'], (old: MemorableMoment[] | undefined) => {
                 return old ? [newMoment, ...old] : [newMoment];
             });
+            // Invalidate public moments cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['moments'] });
             showToast("Moment created successfully", "success");
             setIsModalOpen(false);
         },
@@ -55,9 +57,12 @@ const MomentManagement = () => {
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }: { id: number, formData: FormData }) => updateMoment(id, formData),
         onSuccess: (updatedMoment) => {
+            // Update admin cache
             queryClient.setQueryData(['admin-moments'], (old: MemorableMoment[] | undefined) => {
                 return old ? old.map(m => m.id === updatedMoment.id ? updatedMoment : m) : [updatedMoment];
             });
+            // Invalidate public moments cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['moments'] });
             showToast("Moment updated successfully", "success");
             setIsModalOpen(false);
             setEditingMoment(undefined);
@@ -87,6 +92,8 @@ const MomentManagement = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
         },
         onSuccess: () => {
+            // Invalidate public moments cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['moments'] });
             showToast("Moment deleted successfully", "success");
         }
     });

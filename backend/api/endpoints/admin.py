@@ -591,8 +591,7 @@ async def update_moment(
     Optionally upload a new image.
     """
     db_moment = get_object_or_404(db, models.MemorableMoment, moment_id)
-    
-    # Helper function to check if value should be updated
+
     def should_update(value):
         """Check if value is meaningful (not None, empty string, or 'string')"""
         if value is None:
@@ -600,11 +599,15 @@ async def update_moment(
         if isinstance(value, str) and (value == "" or value.lower() == "string"):
             return False
         return True
-    
-    # Upload new image if provided (handle empty string from Swagger)
-    if file and isinstance(file, UploadFile):
-        db_moment.image_url = await FileUploadService.upload_image(file, "moment_")
-    
+
+    # Upload new image if provided, using a robust type check
+    if file and type(file).__name__ == 'UploadFile' and getattr(file, 'filename', None):
+        try:
+            new_image_url = await FileUploadService.upload_image(file, "moment_")
+            db_moment.image_url = new_image_url
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
+
     # Update other fields only if they have meaningful values
     if should_update(title):
         db_moment.title = title
@@ -615,10 +618,9 @@ async def update_moment(
             db_moment.date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
             pass
-    
+
     db.commit()
     db.refresh(db_moment)
-    
     return db_moment
 
 

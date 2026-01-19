@@ -29,7 +29,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds
 });
 
 apiClient.interceptors.request.use(
@@ -53,6 +53,12 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If sending FormData, remove Content-Type to let axios set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {
@@ -281,15 +287,11 @@ export const getAdminProjects = async (): Promise<Project[]> => {
 };
 
 export const createProject = async (formData: FormData): Promise<Project> => {
-  return apiClient.post('/admin/projects/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/projects/upload', formData);
 };
 
 export const updateProject = async (id: number, formData: FormData): Promise<Project> => {
-  return apiClient.put(`/admin/projects/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/projects/${id}`, formData);
 };
 
 export const deleteProject = async (id: number): Promise<void> => {
@@ -301,9 +303,7 @@ export const getAdminSkills = async (): Promise<TechnicalSkill[]> => {
 };
 
 export const createSkill = async (formData: FormData): Promise<TechnicalSkill> => {
-  return apiClient.post('/admin/skills/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/skills/upload', formData);
 };
 
 export const updateSkill = async (id: number, skill: Partial<TechnicalSkill>): Promise<TechnicalSkill> => {
@@ -351,15 +351,11 @@ export const getAdminCertificates = async (): Promise<Certificate[]> => {
 };
 
 export const createCertificate = async (formData: FormData): Promise<Certificate> => {
-  return apiClient.post('/admin/certificates/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/certificates/upload', formData);
 };
 
 export const updateCertificate = async (id: number, formData: FormData): Promise<Certificate> => {
-  return apiClient.put(`/admin/certificates/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/certificates/${id}`, formData);
 };
 
 export const deleteCertificate = async (id: number): Promise<void> => {
@@ -371,15 +367,11 @@ export const getAdminMoments = async (): Promise<MemorableMoment[]> => {
 };
 
 export const createMoment = async (formData: FormData): Promise<MemorableMoment> => {
-  return apiClient.post('/admin/moments/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/moments/upload', formData);
 };
 
 export const updateMoment = async (id: number, formData: FormData): Promise<MemorableMoment> => {
-  return apiClient.put(`/admin/moments/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/moments/${id}`, formData);
 };
 
 export const deleteMoment = async (id: number): Promise<void> => {
@@ -391,9 +383,7 @@ export const getAdminCVs = async (): Promise<CV[]> => {
 };
 
 export const uploadCV = async (formData: FormData): Promise<CV> => {
-  return apiClient.post('/admin/cv/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/cv/upload', formData);
 };
 
 export const deleteCV = async (id: number): Promise<void> => {

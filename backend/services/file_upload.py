@@ -29,7 +29,7 @@ class FileUploadService:
         prefix: str = ""
     ) -> str:
         """
-        Upload a file to Supabase storage.
+        Upload a file to Supabase storage in a non-blocking way.
         
         Args:
             file: The file to upload
@@ -42,9 +42,9 @@ class FileUploadService:
         Raises:
             HTTPException: If upload fails
         """
+        from fastapi.concurrency import run_in_threadpool
+
         try:
-            supabase = get_supabase_client()
-            
             # Generate unique filename
             file_ext = file.filename.split(".")[-1] if "." in file.filename else "bin"
             filename = f"{prefix}{uuid.uuid4()}.{file_ext}"
@@ -53,18 +53,31 @@ class FileUploadService:
             folder = cls.FOLDERS.get(folder_type, "misc")
             file_path = f"{folder}/{filename}"
             
-            # Read file content
+            # Read file content into memory in the main async thread
             content = await file.read()
             
-            # Upload to Supabase
-            supabase.storage.from_(cls.BUCKET_NAME).upload(
-                path=file_path,
-                file=content,
-                file_options={"content-type": file.content_type or "application/octet-stream"}
-            )
+            # Define the blocking upload function.
+            # The supabase client is created *inside* this function
+            # to ensure it is not shared between threads.
+            def do_upload():
+                supabase = get_supabase_client()
+                supabase.storage.from_(cls.BUCKET_NAME).upload(
+                    path=file_path,
+                    file=content,
+                    file_options={"content-type": file.content_type or "application/octet-stream"}
+                )
+
+            # Run the blocking upload in a thread pool
+            await run_in_threadpool(do_upload)
             
-            # Get public URL
-            public_url = supabase.storage.from_(cls.BUCKET_NAME).get_public_url(file_path)
+            # The public URL can be generated without another network call,
+            # but using the get_public_url method is safer to ensure correctness.
+            # We run it in a thread pool as well for safety.
+            def do_get_url():
+                supabase = get_supabase_client()
+                return supabase.storage.from_(cls.BUCKET_NAME).get_public_url(file_path)
+
+            public_url = await run_in_threadpool(do_get_url)
             
             return public_url
             
