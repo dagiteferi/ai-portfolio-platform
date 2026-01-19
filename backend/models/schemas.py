@@ -79,6 +79,9 @@ class EducationBase(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     description: Optional[str] = None
+    gpa: Optional[str] = None
+    highlights: Optional[str] = None
+    courses: Optional[str] = None
 
 class EducationCreate(EducationBase):
     pass
@@ -90,6 +93,9 @@ class EducationUpdate(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     description: Optional[str] = None
+    gpa: Optional[str] = None
+    highlights: Optional[str] = None
+    courses: Optional[str] = None
 
 class EducationResponse(EducationBase):
     id: int

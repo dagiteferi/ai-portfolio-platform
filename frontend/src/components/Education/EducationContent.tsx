@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { X } from 'lucide-react';
 import EducationCard from './EducationCard';
 import CertificationCard from './CertificationCard';
-import { education as staticEducation, certifications as staticCertifications } from './data';
 import { Education, Certificate } from '../../services/api';
 
 interface EducationContentProps {
@@ -11,26 +10,23 @@ interface EducationContentProps {
 }
 
 const EducationContent: React.FC<EducationContentProps> = memo(({ educationData, certificatesData }) => {
-  const [education, setEducation] = useState(staticEducation);
-  const [certifications, setCertifications] = useState(staticCertifications);
+  const [education, setEducation] = useState<any[]>([]);
+  const [certifications, setCertifications] = useState<any[]>([]);
 
   useEffect(() => {
     if (educationData && educationData.length > 0) {
-      const mappedEdu = educationData.map(edu => {
-        const staticMatch = staticEducation.find(s => s.degree === edu.degree);
-        return {
-          degree: edu.degree,
-          institution: edu.institution,
-          period: staticMatch?.period || `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
-          description: edu.description || staticMatch?.description || '',
-          gpa: staticMatch?.gpa,
-          highlights: staticMatch?.highlights || [],
-          courses: staticMatch?.courses || []
-        };
-      });
+      const mappedEdu = educationData.map(edu => ({
+        degree: edu.degree,
+        institution: edu.institution,
+        period: `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
+        description: edu.description || '',
+        gpa: edu.gpa || '',
+        highlights: edu.highlights ? edu.highlights.split(';').map(h => h.trim()) : [],
+        courses: edu.courses ? edu.courses.split(',').map(c => c.trim()) : []
+      }));
 
-      const combinedEdu = [...mappedEdu, ...staticEducation];
-      const uniqueEdu = combinedEdu.filter((item, index, self) =>
+      // Filter duplicates based on degree
+      const uniqueEdu = mappedEdu.filter((item, index, self) =>
         index === self.findIndex((t) => t.degree === item.degree)
       );
 
@@ -40,19 +36,16 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
 
   useEffect(() => {
     if (certificatesData && certificatesData.length > 0) {
-      const mappedCerts = certificatesData.map(cert => {
-        const staticMatch = staticCertifications.find(s => s.name === cert.title);
-        return {
-          name: cert.title,
-          issuer: cert.issuer,
-          date: staticMatch?.date || (cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : ''),
-          image: cert.url || staticMatch?.image || '',
-          skills: (cert.description ? cert.description.split(',').map(s => s.trim()) : []) || staticMatch?.skills || []
-        };
-      });
+      const mappedCerts = certificatesData.map(cert => ({
+        name: cert.title,
+        issuer: cert.issuer,
+        date: cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : '',
+        image: cert.url || '',
+        skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
+      }));
 
-      const combinedCerts = [...mappedCerts, ...staticCertifications];
-      const uniqueCerts = combinedCerts.filter((item, index, self) =>
+      // Filter duplicates based on name
+      const uniqueCerts = mappedCerts.filter((item, index, self) =>
         index === self.findIndex((t) => t.name === item.name)
       );
 

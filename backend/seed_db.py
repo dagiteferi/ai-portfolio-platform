@@ -28,14 +28,20 @@ def seed_data():
             "institution": '10 Academy, online',
             "start_date": date(2024, 12, 1),
             "end_date": date(2025, 3, 1),
-            "description": 'Specialized in Artificial Intelligence and Machine Learning on Deep Learning and Natural Language Processing. (with Distinction). Highlights: Completed a 12-week KAIM AI Mastery Training powered by Kifiya & Mastercard Foundation; Delivered a polished finance-sector capstone with structured code, documentation, and unit tests; Built real-world ML systems: solar-farm site selection, financial sentiment analysis, telecom forecasting, healthcare data warehousing, fraud detection, and portfolio forecasting; Cultivated professional skills through cohort collaboration, mentorship, guest speakers, and challenge-based learning. Courses: Data cleaning, Advanced Python and SQL, CI/CD, Docker, Machine Learning'
+            "description": 'Specialized in Artificial Intelligence and Machine Learning on Deep Learning and Natural Language Processing.',
+            "gpa": '(with Distinction)',
+            "highlights": 'Completed a 12-week KAIM AI Mastery Training powered by Kifiya & Mastercard Foundation; Delivered a polished finance-sector capstone with structured code, documentation, and unit tests; Built real-world ML systems: solar-farm site selection, financial sentiment analysis, telecom forecasting, healthcare data warehousing, fraud detection, and portfolio forecasting; Cultivated professional skills through cohort collaboration, mentorship, guest speakers, and challenge-based learning',
+            "courses": 'Data cleaning, Advanced Python and SQL, CI/CD, Docker, Machine Learning'
         },
         {
             "degree": 'Bachelor of Science in Computer Science',
             "institution": 'Unity University , Adama-Campus',
             "start_date": date(2022, 9, 1),
             "end_date": None, # Present
-            "description": "Strong foundation in computer systems, database design, object-oriented programming (OOP) Data Structures and algorithms, and software engineering with honors. GPA: 3.9/4.0. Highlights: Dean's List for 6 consecutive semesters; Developed full-stack web app for Rent Management System for final project Using React, FastAPI and PostgreSQL; Developed full-stack web app for QR-based Attendance Management System for Unity Using HTML, CSS, JS, PHP and MySQL; Developed full-stack mobile app for my class project using Flutter and MySQL. Courses: Data Structures, Algorithms, Software Engineering, Database Systems, Computer Networks, Flutter"
+            "description": "Strong foundation in computer systems, database design, object-oriented programming (OOP) Data Structures and algorithms, and software engineering with honors.",
+            "gpa": '3.9/4.0',
+            "highlights": "Dean's List for 6 consecutive semesters; Developed full-stack web app for Rent Management System for final project Using React, FastAPI and PostgreSQL; Developed full-stack web app for QR-based Attendance Management System for Unity Using HTML, CSS, JS, PHP and MySQL; Developed full-stack mobile app for my class project using Flutter and MySQL",
+            "courses": 'Data Structures, Algorithms, Software Engineering, Database Systems, Computer Networks, Flutter'
         }
     ]
     for edu in education_data:

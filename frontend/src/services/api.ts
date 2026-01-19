@@ -241,6 +241,9 @@ export interface Education {
   start_date: string;
   end_date?: string;
   description?: string;
+  gpa?: string;
+  highlights?: string;
+  courses?: string;
 }
 
 export interface Certificate {
