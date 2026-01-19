@@ -14,7 +14,7 @@ const SkillBar: React.FC<SkillBarProps> = ({ name, level, isVisible, index }) =>
     if (isVisible) {
       setTimeout(() => {
         setAnimated(true);
-      }, index * 200); // Staggered animation delay
+      }, index * 50); // Staggered animation delay
     }
   }, [isVisible, index]);
 

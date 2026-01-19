@@ -14,16 +14,16 @@ interface AboutContentProps {
 }
 
 const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
-  const [skills, setSkills] = useState<Skill[]>([]);
+  const skills = React.useMemo(() => {
+    if (!skillsData || skillsData.length === 0) return [];
 
-  useEffect(() => {
-    if (skillsData && skillsData.length > 0) {
-      const mappedSkills: Skill[] = skillsData.map(s => ({
+    return skillsData.map(s => {
+      const numericLevel = parseInt(s.proficiency || '', 10);
+      return {
         name: s.name,
-        level: s.proficiency === 'Expert' ? 95 : s.proficiency === 'Advanced' ? 85 : s.proficiency === 'Intermediate' ? 75 : 65
-      }));
-      setSkills(mappedSkills);
-    }
+        level: !isNaN(numericLevel) ? numericLevel : (s.proficiency === 'Expert' ? 95 : s.proficiency === 'Advanced' ? 85 : s.proficiency === 'Intermediate' ? 75 : 65)
+      };
+    });
   }, [skillsData]);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -37,7 +37,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 }
     );
 
     if (sectionRef.current) {
