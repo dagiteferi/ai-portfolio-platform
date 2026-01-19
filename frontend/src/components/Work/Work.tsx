@@ -24,7 +24,11 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
         achievements: [],
         technologies: []
       }));
-      setWorkExperience([...mappedExperience, ...staticWorkExperience]);
+      const combinedExperience = [...mappedExperience, ...staticWorkExperience];
+      const uniqueExperience = combinedExperience.filter((item, index, self) =>
+        index === self.findIndex((t) => t.company === item.company && t.title === item.title)
+      );
+      setWorkExperience(uniqueExperience);
     }
   }, [experienceData]);
 

@@ -16,27 +16,47 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
 
   useEffect(() => {
     if (educationData && educationData.length > 0) {
-      const mappedEdu = educationData.map(edu => ({
-        degree: edu.degree,
-        institution: edu.institution,
-        period: `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
-        description: edu.description || '',
-        achievements: []
-      }));
-      setEducation([...mappedEdu, ...staticEducation]);
+      const mappedEdu = educationData.map(edu => {
+        const staticMatch = staticEducation.find(s => s.degree === edu.degree);
+        return {
+          degree: edu.degree,
+          institution: edu.institution,
+          period: staticMatch?.period || `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
+          description: edu.description || staticMatch?.description || '',
+          gpa: staticMatch?.gpa,
+          highlights: staticMatch?.highlights || [],
+          courses: staticMatch?.courses || []
+        };
+      });
+
+      const combinedEdu = [...mappedEdu, ...staticEducation];
+      const uniqueEdu = combinedEdu.filter((item, index, self) =>
+        index === self.findIndex((t) => t.degree === item.degree)
+      );
+
+      setEducation(uniqueEdu);
     }
   }, [educationData]);
 
   useEffect(() => {
     if (certificatesData && certificatesData.length > 0) {
-      const mappedCerts = certificatesData.map(cert => ({
-        name: cert.title,
-        issuer: cert.issuer,
-        date: cert.date_issued || '',
-        image: cert.url || '',
-        skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
-      }));
-      setCertifications([...mappedCerts, ...staticCertifications]);
+      const mappedCerts = certificatesData.map(cert => {
+        const staticMatch = staticCertifications.find(s => s.name === cert.title);
+        return {
+          name: cert.title,
+          issuer: cert.issuer,
+          date: staticMatch?.date || (cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : ''),
+          image: cert.url || staticMatch?.image || '',
+          skills: (cert.description ? cert.description.split(',').map(s => s.trim()) : []) || staticMatch?.skills || []
+        };
+      });
+
+      const combinedCerts = [...mappedCerts, ...staticCertifications];
+      const uniqueCerts = combinedCerts.filter((item, index, self) =>
+        index === self.findIndex((t) => t.name === item.name)
+      );
+
+      setCertifications(uniqueCerts);
     }
   }, [certificatesData]);
 

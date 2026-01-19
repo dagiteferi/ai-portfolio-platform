@@ -26,7 +26,11 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
         demo: proj.project_url || '#',
         featured: proj.is_featured
       }));
-      setProjects([...mappedProjects, ...staticProjects]);
+      const combinedProjects = [...mappedProjects, ...staticProjects];
+      const uniqueProjects = combinedProjects.filter((item, index, self) =>
+        index === self.findIndex((t) => t.title === item.title)
+      );
+      setProjects(uniqueProjects);
     }
   }, [projectsData]);
 

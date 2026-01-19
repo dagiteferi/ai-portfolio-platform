@@ -19,7 +19,11 @@ const Gallery: React.FC<GalleryProps> = memo(({ momentsData }) => {
         linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/',
         title: moment.title
       }));
-      setGalleryItems([...mappedMoments, ...staticGalleryItems]);
+      const combinedMoments = [...mappedMoments, ...staticGalleryItems];
+      const uniqueMoments = combinedMoments.filter((item, index, self) =>
+        index === self.findIndex((t) => t.title === item.title)
+      );
+      setGalleryItems(uniqueMoments);
     }
   }, [momentsData]);
 
