@@ -2,9 +2,44 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { X } from 'lucide-react';
 import EducationCard from './EducationCard';
 import CertificationCard from './CertificationCard';
-import { education, certifications } from './data';
+import { education as staticEducation, certifications as staticCertifications } from './data';
+import { Education, Certificate } from '../../services/api';
 
-const EducationContent = memo(() => {
+interface EducationContentProps {
+  educationData?: Education[];
+  certificatesData?: Certificate[];
+}
+
+const EducationContent: React.FC<EducationContentProps> = memo(({ educationData, certificatesData }) => {
+  const [education, setEducation] = useState(staticEducation);
+  const [certifications, setCertifications] = useState(staticCertifications);
+
+  useEffect(() => {
+    if (educationData && educationData.length > 0) {
+      const mappedEdu = educationData.map(edu => ({
+        degree: edu.degree,
+        institution: edu.institution,
+        period: `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
+        description: edu.description || '',
+        achievements: []
+      }));
+      setEducation([...mappedEdu, ...staticEducation]);
+    }
+  }, [educationData]);
+
+  useEffect(() => {
+    if (certificatesData && certificatesData.length > 0) {
+      const mappedCerts = certificatesData.map(cert => ({
+        name: cert.title,
+        issuer: cert.issuer,
+        date: cert.date_issued || '',
+        image: cert.url || '',
+        skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
+      }));
+      setCertifications([...mappedCerts, ...staticCertifications]);
+    }
+  }, [certificatesData]);
+
   const [isVisible, setIsVisible] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -46,7 +81,6 @@ const EducationContent = memo(() => {
           </p>
         </div>
 
-        {/* Education Section */}
         <div className="grid lg:grid-cols-2 gap-8 mb-20">
           {education.map((edu, index) => (
             <EducationCard
@@ -57,12 +91,11 @@ const EducationContent = memo(() => {
           ))}
         </div>
 
-        {/* Certifications Section */}
         <div>
           <h3 className={`text-3xl font-bold text-foreground text-center mb-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             Professional <span className="text-gradient">Certifications</span>
           </h3>
-          
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {certifications.map((cert, index) => (
               <CertificationCard
@@ -75,7 +108,6 @@ const EducationContent = memo(() => {
           </div>
         </div>
 
-        {/* Certificate Modal */}
         {selectedCertificate && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-background rounded-xl max-w-2xl w-full max-h-[80vh] overflow-auto">

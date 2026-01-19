@@ -1,12 +1,34 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Filter, Github, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { categories, projects } from './data';
+import { categories, projects as staticProjects } from './data';
 import ProjectCard from './ProjectCard';
+import { Project } from '../../services/api';
 
-const Projects = () => {
+interface ProjectsProps {
+  projectsData?: Project[];
+}
+
+const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
   const [activeFilter, setActiveFilter] = useState('All');
+  const [projects, setProjects] = useState(staticProjects);
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (projectsData && projectsData.length > 0) {
+      const mappedProjects = projectsData.map(proj => ({
+        title: proj.title,
+        category: proj.category || 'Uncategorized',
+        description: proj.description || '',
+        technologies: proj.technologies ? proj.technologies.split(',').map(t => t.trim()) : [],
+        image: proj.image_url || '',
+        github: proj.github_url || '',
+        demo: proj.project_url || '#',
+        featured: proj.is_featured
+      }));
+      setProjects([...mappedProjects, ...staticProjects]);
+    }
+  }, [projectsData]);
 
   useEffect(() => {
     if (activeFilter === 'All') {
@@ -30,18 +52,16 @@ const Projects = () => {
           </p>
         </div>
 
-        {/* Filter Buttons */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category) => (
             <Button
               key={category}
               onClick={() => setActiveFilter(category)}
               variant={activeFilter === category ? 'default' : 'outline'}
-              className={`hover-scale ${
-                activeFilter === category 
-                  ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground' 
-                  : 'hover:border-primary hover:text-primary'
-              }`}
+              className={`hover-scale ${activeFilter === category
+                ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
+                : 'hover:border-primary hover:text-primary'
+                }`}
             >
               <Filter className="w-4 h-4 mr-2" />
               {category}
@@ -49,7 +69,6 @@ const Projects = () => {
           ))}
         </div>
 
-        {/* Featured Project */}
         {activeFilter === 'All' && featuredProject ? (
           <div className="mb-16">
             <div className="card-elegant bg-gradient-to-br from-primary/5 via-accent/5 to-pink/5 border-primary/20">
@@ -63,11 +82,11 @@ const Projects = () => {
                       {featuredProject.category}
                     </span>
                   </div>
-                  
+
                   <h3 className="text-3xl font-bold text-foreground">
                     {featuredProject.title}
                   </h3>
-                  
+
                   <p className="text-lg text-gray-900 leading-relaxed">
                     {featuredProject.description}
                   </p>
@@ -126,14 +145,12 @@ const Projects = () => {
           </div>
         ) : null}
 
-        {/* Projects Grid */}
         <div className="grid lg:grid-cols-2 gap-12">
           {filteredProjects.filter(p => !p.featured).map((project, index) => (
             <ProjectCard key={project.title} project={project} isVisible={true} index={index} />
           ))}
         </div>
 
-        {/* Call to Action */}
         <div className="text-center mt-16">
           <div className="card-elegant max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-foreground mb-4">
@@ -154,6 +171,6 @@ const Projects = () => {
       </div>
     </section>
   );
-};
+});
 
-export default memo(Projects);
+export default Projects;

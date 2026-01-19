@@ -7,7 +7,7 @@ interface ProjectCardProps {
     title: string;
     category: string;
     description: string;
-    image?: string; // Made optional
+    image?: string;
     technologies: string[];
     github?: string;
     demo?: string;
@@ -21,16 +21,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
   return (
     <div
       key={project.title}
-      className={`group transition-all duration-300 ${
-        isVisible ? 'animate-fade-in-up' : 'opacity-0'
-      }`}
+      className={`group transition-all duration-300 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
+        }`}
       style={{
         animationDelay: isVisible ? `${index * 0.2}s` : '0s'
       }}
     >
       <div className="card-elegant hover-scale h-full">
         <div className="space-y-6">
-          {/* Project Header */}
           {project.image ? (
             <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
               <img
@@ -76,12 +74,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
             </div>
           </div>
 
-          {/* Project Description */}
           <p className="text-gray-900 leading-relaxed text-lg">
             {project.description}
           </p>
 
-          {/* Technologies */}
           <div>
             <h4 className="font-semibold text-foreground mb-3">Technologies Used:</h4>
             <div className="flex flex-wrap gap-2">
@@ -96,7 +92,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
             </div>
           </div>
 
-          {/* Project Actions */}
           <div className="pt-4 border-t border-border">
             <div className="flex space-x-4">
               {project.demo && (

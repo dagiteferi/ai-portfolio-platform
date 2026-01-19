@@ -1,9 +1,28 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { galleryItems } from './data';
+import { galleryItems as staticGalleryItems } from './data';
 import GalleryItem from './GalleryItem';
+import { MemorableMoment } from '../../services/api';
 
-const Gallery = () => {
+interface GalleryProps {
+  momentsData?: MemorableMoment[];
+}
+
+const Gallery: React.FC<GalleryProps> = memo(({ momentsData }) => {
+  const [galleryItems, setGalleryItems] = useState(staticGalleryItems);
+
+  useEffect(() => {
+    if (momentsData && momentsData.length > 0) {
+      const mappedMoments = momentsData.map(moment => ({
+        src: moment.image_url || '',
+        alt: moment.title,
+        linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/',
+        title: moment.title
+      }));
+      setGalleryItems([...mappedMoments, ...staticGalleryItems]);
+    }
+  }, [momentsData]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
   const [isHovering, setIsHovering] = useState(false);
@@ -42,7 +61,7 @@ const Gallery = () => {
 
   const handleManualScroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const itemWidth = 320 + 32; // w-80 (320px) + space-x-8 (32px)
+      const itemWidth = 320 + 32;
       const scrollAmount = itemWidth * 1;
 
       scrollRef.current.scrollBy({
@@ -97,6 +116,6 @@ const Gallery = () => {
       </div>
     </section>
   );
-};
+});
 
 export default Gallery;
