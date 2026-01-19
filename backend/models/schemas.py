@@ -168,6 +168,8 @@ class WorkExperienceBase(BaseModel):
     is_current: bool = False
     description: Optional[str] = None
     location: Optional[str] = None
+    achievements: Optional[str] = None
+    technologies: Optional[str] = None
 
 class WorkExperienceCreate(WorkExperienceBase):
     pass
@@ -181,6 +183,8 @@ class WorkExperienceUpdate(BaseModel):
     is_current: Optional[bool] = None
     description: Optional[str] = None
     location: Optional[str] = None
+    achievements: Optional[str] = None
+    technologies: Optional[str] = None
 
 class WorkExperienceResponse(WorkExperienceBase):
     id: int

@@ -77,7 +77,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
               </div>
 
               <div>
-                <h4 className="font-semibold text-foreground mb-3">Technologies Used:</h4>
+                <h4 className="font-semibold text-foreground mb-3">Skills Used:</h4>
                 <div className="flex flex-wrap gap-2">
                   {job.technologies.map((tech, i) => (
                     <span

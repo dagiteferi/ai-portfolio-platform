@@ -21,8 +21,8 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
         period: `${exp.start_date ? new Date(exp.start_date).getFullYear() : ''} - ${exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}`,
         type: 'Full-time',
         description: exp.description || '',
-        achievements: [],
-        technologies: []
+        achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
+        technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []
       }));
       const combinedExperience = [...mappedExperience, ...staticWorkExperience];
       const uniqueExperience = combinedExperience.filter((item, index, self) =>

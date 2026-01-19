@@ -231,6 +231,8 @@ export interface WorkExperience {
   end_date?: string;
   description?: string;
   is_current: boolean;
+  achievements?: string;
+  technologies?: string;
 }
 
 export interface Education {

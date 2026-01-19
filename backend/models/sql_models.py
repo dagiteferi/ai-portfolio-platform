@@ -64,6 +64,8 @@ class WorkExperience(Base):
     is_current = Column(Boolean, default=False)
     description = Column(Text, nullable=True)
     location = Column(String, nullable=True)
+    achievements = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
+    technologies = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
 
 class Project(Base):
     __tablename__ = "projects"
