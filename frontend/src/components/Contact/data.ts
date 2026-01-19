@@ -11,7 +11,7 @@ export const contactInfo = [
     icon: Phone,
     title: 'Phone',
     value: '+251 920 362324',
-    href: 'tel:++201 920 362324'
+    href: 'tel:+251920362324'
   },
   {
     icon: MapPin,
@@ -24,6 +24,6 @@ export const contactInfo = [
 export const availableServices = [
   'AI/ML ',
   'Full-stack Development', 
-  'Flutter Development',
+  'Back-end Development',
   'Data science',
 ];

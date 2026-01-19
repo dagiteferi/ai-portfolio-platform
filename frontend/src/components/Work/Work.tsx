@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { workExperience as staticWorkExperience } from './data';
 import JobCard from './JobCard';
 import { WorkExperience } from '../../services/api';
 
@@ -10,7 +9,7 @@ interface WorkProps {
 }
 
 const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
-  const [workExperience, setWorkExperience] = useState(staticWorkExperience);
+  const [workExperience, setWorkExperience] = useState<any[]>([]);
 
   useEffect(() => {
     if (experienceData && experienceData.length > 0) {
@@ -24,11 +23,7 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
         achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
         technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []
       }));
-      const combinedExperience = [...mappedExperience, ...staticWorkExperience];
-      const uniqueExperience = combinedExperience.filter((item, index, self) =>
-        index === self.findIndex((t) => t.company === item.company && t.title === item.title)
-      );
-      setWorkExperience(uniqueExperience);
+      setWorkExperience(mappedExperience);
     }
   }, [experienceData]);
 

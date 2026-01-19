@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { galleryItems as staticGalleryItems } from './data';
 import GalleryItem from './GalleryItem';
 import { MemorableMoment } from '../../services/api';
 
@@ -9,7 +8,7 @@ interface GalleryProps {
 }
 
 const Gallery: React.FC<GalleryProps> = memo(({ momentsData }) => {
-  const [galleryItems, setGalleryItems] = useState(staticGalleryItems);
+  const [galleryItems, setGalleryItems] = useState<any[]>([]);
 
   useEffect(() => {
     if (momentsData && momentsData.length > 0) {
@@ -19,11 +18,7 @@ const Gallery: React.FC<GalleryProps> = memo(({ momentsData }) => {
         linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/',
         title: moment.title
       }));
-      const combinedMoments = [...mappedMoments, ...staticGalleryItems];
-      const uniqueMoments = combinedMoments.filter((item, index, self) =>
-        index === self.findIndex((t) => t.title === item.title)
-      );
-      setGalleryItems(uniqueMoments);
+      setGalleryItems(mappedMoments);
     }
   }, [momentsData]);
 

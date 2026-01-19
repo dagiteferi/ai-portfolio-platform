@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import SkillBar from './SkillBar';
-import { skills as staticSkills } from './data';
 import { TechnicalSkill } from '../../services/api';
 
 interface Skill {
@@ -15,7 +14,7 @@ interface AboutContentProps {
 }
 
 const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
-  const [skills, setSkills] = useState<Skill[]>(staticSkills);
+  const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
     if (skillsData && skillsData.length > 0) {
@@ -23,12 +22,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
         name: s.name,
         level: s.proficiency === 'Expert' ? 95 : s.proficiency === 'Advanced' ? 85 : s.proficiency === 'Intermediate' ? 75 : 65
       }));
-
-      const combined = [...mappedSkills, ...staticSkills];
-      const unique = combined.filter((skill, index, self) =>
-        index === self.findIndex((t) => t.name === skill.name)
-      );
-      setSkills(unique);
+      setSkills(mappedSkills);
     }
   }, [skillsData]);
 
@@ -89,14 +83,14 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
           <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
             <div className="space-y-6">
               <p className="text-lg text-gray-900 leading-relaxed">
-                I am a passionate AI and machine learning engineer, full stack developer, and Flutter
+                I am a passionate AI and machine learning engineer, full stack developer,
                 enthusiast with a strong computer science background, holding a 3.93 GPA, dedicated to
                 creating intelligent systems and scalable applications.
               </p>
 
               <p className="text-lg text-gray-900 leading-relaxed">
                 My expertise spans across deep learning, natural language processing,
-                computer vision, full‑stack development, Flutter, and MLOps, and I
+                computer vision, full‑stack development, and MLOps, and I
                 thrive at the intersection of research and engineering, transforming
                 innovative ideas into production-ready solutions.
               </p>

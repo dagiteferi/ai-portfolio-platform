@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { Download, Github, Linkedin, Facebook } from 'lucide-react';
+import { Download, Github, Linkedin, Instagram } from 'lucide-react';
 import { Button } from './ui/button';
 import { CV } from '../services/api';
 
@@ -10,7 +10,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
-  const roles = ["Beliver", "AI/ML Engineer", "Flutter Developer", "Full-stack Dev"];
+  const roles = ["Beliver", "AI/ML Engineer", "Full-stack Dev"];
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
 
   useEffect(() => {
@@ -45,8 +45,8 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
       label: 'GitHub'
     },
     {
-      icon: Facebook,
-      href: 'https://web.facebook.com/dagmawi.teferi.98',
+      icon: Instagram,
+      href: 'https://www.instagram.com/dagmawi_teferi',
       label: 'Twitter'
     }
   ];
@@ -74,7 +74,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
           </h1>
 
           <div className="flex items-center justify-center lg:justify-start flex-wrap gap-y-2 mb-8 text-black">
-            <span className="text-2xl font-mono mr-2">{'<'}</span>
+            <span className="text-2xl font-mono mr-2">{'</'}</span>
             <span className="text-sm md:text-base font-medium">Believe</span>
             <span className="text-cyan-500 text-base mx-2">→</span>
             <span className="text-sm md:text-base font-medium">Learn</span>
@@ -83,8 +83,8 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
             <span className="text-cyan-500 text-base mx-2">→</span>
             <span className="text-sm md:text-base font-medium">Solve</span>
             <span className="text-cyan-500 text-base mx-2">→</span>
-            <span className="text-sm md:text-base font-medium">Done</span>
-            <span className="text-2xl font-mono ml-2">{'/>'}</span>
+            <span className="text-sm md:text-base font-medium">Repeat</span>
+            <span className="text-2xl font-mono ml-2">{'>'}</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">

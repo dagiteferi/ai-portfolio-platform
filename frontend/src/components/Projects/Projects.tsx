@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Filter, Github, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { categories, projects as staticProjects } from './data';
+import { categories } from './data';
 import ProjectCard from './ProjectCard';
 import { Project } from '../../services/api';
 
@@ -11,7 +11,7 @@ interface ProjectsProps {
 
 const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
   const [activeFilter, setActiveFilter] = useState('All');
-  const [projects, setProjects] = useState(staticProjects);
+  const [projects, setProjects] = useState<any[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
 
   useEffect(() => {
@@ -26,11 +26,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
         demo: proj.project_url || '#',
         featured: proj.is_featured
       }));
-      const combinedProjects = [...mappedProjects, ...staticProjects];
-      const uniqueProjects = combinedProjects.filter((item, index, self) =>
-        index === self.findIndex((t) => t.title === item.title)
-      );
-      setProjects(uniqueProjects);
+      setProjects(mappedProjects);
     }
   }, [projectsData]);
 
@@ -96,7 +92,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
                   </p>
 
                   <div className="flex flex-wrap gap-2">
-                    {featuredProject.technologies.map((tech) => (
+                    {featuredProject.technologies.map((tech: string) => (
                       <span key={tech} className="px-3 py-1 bg-background text-foreground text-sm rounded-full border border-border">
                         {tech}
                       </span>
