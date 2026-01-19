@@ -321,7 +321,7 @@ def seed_data():
         {
             "title": 'stu-infomation',
             "category": 'Software Applications',
-            "description": 'No description provided.',
+            "description": 'A student information management system built with Visual Basic .NET to efficiently store, retrieve, and manage student records and academic data.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/stu-infomation',
             "project_url": '#'
@@ -338,7 +338,7 @@ def seed_data():
         {
             "title": 'registration-software',
             "category": 'Software Applications',
-            "description": 'No description provided.',
+            "description": 'A desktop registration software application developed using Visual Basic .NET, designed to streamline user enrollment and event registration processes.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/registration-software',
             "project_url": '#'
@@ -346,7 +346,7 @@ def seed_data():
         {
             "title": 'Calculator',
             "category": 'Mobile Apps',
-            "description": 'No description provided.',
+            "description": 'A cross-platform mobile calculator application built with Flutter and Dart, featuring a clean, intuitive UI and support for standard arithmetic operations.',
             "technologies": 'Dart, Flutter',
             "image_url": '/assets/flutter calculater.jpg',
             "github_url": 'https://github.com/dagiteferi/Calculator',
@@ -355,7 +355,7 @@ def seed_data():
         {
             "title": 'Attendance-System',
             "category": 'Web Development',
-            "description": 'No description provided.',
+            "description": 'A web-based attendance management system utilizing PHP and MySQL for backend data handling, coupled with a responsive HTML/CSS/JS frontend for real-time tracking.',
             "technologies": 'HTML, CSS, JavaScript, PHP, MySQL',
             "image_url": '/assets/qr attendace.png',
             "github_url": 'https://github.com/dagiteferi/Attendance-System',
@@ -364,7 +364,7 @@ def seed_data():
         {
             "title": 'BinarySearchTree',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'An efficient C++ implementation of the Binary Search Tree data structure, demonstrating core algorithms for insertion, deletion, and traversal.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/BinarySearchTree',
             "project_url": '#'
@@ -372,7 +372,7 @@ def seed_data():
         {
             "title": 'AVL-Tree-Implementation',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A robust C++ implementation of an AVL Tree (self-balancing binary search tree), ensuring optimal O(log n) time complexity for search, insert, and delete operations.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/AVL-Tree-Implementation',
             "project_url": '#'
@@ -380,7 +380,7 @@ def seed_data():
         {
             "title": 'FIRSR-IN-FIRST-OUT',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A C++ implementation of the First-In-First-Out (FIFO) queue data structure, showcasing fundamental memory management and data processing principles.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/FIFS',
             "project_url": 'https://attendance-system-plum-eta.vercel.app/'
@@ -388,7 +388,7 @@ def seed_data():
         {
             "title": 'Anasimos',
             "category": 'Web Development',
-            "description": 'No description provided.',
+            "description": 'A responsive web application built with HTML, CSS, and JavaScript, focusing on clean design aesthetics and interactive user interface elements.',
             "technologies": 'Html, css, javascript',
             "image_url": '/assets/anasimoseproject.jpeg',
             "github_url": 'https://github.com/dagiteferi/Anasimos',
@@ -397,7 +397,7 @@ def seed_data():
         {
             "title": 'Search-And-Sort-Algorithms-using-c-',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A comprehensive collection of classic search and sort algorithms implemented in C++, serving as an educational resource for understanding algorithmic efficiency and logic.',
             "technologies": 'C++',
             "image_url": '/assets/search sort.jpeg',
             "github_url": 'https://github.com/dagiteferi/Search-And-Sort-Algorithms-using-c-',
