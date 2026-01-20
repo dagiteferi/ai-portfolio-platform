@@ -480,12 +480,26 @@ async def update_certificate(
             return False
         return True
     
+    import logging
+    logger = logging.getLogger(__name__)
+
     # Upload new file if provided (handle empty string from Swagger)
-    if file and isinstance(file, UploadFile) and file.filename and file.filename.strip():
+    logger.info(f"File object received for certificate {certificate_id} - Type: {type(file)}")
+    if hasattr(file, 'filename'):
+        logger.info(f"Filename: '{file.filename}', Content-type: {getattr(file, 'content_type', 'N/A')}")
+
+    # Use duck typing instead of isinstance to avoid potential import mismatches
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
         try:
-            db_certificate.url = await FileUploadService.upload_certificate(file)
+            logger.info(f"Uploading new certificate for ID {certificate_id}: {file.filename}")
+            new_url = await FileUploadService.upload_certificate(file)
+            db_certificate.url = new_url
+            logger.info(f"Certificate uploaded successfully: {new_url}")
         except Exception as e:
+            logger.error(f"Failed to upload certificate for ID {certificate_id}: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to upload certificate: {str(e)}")
+    else:
+        logger.info(f"No valid file provided for certificate {certificate_id} update.")
     
     # Update other fields only if they have meaningful values
     if should_update(title):
@@ -604,7 +618,8 @@ async def update_moment(
         return True
 
     # Upload new image if provided
-    if isinstance(file, UploadFile) and file.filename:
+    # Use duck typing instead of isinstance to avoid potential import mismatches
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
         try:
             new_image_url = await FileUploadService.upload_image(file, "moment_")
             db_moment.image_url = new_image_url
