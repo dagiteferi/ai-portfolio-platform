@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { MapPin, Calendar, ChevronRight } from 'lucide-react';
-import { WorkExperienceEntry } from './data';
+export interface WorkExperienceEntry {
+  title: string;
+  company: string;
+  location: string;
+  period: string;
+  type: string;
+  description: string;
+  achievements: string[];
+  technologies: string[];
+}
 
 interface JobCardProps {
   job: WorkExperienceEntry;
