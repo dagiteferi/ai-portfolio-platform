@@ -14,35 +14,11 @@ const ExperienceManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_EXPERIENCE: WorkExperience[] = [
-        {
-            id: 1,
-            position: "Senior AI Engineer",
-            company: "Tech Corp",
-            location: "San Francisco, CA",
-            start_date: "2021-01",
-            is_current: true,
-            description: "Leading AI development team for core product features."
-        },
-        {
-            id: 2,
-            position: "ML Researcher",
-            company: "AI Labs",
-            location: "Remote",
-            start_date: "2019-06",
-            end_date: "2020-12",
-            is_current: false,
-            description: "Published 3 papers on transformer architectures."
-        }
-    ];
-
-    const { data: apiExperience, isLoading } = useQuery({
+    const { data: experience, isLoading } = useQuery({
         queryKey: ['admin-experience'],
         queryFn: getAdminExperience,
         staleTime: 1000 * 60 * 5,
     });
-
-    const experience = apiExperience && apiExperience.length > 0 ? apiExperience : MOCK_EXPERIENCE;
 
     const createMutation = useMutation({
         mutationFn: createExperience,
@@ -50,6 +26,8 @@ const ExperienceManagement = () => {
             queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
                 return old ? [newExp, ...old] : [newExp];
             });
+            // Invalidate public experience cache
+            queryClient.invalidateQueries({ queryKey: ['experience'] });
             showToast("Experience created successfully", "success");
             setIsModalOpen(false);
         },
@@ -64,6 +42,8 @@ const ExperienceManagement = () => {
             queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
                 return old ? old.map(e => e.id === updatedExp.id ? updatedExp : e) : [updatedExp];
             });
+            // Invalidate public experience cache
+            queryClient.invalidateQueries({ queryKey: ['experience'] });
             showToast("Experience updated successfully", "success");
             setIsModalOpen(false);
             setEditingExperience(undefined);
@@ -76,7 +56,7 @@ const ExperienceManagement = () => {
     const deleteMutation = useMutation({
         mutationFn: deleteExperience,
         onMutate: async (expId) => {
-            await queryClient.cancelQueries({ queryKey: ['admin-skills'] });
+            await queryClient.cancelQueries({ queryKey: ['admin-experience'] });
             const previousExp = queryClient.getQueryData(['admin-experience']);
             queryClient.setQueryData(['admin-experience'], (old: WorkExperience[] | undefined) => {
                 return old ? old.filter(e => e.id !== expId) : [];
@@ -91,6 +71,7 @@ const ExperienceManagement = () => {
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
+            queryClient.invalidateQueries({ queryKey: ['experience'] });
         },
         onSuccess: () => {
             showToast("Experience deleted successfully", "success");
@@ -166,7 +147,7 @@ const ExperienceManagement = () => {
         <>
             <ManagementTable
                 title="Work Experience"
-                data={experience}
+                data={experience || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

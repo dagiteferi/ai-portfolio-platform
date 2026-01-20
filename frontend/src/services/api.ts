@@ -275,7 +275,7 @@ export interface MemorableMoment {
 export interface CV {
   id: number;
   url: string;
-  uploaded_at: string;
+  created_at: string;
 }
 
 export const adminLogin = async (payload: AdminLoginRequest): Promise<AdminTokenResponse> => {

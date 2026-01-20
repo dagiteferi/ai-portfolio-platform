@@ -23,7 +23,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
 
   const handleDownloadCV = useCallback(() => {
     const latestCV = cvData && cvData.length > 0
-      ? cvData.reduce((prev, current) => (new Date(prev.uploaded_at) > new Date(current.uploaded_at) ? prev : current))
+      ? cvData.reduce((prev, current) => (new Date(prev.created_at) > new Date(current.created_at) ? prev : current))
       : null;
 
     const link = document.createElement('a');

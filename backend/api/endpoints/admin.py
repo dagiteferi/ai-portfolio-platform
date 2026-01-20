@@ -84,7 +84,7 @@ async def post_content(
 
 
 @router.get("/admin/logs", response_model=List[str], tags=["Logs"])
-async def list_log_files(authenticated: bool = Depends(require_admin)):
+def list_log_files(authenticated: bool = Depends(require_admin)):
     """List all available log files."""
     from backend.main import LOGS_DIR as log_dir
     
@@ -101,7 +101,7 @@ async def list_log_files(authenticated: bool = Depends(require_admin)):
 
 
 @router.get("/admin/logs/{filename}", tags=["Logs"])
-async def get_log_file_content(
+def get_log_file_content(
     filename: str,
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
@@ -190,18 +190,33 @@ async def upload_cv(
     authenticated: bool = Depends(require_admin)
 ):
     """Upload a new CV file to Supabase storage."""
-    public_url = await FileUploadService.upload_cv(file)
+    import logging
+    logger = logging.getLogger(__name__)
     
-    db_cv = models.CV(url=public_url)
-    db.add(db_cv)
-    db.commit()
-    db.refresh(db_cv)
+    logger.info(f"CV upload started - Filename: {getattr(file, 'filename', 'N/A')}")
     
-    return db_cv
+    # Use duck typing instead of isinstance to avoid potential import mismatches
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            public_url = await FileUploadService.upload_cv(file)
+            logger.info(f"CV uploaded to Supabase: {public_url}")
+            
+            db_cv = models.CV(url=public_url)
+            db.add(db_cv)
+            db.commit()
+            db.refresh(db_cv)
+            
+            return db_cv
+        except Exception as e:
+            logger.error(f"Failed to upload CV: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload CV: {str(e)}")
+    else:
+        logger.warning("No valid file provided for CV upload")
+        raise HTTPException(status_code=400, detail="No valid file provided")
 
 
 @router.get("/admin/cv", response_model=List[schemas.CVResponse], tags=["CV"])
-async def get_cvs(db: Session = Depends(get_db)):
+def get_cvs(db: Session = Depends(get_db)):
     """Get all CV records."""
     return db.query(models.CV).all()
 
@@ -248,7 +263,16 @@ async def upload_skill(
     authenticated: bool = Depends(require_admin)
 ):
     """Create a new skill with icon upload."""
-    icon_url = await FileUploadService.upload_image(file, "icon_")
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    icon_url = None
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            icon_url = await FileUploadService.upload_image(file, "icon_")
+        except Exception as e:
+            logger.error(f"Failed to upload skill icon: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload icon: {str(e)}")
     
     db_skill = models.TechnicalSkill(
         name=name,
@@ -264,7 +288,7 @@ async def upload_skill(
 
 
 @router.get("/admin/skills", response_model=List[schemas.TechnicalSkillResponse], tags=["Technical Skills"])
-async def get_skills(db: Session = Depends(get_db)):
+def get_skills(db: Session = Depends(get_db)):
     """Get all technical skills."""
     return db.query(models.TechnicalSkill).all()
 
@@ -338,7 +362,7 @@ async def create_education(
 
 
 @router.get("/admin/education", response_model=List[schemas.EducationResponse], tags=["Education"])
-async def get_education(db: Session = Depends(get_db)):
+def get_education(db: Session = Depends(get_db)):
     """Get all education entries."""
     return db.query(models.Education).all()
 
@@ -422,7 +446,16 @@ async def upload_certificate(
     authenticated: bool = Depends(require_admin)
 ):
     """Create a new certificate with file upload."""
-    cert_url = await FileUploadService.upload_certificate(file)
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    cert_url = None
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            cert_url = await FileUploadService.upload_certificate(file)
+        except Exception as e:
+            logger.error(f"Failed to upload certificate file: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload certificate: {str(e)}")
     
     # Parse date
     parsed_date = None
@@ -448,7 +481,7 @@ async def upload_certificate(
 
 
 @router.get("/admin/certificates", response_model=List[schemas.CertificateResponse], tags=["Certificates"])
-async def get_certificates(db: Session = Depends(get_db)):
+def get_certificates(db: Session = Depends(get_db)):
     """Get all certificates."""
     return db.query(models.Certificate).all()
 
@@ -564,7 +597,16 @@ async def upload_moment(
     authenticated: bool = Depends(require_admin)
 ):
     """Create a new memorable moment with image upload."""
-    image_url = await FileUploadService.upload_image(file, "moment_")
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    image_url = None
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            image_url = await FileUploadService.upload_image(file, "moment_")
+        except Exception as e:
+            logger.error(f"Failed to upload moment image: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
     
     # Parse date
     parsed_date = None
@@ -588,7 +630,7 @@ async def upload_moment(
 
 
 @router.get("/admin/moments", response_model=List[schemas.MemorableMomentResponse], tags=["Memorable Moments"])
-async def get_moments(db: Session = Depends(get_db)):
+def get_moments(db: Session = Depends(get_db)):
     """Get all memorable moments."""
     return db.query(models.MemorableMoment).all()
 
@@ -675,7 +717,7 @@ async def create_experience(
 
 
 @router.get("/admin/experience", response_model=List[schemas.WorkExperienceResponse], tags=["Work Experience"])
-async def get_experience(db: Session = Depends(get_db)):
+def get_experience(db: Session = Depends(get_db)):
     """Get all work experience entries."""
     return db.query(models.WorkExperience).all()
 
@@ -764,7 +806,16 @@ async def upload_project(
     authenticated: bool = Depends(require_admin)
 ):
     """Create a new project with image upload."""
-    image_url = await FileUploadService.upload_image(file, "project_")
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    image_url = None
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            image_url = await FileUploadService.upload_image(file, "project_")
+        except Exception as e:
+            logger.error(f"Failed to upload project image: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
     
     db_project = models.Project(
         title=title,
@@ -784,13 +835,13 @@ async def upload_project(
 
 
 @router.get("/admin/projects", response_model=List[schemas.ProjectResponse], tags=["Projects"])
-async def get_projects(db: Session = Depends(get_db)):
+def get_projects(db: Session = Depends(get_db)):
     """Get all projects."""
     return db.query(models.Project).all()
 
 
 @router.get("/admin/projects/stats", tags=["Projects"])
-async def get_project_stats(db: Session = Depends(get_db)):
+def get_project_stats(db: Session = Depends(get_db)):
     """
     Get project statistics by category.
     Returns total count and count per category.
@@ -820,7 +871,7 @@ async def get_project_stats(db: Session = Depends(get_db)):
 
 
 @router.get("/admin/projects/category/{category}", response_model=List[schemas.ProjectResponse], tags=["Projects"])
-async def get_projects_by_category(
+def get_projects_by_category(
     category: str,
     db: Session = Depends(get_db)
 ):
@@ -845,7 +896,7 @@ async def get_projects_by_category(
 
 
 @router.get("/admin/projects/featured", response_model=List[schemas.ProjectResponse], tags=["Projects"])
-async def get_featured_projects(db: Session = Depends(get_db)):
+def get_featured_projects(db: Session = Depends(get_db)):
     """Get only featured projects."""
     return db.query(models.Project).filter(
         models.Project.is_featured == True
