@@ -1,5 +1,20 @@
 # AI Portfolio Platform
 
+![AI Portfolio Platform](https://hxljdipatutpfiyjtgyu.supabase.co/storage/v1/object/public/documents/images/project_3856f05d-21a8-419c-b100-702922015c02.png)
+
+<div align="center">
+
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white)
+
+</div>
+
 An enterprise-grade, open-source platform designed to showcase professional achievements through an intelligent, context-aware AI interface. This system integrates a modern React frontend with a high-performance FastAPI backend, leveraging advanced Retrieval-Augmented Generation (RAG) and LangGraph for sophisticated agentic interactions.
 
 ---

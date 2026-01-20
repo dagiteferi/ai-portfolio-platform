@@ -14,42 +14,11 @@ const ProjectManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_PROJECTS: Project[] = [
-        {
-            id: 1,
-            title: "AI Portfolio Platform",
-            category: "Web Development",
-            description: "A professional portfolio platform for AI/ML engineers with real-time chat and admin control.",
-            is_featured: true,
-            technologies: "React, FastAPI, PostgreSQL",
-            github_url: "https://github.com",
-            project_url: "https://example.com"
-        },
-        {
-            id: 2,
-            title: "Neural Network Visualizer",
-            category: "Data Science",
-            description: "Interactive tool to visualize neural network architectures and activation maps.",
-            is_featured: true,
-            technologies: "Python, TensorFlow, D3.js"
-        },
-        {
-            id: 3,
-            title: "Autonomous Drone Navigator",
-            category: "Robotics",
-            description: "Computer vision based navigation system for indoor autonomous drones.",
-            is_featured: false,
-            technologies: "C++, OpenCV, ROS"
-        }
-    ];
-
-    const { data: apiProjects, isLoading } = useQuery({
+    const { data: projects, isLoading } = useQuery({
         queryKey: ['admin-projects'],
         queryFn: getAdminProjects,
         staleTime: 1000 * 60 * 5,
     });
-
-    const projects = apiProjects && apiProjects.length > 0 ? apiProjects : MOCK_PROJECTS;
 
     const createMutation = useMutation({
         mutationFn: createProject,
@@ -57,6 +26,8 @@ const ProjectManagement = () => {
             queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
                 return old ? [newProject, ...old] : [newProject];
             });
+            // Invalidate public projects cache
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
             showToast("Project created successfully", "success");
             setIsModalOpen(false);
         },
@@ -71,6 +42,8 @@ const ProjectManagement = () => {
             queryClient.setQueryData(['admin-projects'], (old: Project[] | undefined) => {
                 return old ? old.map(p => p.id === updatedProject.id ? updatedProject : p) : [updatedProject];
             });
+            // Invalidate public projects cache
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
             showToast("Project updated successfully", "success");
             setIsModalOpen(false);
             setEditingProject(undefined);
@@ -100,6 +73,8 @@ const ProjectManagement = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
         },
         onSuccess: () => {
+            // Invalidate public projects cache
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
             showToast("Project deleted successfully", "success");
         }
     });
@@ -188,7 +163,7 @@ const ProjectManagement = () => {
         <>
             <ManagementTable
                 title="Projects"
-                data={projects}
+                data={projects || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

@@ -882,8 +882,12 @@ async def update_project(
         return True
     
     # Upload new image if provided (handle empty string from Swagger)
-    if file and isinstance(file, UploadFile):
-        db_project.image_url = await FileUploadService.upload_image(file, "project_")
+    # Use duck typing instead of isinstance to avoid potential import mismatches
+    if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
+        try:
+            db_project.image_url = await FileUploadService.upload_image(file, "project_")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
     
     # Update other fields only if they have meaningful values
     if should_update(title):

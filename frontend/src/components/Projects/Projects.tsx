@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Filter, Github, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { categories } from './data';
 import ProjectCard from './ProjectCard';
 import { Project } from '../../services/api';
 
@@ -13,6 +12,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [projects, setProjects] = useState<any[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All']);
 
   useEffect(() => {
     if (projectsData && projectsData.length > 0) {
@@ -27,6 +27,10 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
         featured: proj.is_featured
       }));
       setProjects(mappedProjects);
+
+      // Extract unique categories
+      const uniqueCategories = ['All', ...Array.from(new Set(mappedProjects.map(p => p.category)))];
+      setCategories(uniqueCategories);
     }
   }, [projectsData]);
 
