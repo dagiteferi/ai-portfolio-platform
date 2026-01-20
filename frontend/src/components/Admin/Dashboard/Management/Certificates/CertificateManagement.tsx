@@ -14,32 +14,11 @@ const CertificateManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_CERTIFICATES: Certificate[] = [
-        {
-            id: 1,
-            title: "AWS Certified Solutions Architect",
-            issuer: "Amazon Web Services",
-            date_issued: "2023-05-15",
-            is_professional: true,
-            url: "https://aws.amazon.com"
-        },
-        {
-            id: 2,
-            title: "Deep Learning Specialization",
-            issuer: "Coursera",
-            date_issued: "2022-11-20",
-            is_professional: false,
-            url: "https://coursera.org"
-        }
-    ];
-
-    const { data: apiCertificates, isLoading } = useQuery({
+    const { data: certificates, isLoading } = useQuery({
         queryKey: ['admin-certificates'],
         queryFn: getAdminCertificates,
         staleTime: 1000 * 60 * 5,
     });
-
-    const certificates = apiCertificates && apiCertificates.length > 0 ? apiCertificates : MOCK_CERTIFICATES;
 
     const createMutation = useMutation({
         mutationFn: (data: any) => {
@@ -55,6 +34,8 @@ const CertificateManagement = () => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? [newCert, ...old] : [newCert];
             });
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate created successfully", "success");
             setIsModalOpen(false);
         },
@@ -77,6 +58,8 @@ const CertificateManagement = () => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? old.map(c => c.id === updatedCert.id ? updatedCert : c) : [updatedCert];
             });
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate updated successfully", "success");
             setIsModalOpen(false);
             setEditingCertificate(undefined);
@@ -106,6 +89,8 @@ const CertificateManagement = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
         },
         onSuccess: () => {
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate deleted successfully", "success");
         }
     });
@@ -181,7 +166,7 @@ const CertificateManagement = () => {
         <>
             <ManagementTable
                 title="Certificates"
-                data={certificates}
+                data={certificates || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

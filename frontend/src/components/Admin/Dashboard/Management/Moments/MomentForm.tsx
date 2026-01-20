@@ -40,18 +40,8 @@ const MomentForm: React.FC<MomentFormProps> = ({ moment, onSubmit, onCancel, isS
             data.append(key, String(value));
         });
         if (file) {
-            console.log('Appending file to FormData:', file.name, file.size, file.type);
             data.append('file', file);
-        } else {
-            console.log('No file selected, not appending to FormData');
         }
-
-        // Log FormData contents
-        console.log('FormData contents:');
-        Array.from(data.entries()).forEach(([key, value]) => {
-            console.log(key, value);
-        });
-
         await onSubmit(data);
     };
 

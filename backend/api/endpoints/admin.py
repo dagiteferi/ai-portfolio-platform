@@ -481,8 +481,11 @@ async def update_certificate(
         return True
     
     # Upload new file if provided (handle empty string from Swagger)
-    if file and isinstance(file, UploadFile):
-        db_certificate.url = await FileUploadService.upload_certificate(file)
+    if file and isinstance(file, UploadFile) and file.filename and file.filename.strip():
+        try:
+            db_certificate.url = await FileUploadService.upload_certificate(file)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to upload certificate: {str(e)}")
     
     # Update other fields only if they have meaningful values
     if should_update(title):
@@ -600,8 +603,8 @@ async def update_moment(
             return False
         return True
 
-    # Upload new image if provided, using a robust type check
-    if file and type(file).__name__ == 'UploadFile' and getattr(file, 'filename', None):
+    # Upload new image if provided
+    if isinstance(file, UploadFile) and file.filename:
         try:
             new_image_url = await FileUploadService.upload_image(file, "moment_")
             db_moment.image_url = new_image_url
