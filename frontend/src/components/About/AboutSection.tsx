@@ -36,31 +36,30 @@ const AboutSection: React.FC = memo(() => {
                 newState[index] = true;
                 return newState;
               });
-            }, index * 200); // Staggered animation delay.
+            }, index * 200); 
           });
         }
       },
-      { threshold: 0.3 } // Trigger when 30% of the section is visible.
+      { threshold: 0.3 } 
     );
 
-    // Observe the section if the ref is attached.
+ 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
     }
 
-    // Cleanup function to disconnect the observer when the component unmounts.
     return () => observer.disconnect();
-  }, [skills]); // Dependency array includes skills to re-run if skills data changes.
+  }, [skills]); 
 
  
   const handleViewLinkedIn = useCallback(() => {
     window.open('https://www.linkedin.com/in/dagmawi-teferi', '_blank');
-  }, []); // Empty dependency array as the URL is static.
+  }, []); 
 
   return (
     <section ref={sectionRef} id="about" className="section-padding bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
+        
         <div className={`text-center mb-8 sm:mb-12 lg:mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
             About <span className="text-gradient">Me</span>
@@ -73,23 +72,22 @@ const AboutSection: React.FC = memo(() => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* Profile Image Section */}
           <div className={`${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
-            onMouseEnter={() => setIsHovered(true)} // Set hovered state on mouse enter.
-            onMouseLeave={() => setIsHovered(false)} // Clear hovered state on mouse leave.
+            onMouseEnter={() => setIsHovered(true)} 
+            onMouseLeave={() => setIsHovered(false)} 
           >
             <div className="relative max-w-xl mx-auto">
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
-                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'} // Dynamically change image source on hover.
+                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'} 
                   alt="Dagmawi Teferi - AI/ML Engineer and Fullstack Developer Profile"
-                  className="w-full h-full object-cover object-top" // Ensure image covers and top is visible.
+                  className="w-full h-full object-cover object-top" 
                 />
               </div>
-              {/* Decorative background blur effect. */}
+             
               <div className="absolute -inset-6 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl -z-10 blur-2xl"></div>
             </div>
           </div>
 
-          {/* Content Section */}
           <div className={`space-y-6 sm:space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
             <div className="space-y-4 sm:space-y-6">
               <p className="text-base sm:text-lg text-gray-900 leading-relaxed">
@@ -113,7 +111,7 @@ const AboutSection: React.FC = memo(() => {
             </div>
 
             <Button
-              onClick={handleViewLinkedIn} // Use memoized callback for LinkedIn button.
+              onClick={handleViewLinkedIn} 
               className="btn-gradient hover-scale group"
             >
               <ExternalLink className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
@@ -122,7 +120,6 @@ const AboutSection: React.FC = memo(() => {
           </div>
         </div>
 
-        {/* Technical Skills Section */}
         <div className="mt-12 sm:mt-16 lg:mt-20">
           <div className={`text-center mb-8 sm:mb-10 lg:mb-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 sm:mb-4">
