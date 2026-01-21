@@ -76,4 +76,4 @@ coverage/
 description.md
 run backend.txt
 assets/
-.pytest_cache
+.pytest_cachefrontend/
