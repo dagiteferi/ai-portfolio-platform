@@ -1,40 +1,40 @@
-import { Brain, Code, Cloud, Zap, BarChart, Smartphone } from 'lucide-react';
+import { Brain, Code, Cloud, BarChart, Database, Zap } from 'lucide-react';
 
 export const services = [
   {
     icon: Brain,
-    title: 'AI Model Development',
-    description: 'Crafting tailored machine learning models to address specific business challenges, enhancing decision-making and operational efficiency.',
+    title: 'Agentic AI Systems',
+    description: 'Designing and implementing intelligent agents using LangGraph and RAG, enabling sophisticated, context-aware autonomous reasoning for enterprise applications.',
     color: 'from-primary to-primary-glow'
   },
   {
-    icon: Code,
-    title: 'Full-Stack Web Development',
-    description: 'Modern, responsive web applications built with React, TypeScript, and cutting-edge technologies.',
+    icon: Database,
+    title: 'Backend Development',
+    description: 'Building robust and scalable server-side architectures using FastAPI, PostgreSQL, and Docker, ensuring high-performance API integration and secure data management.',
     color: 'from-accent to-info'
   },
   {
     icon: BarChart,
     title: 'Data Science & Analytics',
-    description: 'Leveraging advanced statistical methods and machine learning to extract actionable insights and drive data-driven strategies.',
+    description: 'Extracting actionable intelligence from complex datasets using advanced machine learning, statistical modeling, and predictive analytics to drive data-informed decisions.',
     color: 'from-success to-secondary'
   },
   {
     icon: Cloud,
-    title: 'AI Model Deployment',
-    description: 'Scalable deployment of AI models to production environments using cloud platforms and MLOps.',
+    title: 'MLOps & Cloud Infrastructure',
+    description: 'Architecting robust deployment pipelines and scalable cloud infrastructure to ensure the reliable performance and monitoring of AI models in production.',
     color: 'from-warning to-beige'
   },
   {
-    icon: Smartphone,
-    title: 'Flutter Mobile App Development',
-    description: 'Crafting high-performance, cross-platform mobile applications with Flutter for seamless user experiences.',
+    icon: Code,
+    title: 'Frontend Development',
+    description: 'Developing modern, interactive user interfaces with React, focusing on creating responsive and intuitive web experiences for AI-powered applications.',
     color: 'from-pink to-accent'
   },
   {
     icon: Zap,
-    title: 'AI Automation',
-    description: 'Automate repetitive tasks and workflows using intelligent AI-powered solutions.',
+    title: 'Data Engineering & Vision',
+    description: 'Building high-performance data warehouses and real-time object detection systems (YOLO) to manage and analyze large-scale information and visual data.',
     color: 'from-info to-primary'
   }
 ];
