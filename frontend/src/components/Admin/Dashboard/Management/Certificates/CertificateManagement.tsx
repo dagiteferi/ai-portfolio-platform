@@ -14,47 +14,22 @@ const CertificateManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_CERTIFICATES: Certificate[] = [
-        {
-            id: 1,
-            title: "AWS Certified Solutions Architect",
-            issuer: "Amazon Web Services",
-            date_issued: "2023-05-15",
-            is_professional: true,
-            url: "https://aws.amazon.com"
-        },
-        {
-            id: 2,
-            title: "Deep Learning Specialization",
-            issuer: "Coursera",
-            date_issued: "2022-11-20",
-            is_professional: false,
-            url: "https://coursera.org"
-        }
-    ];
-
-    const { data: apiCertificates, isLoading } = useQuery({
+    const { data: certificates, isLoading } = useQuery({
         queryKey: ['admin-certificates'],
         queryFn: getAdminCertificates,
         staleTime: 1000 * 60 * 5,
     });
 
-    const certificates = apiCertificates && apiCertificates.length > 0 ? apiCertificates : MOCK_CERTIFICATES;
-
     const createMutation = useMutation({
-        mutationFn: (data: any) => {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    formData.append(key, String(value));
-                }
-            });
+        mutationFn: (formData: FormData) => {
             return createCertificate(formData);
         },
         onSuccess: (newCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? [newCert, ...old] : [newCert];
             });
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate created successfully", "success");
             setIsModalOpen(false);
         },
@@ -64,19 +39,15 @@ const CertificateManagement = () => {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    formData.append(key, String(value));
-                }
-            });
+        mutationFn: ({ id, formData }: { id: number, formData: FormData }) => {
             return updateCertificate(id, formData);
         },
         onSuccess: (updatedCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? old.map(c => c.id === updatedCert.id ? updatedCert : c) : [updatedCert];
             });
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate updated successfully", "success");
             setIsModalOpen(false);
             setEditingCertificate(undefined);
@@ -106,6 +77,8 @@ const CertificateManagement = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
         },
         onSuccess: () => {
+            // Invalidate public certificates cache to refresh main frontend
+            queryClient.invalidateQueries({ queryKey: ['certificates'] });
             showToast("Certificate deleted successfully", "success");
         }
     });
@@ -126,11 +99,11 @@ const CertificateManagement = () => {
         }
     };
 
-    const handleSubmit = async (data: any) => {
+    const handleSubmit = async (formData: FormData) => {
         if (editingCertificate) {
-            updateMutation.mutate({ id: editingCertificate.id, data });
+            updateMutation.mutate({ id: editingCertificate.id, formData });
         } else {
-            createMutation.mutate(data);
+            createMutation.mutate(formData);
         }
     };
 
@@ -166,14 +139,27 @@ const CertificateManagement = () => {
             )
         },
         {
-            header: 'Link',
-            accessor: (item: Certificate) => (
-                item.url && (
-                    <a href={item.url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+            header: 'Preview',
+            accessor: (item: Certificate) => {
+                if (!item.url) return null;
+
+                const isImage = item.url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+
+                if (isImage) {
+                    return (
+                        <a href={item.url} target="_blank" rel="noreferrer" className="block h-8 w-12 rounded overflow-hidden border hover:opacity-80 transition-opacity">
+                            <img src={item.url} alt={item.title} className="h-full w-full object-cover" />
+                        </a>
+                    );
+                }
+
+                return (
+                    <a href={item.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline">
                         <ExternalLink className="h-3.5 w-3.5" />
+                        View
                     </a>
-                )
-            )
+                );
+            }
         }
     ];
 
@@ -181,7 +167,7 @@ const CertificateManagement = () => {
         <>
             <ManagementTable
                 title="Certificates"
-                data={certificates}
+                data={certificates || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

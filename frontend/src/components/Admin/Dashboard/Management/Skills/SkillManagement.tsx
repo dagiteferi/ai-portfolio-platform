@@ -13,21 +13,11 @@ const SkillManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_SKILLS: TechnicalSkill[] = [
-        { id: 1, name: "React", category: "Frontend", proficiency: "Expert" },
-        { id: 2, name: "Python", category: "Backend", proficiency: "Expert" },
-        { id: 3, name: "TensorFlow", category: "AI/ML", proficiency: "Advanced" },
-        { id: 4, name: "PostgreSQL", category: "Database", proficiency: "Advanced" },
-        { id: 5, name: "Docker", category: "DevOps", proficiency: "Intermediate" }
-    ];
-
-    const { data: apiSkills, isLoading } = useQuery({
+    const { data: skills, isLoading } = useQuery({
         queryKey: ['admin-skills'],
         queryFn: getAdminSkills,
         staleTime: 1000 * 60 * 5,
     });
-
-    const skills = apiSkills && apiSkills.length > 0 ? apiSkills : MOCK_SKILLS;
 
     const createMutation = useMutation({
         mutationFn: (data: FormData | Partial<TechnicalSkill>) => {
@@ -44,6 +34,8 @@ const SkillManagement = () => {
             queryClient.setQueryData(['admin-skills'], (old: TechnicalSkill[] | undefined) => {
                 return old ? [newSkill, ...old] : [newSkill];
             });
+            // Invalidate public skills cache
+            queryClient.invalidateQueries({ queryKey: ['skills'] });
             showToast("Skill created successfully", "success");
             setIsModalOpen(false);
         },
@@ -60,6 +52,8 @@ const SkillManagement = () => {
             queryClient.setQueryData(['admin-skills'], (old: TechnicalSkill[] | undefined) => {
                 return old ? old.map(s => s.id === updatedSkill.id ? updatedSkill : s) : [updatedSkill];
             });
+            // Invalidate public skills cache
+            queryClient.invalidateQueries({ queryKey: ['skills'] });
             showToast("Skill updated successfully", "success");
             setIsModalOpen(false);
             setEditingSkill(undefined);
@@ -87,6 +81,7 @@ const SkillManagement = () => {
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills'] });
         },
         onSuccess: () => {
             showToast("Skill deleted successfully", "success");
@@ -180,7 +175,7 @@ const SkillManagement = () => {
         <>
             <ManagementTable
                 title="Technical Skills"
-                data={skills}
+                data={skills || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

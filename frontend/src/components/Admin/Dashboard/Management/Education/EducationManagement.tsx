@@ -13,34 +13,11 @@ const EducationManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_EDUCATION: Education[] = [
-        {
-            id: 1,
-            institution: "Stanford University",
-            degree: "Master of Science",
-            field_of_study: "Artificial Intelligence",
-            start_date: "2018-09",
-            end_date: "2020-06",
-            description: "Specialized in Deep Learning and Computer Vision."
-        },
-        {
-            id: 2,
-            institution: "MIT",
-            degree: "Bachelor of Science",
-            field_of_study: "Computer Science",
-            start_date: "2014-09",
-            end_date: "2018-06",
-            description: "GPA: 4.0/4.0. Minor in Mathematics."
-        }
-    ];
-
-    const { data: apiEducation, isLoading } = useQuery({
+    const { data: education, isLoading } = useQuery({
         queryKey: ['admin-education'],
         queryFn: getAdminEducation,
         staleTime: 1000 * 60 * 5,
     });
-
-    const education = apiEducation && apiEducation.length > 0 ? apiEducation : MOCK_EDUCATION;
 
     const createMutation = useMutation({
         mutationFn: createEducation,
@@ -48,6 +25,8 @@ const EducationManagement = () => {
             queryClient.setQueryData(['admin-education'], (old: Education[] | undefined) => {
                 return old ? [newEdu, ...old] : [newEdu];
             });
+            // Invalidate public education cache
+            queryClient.invalidateQueries({ queryKey: ['education'] });
             showToast("Education created successfully", "success");
             setIsModalOpen(false);
         },
@@ -62,6 +41,8 @@ const EducationManagement = () => {
             queryClient.setQueryData(['admin-education'], (old: Education[] | undefined) => {
                 return old ? old.map(e => e.id === updatedEdu.id ? updatedEdu : e) : [updatedEdu];
             });
+            // Invalidate public education cache
+            queryClient.invalidateQueries({ queryKey: ['education'] });
             showToast("Education updated successfully", "success");
             setIsModalOpen(false);
             setEditingEducation(undefined);
@@ -89,6 +70,7 @@ const EducationManagement = () => {
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-education'] });
+            queryClient.invalidateQueries({ queryKey: ['education'] });
         },
         onSuccess: () => {
             showToast("Education entry deleted successfully", "success");
@@ -152,7 +134,7 @@ const EducationManagement = () => {
         <>
             <ManagementTable
                 title="Education"
-                data={education}
+                data={education || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

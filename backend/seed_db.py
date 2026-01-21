@@ -11,15 +11,13 @@ from backend.models import sql_models as models
 def seed_data():
     db = SessionLocal()
     
-    # Clear existing data (optional, but good for idempotent seeding)
-    # db.query(models.CV).delete() # Keep CVs for now
-    db.query(models.Education).delete()
-    db.query(models.Certificate).delete()
-    db.query(models.MemorableMoment).delete()
-    db.query(models.WorkExperience).delete()
-    db.query(models.Project).delete()
-    db.query(models.TechnicalSkill).delete()
-    db.commit()
+    # Reset database schema
+    print("Resetting database schema...")
+    models.Base.metadata.drop_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
+    
+    # Re-create session after schema reset
+    db = SessionLocal()
 
     print("Seeding Education...")
     education_data = [
@@ -28,14 +26,20 @@ def seed_data():
             "institution": '10 Academy, online',
             "start_date": date(2024, 12, 1),
             "end_date": date(2025, 3, 1),
-            "description": 'Specialized in Artificial Intelligence and Machine Learning on Deep Learning and Natural Language Processing. (with Distinction). Highlights: Completed a 12-week KAIM AI Mastery Training powered by Kifiya & Mastercard Foundation; Delivered a polished finance-sector capstone with structured code, documentation, and unit tests; Built real-world ML systems: solar-farm site selection, financial sentiment analysis, telecom forecasting, healthcare data warehousing, fraud detection, and portfolio forecasting; Cultivated professional skills through cohort collaboration, mentorship, guest speakers, and challenge-based learning. Courses: Data cleaning, Advanced Python and SQL, CI/CD, Docker, Machine Learning'
+            "description": 'Specialized in Artificial Intelligence and Machine Learning on Deep Learning and Natural Language Processing.',
+            "gpa": '(with Distinction)',
+            "highlights": 'Completed a 12-week KAIM AI Mastery Training powered by Kifiya & Mastercard Foundation; Delivered a polished finance-sector capstone with structured code, documentation, and unit tests; Built real-world ML systems: solar-farm site selection, financial sentiment analysis, telecom forecasting, healthcare data warehousing, fraud detection, and portfolio forecasting; Cultivated professional skills through cohort collaboration, mentorship, guest speakers, and challenge-based learning',
+            "courses": 'Data cleaning, Advanced Python and SQL, CI/CD, Docker, Machine Learning'
         },
         {
             "degree": 'Bachelor of Science in Computer Science',
             "institution": 'Unity University , Adama-Campus',
             "start_date": date(2022, 9, 1),
             "end_date": None, # Present
-            "description": "Strong foundation in computer systems, database design, object-oriented programming (OOP) Data Structures and algorithms, and software engineering with honors. GPA: 3.9/4.0. Highlights: Dean's List for 6 consecutive semesters; Developed full-stack web app for Rent Management System for final project Using React, FastAPI and PostgreSQL; Developed full-stack web app for QR-based Attendance Management System for Unity Using HTML, CSS, JS, PHP and MySQL; Developed full-stack mobile app for my class project using Flutter and MySQL. Courses: Data Structures, Algorithms, Software Engineering, Database Systems, Computer Networks, Flutter"
+            "description": "Strong foundation in computer systems, database design, object-oriented programming (OOP) Data Structures and algorithms, and software engineering with honors.",
+            "gpa": '3.9/4.0',
+            "highlights": "Dean's List for 6 consecutive semesters; Developed full-stack web app for Rent Management System for final project Using React, FastAPI and PostgreSQL; Developed full-stack web app for QR-based Attendance Management System for Unity Using HTML, CSS, JS, PHP and MySQL; Developed full-stack mobile app for my class project using Flutter and MySQL",
+            "courses": 'Data Structures, Algorithms, Software Engineering, Database Systems, Computer Networks, Flutter'
         }
     ]
     for edu in education_data:
@@ -139,47 +143,62 @@ def seed_data():
         {
             "title": 'AI Engineer Intern,',
             "company": 'Kifiya Financial Technology',
+            "type": 'Internship',
             "location": 'Addis Ababa, Ethiopia',
             "start_date": date(2025, 3, 1),
             "end_date": None, # Present
             "is_current": True,
-            "description": "Crafting innovative AI solutions at Kifiya Financial Technology, I specialize in building and fine-tuning Agentic AI systems with LLMs and RAG pipelines. Working closely with diverse teams, I create scalable tools that boost decision-making, streamline operations, and elevate customer experiences in the fintech world. Achievements: Developing GenAI solutions using LangGraph and Retrieval-Augmented Generation (RAG) techniques; Designing and implementing conversational workflows with the LangChain ecosystem for enterprise use cases; Test and modify the ML models; Collaborating with senior engineers and cross-functional teams; Gaining hands-on experience in applying AI technologies within fintech and digital services. Technologies: Python, LangGraph, Docker, FastAPI, VectorDB, Docker, postgresql"
+            "description": "Crafting innovative AI solutions at Kifiya Financial Technology, I specialize in building and fine-tuning Agentic AI systems with LLMs and RAG pipelines. Working closely with diverse teams, I create scalable tools that boost decision-making, streamline operations, and elevate customer experiences in the fintech world.",
+            "achievements": "Developing GenAI solutions using LangGraph and Retrieval-Augmented Generation (RAG) techniques; Designing and implementing conversational workflows with the LangChain ecosystem for enterprise use cases; Test and modify the ML models; Collaborating with senior engineers and cross-functional teams; Gaining hands-on experience in applying AI technologies within fintech and digital services",
+            "technologies": "Python, LangGraph, Docker, FastAPI, VectorDB, Docker, postgresql"
         },
         {
             "title": 'Youth Advisor ',
             "company": 'Kifiya Financial Technology',
+            "type": 'Part-time',
             "location": 'Addis Ababa, Ethiopia',
             "start_date": date(2023, 12, 1),
             "end_date": date(2025, 4, 1),
             "is_current": False,
-            "description": "As a Youth Advisor, I amplify the voices of young people, translating their needs into actionable insights for impactful programs. Through strategic collaboration with stakeholders in multiple engagements, I shape and deliver initiatives that tackle real challenges, fostering meaningful, youth-driven solutions that inspire change. Achievements: Identified and communicated the needs of the youth, providing valuable advice and insights to support youth-focused initiatives; Collaborated with stakeholders in 4+ meetings to design and implement strategic programs that address youth needs,ensuring effective and impactful solutions. Technologies: Advisory, Teamwork, Communication, Ideas Development, Easily Adaptable"
+            "description": "As a Youth Advisor, I amplify the voices of young people, translating their needs into actionable insights for impactful programs. Through strategic collaboration with stakeholders in multiple engagements, I shape and deliver initiatives that tackle real challenges, fostering meaningful, youth-driven solutions that inspire change.",
+            "achievements": "Identified and communicated the needs of the youth, providing valuable advice and insights to support youth-focused initiatives; Collaborated with stakeholders in 4+ meetings to design and implement strategic programs that address youth needs,ensuring effective and impactful solutions",
+            "technologies": "Advisory, Teamwork, Communication, Ideas Development, Easily Adaptable"
         },
         {
             "title": 'Computer Networking Engineer',
             "company": 'GABI Technology PLC',
+            "type": 'Full-time',
             "location": 'Adama, Oromia Region, Ethiopia',
             "start_date": date(2024, 7, 1),
             "end_date": date(2024, 12, 1),
             "is_current": False,
-            "description": "At GABI Technology PLC, I engineered robust network solutions, designing and implementing LAN infrastructure for Adama City Administration to ensure reliable connectivity for over 500 users. By configuring Cisco switches and routers, I boosted network performance and security, while collaborating with teams to troubleshoot issues and build a scalable data center for enhanced data accessibility. Achievements: Designed and implemented a LAN network infrastructure for Adama City Administration, reducing downtime and ensuring reliable connectivity for over 500 users; Configured and optimized Cisco switches and routers, enhancing network performance and security for seamless organizational communication; Collaborated with cross-functional teams to troubleshoot and resolve network issues, minimizing disruptions and ensuring smooth daily operations; Built and configured a data center to support scalable and secure data storage, improving data accessibility and processing efficiency. Technologies: putty, cisco packet tracer, CMD, punch down tool, Crimper, fibber optic, Utp- calble"
+            "description": "At GABI Technology PLC, I engineered robust network solutions, designing and implementing LAN infrastructure for Adama City Administration to ensure reliable connectivity for over 500 users. By configuring Cisco switches and routers, I boosted network performance and security, while collaborating with teams to troubleshoot issues and build a scalable data center for enhanced data accessibility.",
+            "achievements": "Designed and implemented a LAN network infrastructure for Adama City Administration, reducing downtime and ensuring reliable connectivity for over 500 users; Configured and optimized Cisco switches and routers, enhancing network performance and security for seamless organizational communication; Collaborated with cross-functional teams to troubleshoot and resolve network issues, minimizing disruptions and ensuring smooth daily operations; Built and configured a data center to support scalable and secure data storage, improving data accessibility and processing efficiency",
+            "technologies": "putty, cisco packet tracer, CMD, punch down tool, Crimper, fibber optic, Utp- calble"
         },
         {
             "title": 'Software Engineering Intern',
             "company": 'Forage',
+            "type": 'Internship',
             "location": 'Remote',
             "start_date": date(2023, 11, 1),
             "end_date": date(2023, 11, 1),
             "is_current": False,
-            "description": "Software Engineer Intern at Forage, I honed my skills in software development, mastering best practices in coding, debugging, and version control. Working remotely, I contributed to impactful projects, leveraging project management tools to deliver efficient solutions and gain practical experience in a dynamic tech environment. Achievements: Developed and debugged features for Forage’s virtual job simulation platform; Streamlined code integration using version contro; Earned recognition for high-quality code contributions during intern code reviews; Received outstanding intern performance rating. Technologies: JavaScript, Python, Git, Node.js, React, Jira"
+            "description": "Software Engineer Intern at Forage, I honed my skills in software development, mastering best practices in coding, debugging, and version control. Working remotely, I contributed to impactful projects, leveraging project management tools to deliver efficient solutions and gain practical experience in a dynamic tech environment.",
+            "achievements": "Developed and debugged features for Forage’s virtual job simulation platform; Streamlined code integration using version contro; Earned recognition for high-quality code contributions during intern code reviews; Received outstanding intern performance rating",
+            "technologies": "JavaScript, Python, Git, Node.js, React, Jira"
         },
         {
             "title": 'Frontend Web Developer',
             "company": 'PURPOSE BLACK ETH',
+            "type": 'Contract',
             "location": 'Remote',
             "start_date": date(2023, 3, 1),
             "end_date": date(2023, 6, 1),
             "is_current": False,
-            "description": "I crafted and optimized user-friendly web interfaces, enhancing user experience through responsive design and seamless functionality. Collaborating closely with design and development teams in a hybrid setting, I implemented new features and improved applications, ensuring alignment with project goals and timely delivery. Achievements: Developed and optimized user-friendly web interfaces, improving user experience through responsive design and enhanced functionality; Collaborated with design and development teams to implement new features and improve existing applications, ensuring alignment with project requirements and deadlines. Technologies: React.js, Bootstrap, GitLab, Front-End Development"
+            "description": "I crafted and optimized user-friendly web interfaces, enhancing user experience through responsive design and seamless functionality. Collaborating closely with design and development teams in a hybrid setting, I implemented new features and improved applications, ensuring alignment with project goals and timely delivery.",
+            "achievements": "Developed and optimized user-friendly web interfaces, improving user experience through responsive design and enhanced functionality; Collaborated with design and development teams to implement new features and improve existing applications, ensuring alignment with project requirements and deadlines",
+            "technologies": "React.js, Bootstrap, GitLab, Front-End Development"
         }
     ]
     for work in work_data:
@@ -307,7 +326,7 @@ def seed_data():
         {
             "title": 'stu-infomation',
             "category": 'Software Applications',
-            "description": 'No description provided.',
+            "description": 'A student information management system built with Visual Basic .NET to efficiently store, retrieve, and manage student records and academic data.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/stu-infomation',
             "project_url": '#'
@@ -324,7 +343,7 @@ def seed_data():
         {
             "title": 'registration-software',
             "category": 'Software Applications',
-            "description": 'No description provided.',
+            "description": 'A desktop registration software application developed using Visual Basic .NET, designed to streamline user enrollment and event registration processes.',
             "technologies": 'Visual basic.Net',
             "github_url": 'https://github.com/dagiteferi/registration-software',
             "project_url": '#'
@@ -332,7 +351,7 @@ def seed_data():
         {
             "title": 'Calculator',
             "category": 'Mobile Apps',
-            "description": 'No description provided.',
+            "description": 'A cross-platform mobile calculator application built with Flutter and Dart, featuring a clean, intuitive UI and support for standard arithmetic operations.',
             "technologies": 'Dart, Flutter',
             "image_url": '/assets/flutter calculater.jpg',
             "github_url": 'https://github.com/dagiteferi/Calculator',
@@ -341,7 +360,7 @@ def seed_data():
         {
             "title": 'Attendance-System',
             "category": 'Web Development',
-            "description": 'No description provided.',
+            "description": 'A web-based attendance management system utilizing PHP and MySQL for backend data handling, coupled with a responsive HTML/CSS/JS frontend for real-time tracking.',
             "technologies": 'HTML, CSS, JavaScript, PHP, MySQL',
             "image_url": '/assets/qr attendace.png',
             "github_url": 'https://github.com/dagiteferi/Attendance-System',
@@ -350,7 +369,7 @@ def seed_data():
         {
             "title": 'BinarySearchTree',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'An efficient C++ implementation of the Binary Search Tree data structure, demonstrating core algorithms for insertion, deletion, and traversal.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/BinarySearchTree',
             "project_url": '#'
@@ -358,7 +377,7 @@ def seed_data():
         {
             "title": 'AVL-Tree-Implementation',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A robust C++ implementation of an AVL Tree (self-balancing binary search tree), ensuring optimal O(log n) time complexity for search, insert, and delete operations.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/AVL-Tree-Implementation',
             "project_url": '#'
@@ -366,7 +385,7 @@ def seed_data():
         {
             "title": 'FIRSR-IN-FIRST-OUT',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A C++ implementation of the First-In-First-Out (FIFO) queue data structure, showcasing fundamental memory management and data processing principles.',
             "technologies": 'C++',
             "github_url": 'https://github.com/dagiteferi/FIFS',
             "project_url": 'https://attendance-system-plum-eta.vercel.app/'
@@ -374,7 +393,7 @@ def seed_data():
         {
             "title": 'Anasimos',
             "category": 'Web Development',
-            "description": 'No description provided.',
+            "description": 'A responsive web application built with HTML, CSS, and JavaScript, focusing on clean design aesthetics and interactive user interface elements.',
             "technologies": 'Html, css, javascript',
             "image_url": '/assets/anasimoseproject.jpeg',
             "github_url": 'https://github.com/dagiteferi/Anasimos',
@@ -383,7 +402,7 @@ def seed_data():
         {
             "title": 'Search-And-Sort-Algorithms-using-c-',
             "category": 'DSA',
-            "description": 'No description provided.',
+            "description": 'A comprehensive collection of classic search and sort algorithms implemented in C++, serving as an educational resource for understanding algorithmic efficiency and logic.',
             "technologies": 'C++',
             "image_url": '/assets/search sort.jpeg',
             "github_url": 'https://github.com/dagiteferi/Search-And-Sort-Algorithms-using-c-',

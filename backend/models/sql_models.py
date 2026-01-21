@@ -29,6 +29,9 @@ class Education(Base):
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
     description = Column(Text, nullable=True)
+    gpa = Column(String, nullable=True)
+    highlights = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
+    courses = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
 
 class Certificate(Base):
     __tablename__ = "certificates"
@@ -56,11 +59,14 @@ class WorkExperience(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     company = Column(String, nullable=False)
+    type = Column(String, nullable=True) # e.g., Full-time, Part-time, Remote, Hybrid
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True) # Null for present
     is_current = Column(Boolean, default=False)
     description = Column(Text, nullable=True)
     location = Column(String, nullable=True)
+    achievements = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
+    technologies = Column(Text, nullable=True) # Stored as JSON string or delimiter-separated
 
 class Project(Base):
     __tablename__ = "projects"

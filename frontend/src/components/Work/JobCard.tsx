@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { MapPin, Calendar, ChevronRight } from 'lucide-react';
-import { WorkExperienceEntry } from './data';
+export interface WorkExperienceEntry {
+  title: string;
+  company: string;
+  location: string;
+  period: string;
+  type: string;
+  description: string;
+  achievements: string[];
+  technologies: string[];
+}
 
 interface JobCardProps {
   job: WorkExperienceEntry;
@@ -17,17 +26,14 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
 
   return (
     <div
-      className={`relative transition-all duration-300 ${
-        isVisible ? 'animate-fade-in-up' : 'opacity-0'
-      }`}
+      className={`relative transition-all duration-300 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
+        }`}
       style={{
         animationDelay: isVisible ? `${index * 0.2}s` : '0s'
       }}
     >
-      {/* Timeline Dot */}
       <div className="absolute left-6 w-4 h-4 bg-primary rounded-full border-4 border-background z-10"></div>
-      
-      {/* Content */}
+
       <div className="ml-20 card-elegant hover-scale">
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -59,10 +65,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
             className="flex items-center text-primary hover:text-primary-glow transition-colors duration-300 font-medium"
           >
             <span>{expanded ? 'Show Less' : 'Show More'}</span>
-            <ChevronRight 
-              className={`w-4 h-4 ml-1 transition-transform duration-300 ${
-                expanded ? 'rotate-90' : ''
-              }`} 
+            <ChevronRight
+              className={`w-4 h-4 ml-1 transition-transform duration-300 ${expanded ? 'rotate-90' : ''
+                }`}
             />
           </button>
 
@@ -81,7 +86,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
               </div>
 
               <div>
-                <h4 className="font-semibold text-foreground mb-3">Technologies Used:</h4>
+                <h4 className="font-semibold text-foreground mb-3">Skills Used:</h4>
                 <div className="flex flex-wrap gap-2">
                   {job.technologies.map((tech, i) => (
                     <span

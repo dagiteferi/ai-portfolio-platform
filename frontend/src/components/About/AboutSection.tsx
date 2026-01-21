@@ -93,7 +93,7 @@ const AboutSection: React.FC = memo(() => {
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
                   src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'} // Dynamically change image source on hover.
-                  alt="Dagmawi Teferi"
+                  alt="Dagmawi Teferi - AI/ML Engineer and Fullstack Developer Profile"
                   className="w-full h-full object-cover object-top" // Ensure image covers and top is visible.
                 />
               </div>
@@ -106,22 +106,22 @@ const AboutSection: React.FC = memo(() => {
           <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
             <div className="space-y-6">
               <p className="text-lg text-gray-900 leading-relaxed">
-                I am a passionate AI and machine learning engineer, full stack developer, and Flutter 
-                enthusiast with a strong computer science background, holding a 3.93 GPA, dedicated to 
+                I am a passionate AI and machine learning engineer, full stack developer, and Flutter
+                enthusiast with a strong computer science background, holding a 3.93 GPA, dedicated to
                 creating intelligent systems and scalable applications.
               </p>
-              
+
               <p className="text-lg text-gray-900 leading-relaxed">
-                My expertise spans across deep learning, natural language processing, 
-                computer vision, full‑stack development, Flutter, and MLOps, and I 
-                thrive at the intersection of research and engineering, transforming 
+                My expertise spans across deep learning, natural language processing,
+                computer vision, full‑stack development, Flutter, and MLOps, and I
+                thrive at the intersection of research and engineering, transforming
                 innovative ideas into production-ready solutions.
               </p>
 
               <p className="text-lg text-gray-900 leading-relaxed">
                 I am committed to continuous learning and professional development.
-                 I actively seek opportunities to expand my knowledge, stay updated with emerging 
-                 technologies, and embrace new challenges that enhance my skills and expertise.
+                I actively seek opportunities to expand my knowledge, stay updated with emerging
+                technologies, and embrace new challenges that enhance my skills and expertise.
               </p>
             </div>
 

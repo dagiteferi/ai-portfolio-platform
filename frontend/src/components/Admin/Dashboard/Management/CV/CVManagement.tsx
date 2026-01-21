@@ -13,21 +13,11 @@ const CVManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const MOCK_CVS: CV[] = [
-        {
-            id: 1,
-            url: "https://example.com/cv.pdf",
-            uploaded_at: new Date().toISOString()
-        }
-    ];
-
-    const { data: apiCVs, isLoading } = useQuery({
+    const { data: cvs, isLoading } = useQuery({
         queryKey: ['admin-cvs'],
         queryFn: getAdminCVs,
         staleTime: 1000 * 60 * 5,
     });
-
-    const cvs = apiCVs && apiCVs.length > 0 ? apiCVs : MOCK_CVS;
 
     const uploadMutation = useMutation({
         mutationFn: uploadCV,
@@ -35,6 +25,8 @@ const CVManagement = () => {
             queryClient.setQueryData(['admin-cvs'], (old: CV[] | undefined) => {
                 return old ? [newCV, ...old] : [newCV];
             });
+            // Invalidate public CV cache
+            queryClient.invalidateQueries({ queryKey: ['cvs'] });
             showToast("CV uploaded successfully", "success");
             setIsModalOpen(false);
         },
@@ -61,6 +53,7 @@ const CVManagement = () => {
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-cvs'] });
+            queryClient.invalidateQueries({ queryKey: ['cvs'] });
         },
         onSuccess: () => {
             showToast("CV deleted successfully", "success");
@@ -95,7 +88,7 @@ const CVManagement = () => {
                     </div>
                     <div>
                         <p className="font-medium">Curriculum Vitae</p>
-                        <p className="text-xs text-muted-foreground">Uploaded on {new Date(item.uploaded_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground">Uploaded on {new Date(item.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
             )
@@ -123,7 +116,7 @@ const CVManagement = () => {
         <>
             <ManagementTable
                 title="CV Management"
-                data={cvs}
+                data={cvs || []}
                 columns={columns}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

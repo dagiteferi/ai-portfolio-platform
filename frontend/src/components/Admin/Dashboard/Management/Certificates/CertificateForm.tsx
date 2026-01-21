@@ -105,23 +105,49 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
 
             <div>
                 <label className="text-sm font-medium mb-1.5 block">Certificate File / PDF</label>
-                <div className="relative group rounded-xl border-2 border-dashed border-muted-foreground/25 p-6 flex flex-col items-center justify-center hover:border-primary/50 transition-colors bg-muted/5">
-                    {fileName || formData.url ? (
-                        <div className="flex items-center gap-3 w-full">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <FileText className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{fileName || 'Current Certificate File'}</p>
-                                <p className="text-xs text-muted-foreground">Click to change file</p>
-                            </div>
+                <div className="relative group rounded-xl border-2 border-dashed border-muted-foreground/25 p-6 flex flex-col items-center justify-center hover:border-primary/50 transition-colors bg-muted/5 overflow-hidden">
+                    {file && file.type.startsWith('image/') ? (
+                        <div className="relative w-full aspect-video">
+                            <img
+                                src={URL.createObjectURL(file)}
+                                alt="Preview"
+                                className="w-full h-full object-contain rounded-lg"
+                            />
                             <button
                                 type="button"
                                 onClick={() => { setFile(null); setFileName(null); }}
-                                className="p-1 hover:bg-muted rounded-full transition-colors"
+                                className="absolute top-2 right-2 bg-black/50 p-1.5 rounded-full hover:bg-black/70 transition-colors text-white"
                             >
                                 <X className="h-4 w-4" />
                             </button>
+                        </div>
+                    ) : (fileName || (formData.url && formData.url.match(/\.(jpeg|jpg|gif|png|webp)$/i))) ? (
+                        <div className="flex flex-col items-center gap-3 w-full">
+                            {formData.url && formData.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) && !file && (
+                                <div className="relative w-full aspect-video mb-2">
+                                    <img
+                                        src={formData.url}
+                                        alt="Current Certificate"
+                                        className="w-full h-full object-contain rounded-lg"
+                                    />
+                                </div>
+                            )}
+                            <div className="flex items-center gap-3 w-full bg-background/50 p-3 rounded-lg border">
+                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{fileName || 'Current Certificate File'}</p>
+                                    <p className="text-xs text-muted-foreground">Click to change file</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => { setFile(null); setFileName(null); }}
+                                    className="p-1 hover:bg-muted rounded-full transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
                             <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,image/*" />
                         </div>
                     ) : (

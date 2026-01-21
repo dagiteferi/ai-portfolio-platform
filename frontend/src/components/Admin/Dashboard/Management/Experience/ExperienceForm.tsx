@@ -13,7 +13,8 @@ interface ExperienceFormProps {
 const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, onCancel, isSubmitting }) => {
     const [formData, setFormData] = useState({
         company: experience?.company || '',
-        position: experience?.position || '',
+        title: experience?.title || '',
+        type: experience?.type || 'Full-time',
         location: experience?.location || '',
         start_date: experience?.start_date || '',
         end_date: experience?.end_date || '',
@@ -21,7 +22,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
         description: experience?.description || '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -40,8 +41,8 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                 <div>
                     <label className="text-sm font-medium mb-1.5 block">Job Title</label>
                     <Input
-                        name="position"
-                        value={formData.position}
+                        name="title"
+                        value={formData.title}
                         onChange={handleChange}
                         placeholder="e.g. Senior AI Engineer"
                         required
@@ -55,6 +56,35 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                         onChange={handleChange}
                         placeholder="e.g. Google"
                         required
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="text-sm font-medium mb-1.5 block">Employment Type</label>
+                    <select
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="text-sm font-medium mb-1.5 block">Location</label>
+                    <Input
+                        name="location"
+                        value={formData.location}
+                        onChange={handleChange}
+                        placeholder="e.g. San Francisco, CA or Remote"
                     />
                 </div>
             </div>
@@ -95,16 +125,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                         </label>
                     </div>
                 </div>
-            </div>
-
-            <div>
-                <label className="text-sm font-medium mb-1.5 block">Location</label>
-                <Input
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="e.g. San Francisco, CA or Remote"
-                />
             </div>
 
             <div>

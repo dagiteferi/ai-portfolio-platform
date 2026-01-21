@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
 
-// Define the structure of a message object for the UI.
 export interface Message {
   id: string;
   text: string;
@@ -9,45 +8,33 @@ export interface Message {
   file_url?: string;
 }
 
-// Define the structure for API error responses for consistent error handling.
 interface ErrorResponse {
   detail: string;
 }
 
-// --- Configuration for Retries ---
-const MAX_RETRIES = 3; // Maximum number of retries for transient errors
-const RETRY_DELAY_MS = 1000; // Initial delay in milliseconds before retrying
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
-// Function to introduce a delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Function to check if an error is transient and should be retried
 const isTransientError = (error: AxiosError): boolean => {
-  // Retry on network errors (no response) or 5xx server errors
   return (
     axios.isAxiosError(error) &&
     (!error.response || (error.response.status >= 500 && error.response.status < 600))
   );
 };
 
-// Create a single, configured axios instance for the entire application.
 const apiClient = axios.create({
   baseURL: process.env.REACT_APP_BACKEND_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
-  // Set a timeout for requests to prevent them from hanging indefinitely.
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds
 });
 
-// --- Axios Interceptors ---
-// Interceptors are middleware that can globally handle requests and responses.
-
-// Request Interceptor: Use this to inject authentication tokens, logs, or other headers.
 apiClient.interceptors.request.use(
   (config) => {
     const startTime = performance.now();
-    // Store start time for response interceptor
     config.headers['x-request-start-time'] = startTime;
 
     if (process.env.NODE_ENV !== 'production') {
@@ -61,11 +48,17 @@ apiClient.interceptors.request.use(
         })
       );
     }
-    // For example, you could retrieve a token from localStorage here.
+
     const token = localStorage.getItem('adminToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If sending FormData, remove Content-Type to let axios set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {
@@ -84,9 +77,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Use this to handle responses globally.
 apiClient.interceptors.response.use(
-  // Any status code that lie within the range of 2xx cause this function to trigger
   (response: AxiosResponse) => {
     const startTime = response.config.headers['x-request-start-time'] as number;
     const duration = performance.now() - startTime;
@@ -115,7 +106,7 @@ apiClient.interceptors.response.use(
 
     if (isTransientError(error) && config._retryCount < MAX_RETRIES) {
       config._retryCount++;
-      const delayMs = RETRY_DELAY_MS * Math.pow(2, config._retryCount - 1); // Exponential backoff
+      const delayMs = RETRY_DELAY_MS * Math.pow(2, config._retryCount - 1);
       if (process.env.NODE_ENV !== 'production') {
         console.warn(
           JSON.stringify({
@@ -131,10 +122,9 @@ apiClient.interceptors.response.use(
         );
       }
       await delay(delayMs);
-      return apiClient(config); // Retry the request
+      return apiClient(config);
     }
 
-    // Log final error after retries or for non-transient errors
     if (process.env.NODE_ENV !== 'production') {
       if (error.response) {
         console.error(
@@ -188,42 +178,25 @@ apiClient.interceptors.response.use(
   }
 );
 
-
-// --- Type-Safe API Contracts ---
-
-// Define the structure of the request payload for the chat endpoint.
 export interface ChatRequestPayload {
   message: string;
   history: { user: string; assistant: string }[];
   user_name: string;
 }
 
-// Define the structure of the successful response from the chat endpoint.
 export interface ChatResponseData {
   response: string;
   file_url?: string;
 }
 
-
-// --- API Service Functions ---
-
-/**
- * Sends a message to the backend chatbot and returns its response.
- * @param payload - The data to be sent to the chat endpoint.
- * @returns A promise that resolves to the chatbot's response.
- */
 export const sendMessageToBackend = async (payload: ChatRequestPayload): Promise<ChatResponseData> => {
   try {
-    // The interceptor will automatically handle the response data extraction and retries.
     const data: ChatResponseData = await apiClient.post('/chat', payload);
     return data;
   } catch (error) {
-    // The interceptor handles logging, so we just re-throw for the hook to catch.
     throw error;
   }
 };
-
-// --- Admin API Contracts ---
 
 export interface AdminLoginRequest {
   username: string;
@@ -258,12 +231,15 @@ export interface Project {
 export interface WorkExperience {
   id: number;
   company: string;
-  position: string;
+  title: string;
+  type?: string;
   location?: string;
   start_date: string;
   end_date?: string;
   description?: string;
   is_current: boolean;
+  achievements?: string;
+  technologies?: string;
 }
 
 export interface Education {
@@ -274,6 +250,9 @@ export interface Education {
   start_date: string;
   end_date?: string;
   description?: string;
+  gpa?: string;
+  highlights?: string;
+  courses?: string;
 }
 
 export interface Certificate {
@@ -297,45 +276,35 @@ export interface MemorableMoment {
 export interface CV {
   id: number;
   url: string;
-  uploaded_at: string;
+  created_at: string;
 }
-
-// --- Admin API Service Functions ---
 
 export const adminLogin = async (payload: AdminLoginRequest): Promise<AdminTokenResponse> => {
   return apiClient.post('/admin/login', payload);
 };
 
-// Projects
 export const getAdminProjects = async (): Promise<Project[]> => {
   return apiClient.get('/admin/projects');
 };
 
 export const createProject = async (formData: FormData): Promise<Project> => {
-  return apiClient.post('/admin/projects/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/projects/upload', formData);
 };
 
 export const updateProject = async (id: number, formData: FormData): Promise<Project> => {
-  return apiClient.put(`/admin/projects/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/projects/${id}`, formData);
 };
 
 export const deleteProject = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/projects/${id}`);
 };
 
-// Skills
 export const getAdminSkills = async (): Promise<TechnicalSkill[]> => {
   return apiClient.get('/admin/skills');
 };
 
 export const createSkill = async (formData: FormData): Promise<TechnicalSkill> => {
-  return apiClient.post('/admin/skills/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/skills/upload', formData);
 };
 
 export const updateSkill = async (id: number, skill: Partial<TechnicalSkill>): Promise<TechnicalSkill> => {
@@ -346,7 +315,6 @@ export const deleteSkill = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/skills/${id}`);
 };
 
-// Experience
 export const getAdminExperience = async (): Promise<WorkExperience[]> => {
   return apiClient.get('/admin/experience');
 };
@@ -363,7 +331,6 @@ export const deleteExperience = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/experience/${id}`);
 };
 
-// Education
 export const getAdminEducation = async (): Promise<Education[]> => {
   return apiClient.get('/admin/education');
 };
@@ -380,64 +347,50 @@ export const deleteEducation = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/education/${id}`);
 };
 
-// Certificates
 export const getAdminCertificates = async (): Promise<Certificate[]> => {
   return apiClient.get('/admin/certificates');
 };
 
 export const createCertificate = async (formData: FormData): Promise<Certificate> => {
-  return apiClient.post('/admin/certificates/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/certificates/upload', formData);
 };
 
 export const updateCertificate = async (id: number, formData: FormData): Promise<Certificate> => {
-  return apiClient.put(`/admin/certificates/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/certificates/${id}`, formData);
 };
 
 export const deleteCertificate = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/certificates/${id}`);
 };
 
-// Moments
 export const getAdminMoments = async (): Promise<MemorableMoment[]> => {
   return apiClient.get('/admin/moments');
 };
 
 export const createMoment = async (formData: FormData): Promise<MemorableMoment> => {
-  return apiClient.post('/admin/moments/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/moments/upload', formData);
 };
 
 export const updateMoment = async (id: number, formData: FormData): Promise<MemorableMoment> => {
-  return apiClient.put(`/admin/moments/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.put(`/admin/moments/${id}`, formData);
 };
 
 export const deleteMoment = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/moments/${id}`);
 };
 
-// CV
 export const getAdminCVs = async (): Promise<CV[]> => {
   return apiClient.get('/admin/cv');
 };
 
 export const uploadCV = async (formData: FormData): Promise<CV> => {
-  return apiClient.post('/admin/cv/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  return apiClient.post('/admin/cv/upload', formData);
 };
 
 export const deleteCV = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/cv/${id}`);
 };
 
-// Logs
 export const getLogFiles = async (): Promise<string[]> => {
   return apiClient.get('/admin/logs');
 };
@@ -446,6 +399,17 @@ export const getLogContent = async (filename: string, limit = 100, offset = 0): 
   return apiClient.get(`/admin/logs/${filename}`, {
     params: { limit, offset }
   });
+};
+
+export interface Stats {
+  totalProjects: number;
+  totalSkills: number;
+  aiMlProjects: number;
+  dataSolutions: number;
+}
+
+export const getStats = async (): Promise<Stats> => {
+  return apiClient.get('/stats');
 };
 
 export { };

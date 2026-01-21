@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Linkedin, Twitter, Heart, ArrowUp, Facebook } from 'lucide-react';
+import { Github, Linkedin, Twitter, Heart, ArrowUp, Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -16,7 +16,7 @@ const Footer = () => {
       label: 'GitHub'
     },
     { 
-      icon: Facebook, 
+      icon: Instagram, 
       href: 'https://web.facebook.com/dagmawi.teferi.98',
       label: 'Twitter'
     }

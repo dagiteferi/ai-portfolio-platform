@@ -1,10 +1,32 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { workExperience } from './data';
 import JobCard from './JobCard';
+import { WorkExperience } from '../../services/api';
 
-const Work = () => {
+interface WorkProps {
+  experienceData?: WorkExperience[];
+}
+
+const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
+  const [workExperience, setWorkExperience] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (experienceData && experienceData.length > 0) {
+      const mappedExperience = experienceData.map(exp => ({
+        title: exp.title,
+        company: exp.company,
+        location: exp.location || '',
+        period: `${exp.start_date ? new Date(exp.start_date).getFullYear() : ''} - ${exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}`,
+        type: exp.type || 'Full-time',
+        description: exp.description || '',
+        achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
+        technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []
+      }));
+      setWorkExperience(mappedExperience);
+    }
+  }, [experienceData]);
+
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -37,11 +59,9 @@ const Work = () => {
           </p>
         </div>
 
-        {/* Timeline */}
         <div className="relative">
-          {/* Vertical Line */}
           <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-primary/30"></div>
-          
+
           <div className="space-y-12">
             {workExperience.map((job, index) => (
               <JobCard key={index} job={job} index={index} isVisible={isVisible} />
@@ -61,6 +81,6 @@ const Work = () => {
       </div>
     </section>
   );
-};
+});
 
-export default memo(Work);
+export default Work;
