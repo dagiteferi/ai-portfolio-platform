@@ -11,7 +11,7 @@ const Counter = ({ value, label, icon: Icon, color }: { value: number; label: st
     useEffect(() => {
         if (isInView) {
             const controls = animate(0, value, {
-                duration: 2,
+                duration: 1,
                 ease: "easeOut",
                 onUpdate: (latest) => setCount(Math.floor(latest)),
             });

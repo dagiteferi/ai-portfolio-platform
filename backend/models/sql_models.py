@@ -59,6 +59,7 @@ class WorkExperience(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     company = Column(String, nullable=False)
+    type = Column(String, nullable=True) # e.g., Full-time, Part-time, Remote, Hybrid
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True) # Null for present
     is_current = Column(Boolean, default=False)

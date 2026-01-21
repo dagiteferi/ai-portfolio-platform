@@ -163,6 +163,7 @@ class MemorableMomentResponse(MemorableMomentBase):
 class WorkExperienceBase(BaseModel):
     title: str
     company: str
+    type: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     is_current: bool = False
@@ -178,6 +179,7 @@ class WorkExperienceUpdate(BaseModel):
     """All fields optional for partial updates"""
     title: Optional[str] = None
     company: Optional[str] = None
+    type: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     is_current: Optional[bool] = None
