@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useSpring, useTransform, animate } from 'framer-motion';
-import { Briefcase, Cpu, Database, Award } from 'lucide-react';
+import { Briefcase, Cpu, Database, Award, LucideIcon } from 'lucide-react';
 import { getStats, Stats } from '../../services/api';
 
-const Counter = ({ value, label, icon: Icon, color }: { value: number; label: string; icon: any; color: string }) => {
+const Counter = ({ value, label, icon: Icon, color }: { value: number; label: string; icon: LucideIcon; color: string }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {

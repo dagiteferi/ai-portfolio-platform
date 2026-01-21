@@ -52,107 +52,82 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
   ];
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-background">
-      {/* Background decorative image */}
-      <img className="absolute top-0 left-0 w-full h-full object-cover opacity-10 -z-10 pointer-events-none" src="/assets/back_n.png" alt="" />
+    <div className="front">
+      <img className="back" src="/assets/back_n.png" alt="" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Text Content */}
-          <div className="text-center lg:text-left z-10">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight">
-                <span className="block text-foreground">Dagmawi Teferi</span>
-                <AnimatePresence mode='wait'>
-                  <motion.span
-                    key={currentRoleIndex}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="block text-gradient text-3xl md:text-4xl lg:text-5xl mt-2"
-                  >
-                    {roles[currentRoleIndex]}
-                  </motion.span>
-                </AnimatePresence>
-              </h1>
+      <div className="front-child1">
+        <div className="animate-fade-in-up">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+            <span className="block text-gray-900">Dagmawi Teferi</span>
+            <AnimatePresence mode='wait'>
+              <motion.span
+                key={currentRoleIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="block text-gradient text-3xl md:text-4xl lg:text-5xl mt-2"
+              >
+                {roles[currentRoleIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </h1>
 
-              <div className="flex items-center justify-center lg:justify-start flex-wrap gap-2 mb-8 font-mono text-sm md:text-base text-muted-foreground">
-                <span className="text-primary font-bold">{'</'}</span>
-                <span>Believe</span>
-                <span className="text-accent">→</span>
-                <span>Learn</span>
-                <span className="text-accent">→</span>
-                <span>Write</span>
-                <span className="text-accent">→</span>
-                <span>Solve</span>
-                <span className="text-accent">→</span>
-                <span>Repeat</span>
-                <span className="text-primary font-bold">{'>'}</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
-                <Button
-                  onClick={handleDownloadCV}
-                  className="btn-gradient hover-scale group w-full sm:w-auto"
-                  size="lg"
-                >
-                  <Download className="w-5 h-5 mr-2 group-hover:animate-bounce" />
-                  Download CV
-                </Button>
-
-                <Button
-                  onClick={onChatButtonClick}
-                  size="lg"
-                  variant="outline"
-                  className="hover-scale w-full sm:w-auto border-primary/20 hover:border-primary/50 backdrop-blur-sm"
-                >
-                  Chat With My Agent
-                </Button>
-              </div>
-
-              <div className="flex justify-center lg:justify-start space-x-6">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group p-3 rounded-full bg-muted/50 border border-border hover:border-primary hover:bg-primary/10 transition-all duration-300 hover-scale"
-                    aria-label={social.label}
-                  >
-                    <social.icon size={24} className="group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
-                  </a>
-                ))}
-              </div>
-            </motion.div>
+          <div className="flex items-center justify-center lg:justify-start flex-wrap gap-y-2 mb-8 text-black">
+            <span className="text-2xl font-mono mr-2">{'</'}</span>
+            <span className="text-sm md:text-base font-medium">Believe</span>
+            <span className="text-cyan-500 text-base mx-2">→</span>
+            <span className="text-sm md:text-base font-medium">Learn</span>
+            <span className="text-cyan-500 text-base mx-2">→</span>
+            <span className="text-sm md:text-base font-medium">Write</span>
+            <span className="text-cyan-500 text-base mx-2">→</span>
+            <span className="text-sm md:text-base font-medium">Solve</span>
+            <span className="text-cyan-500 text-base mx-2">→</span>
+            <span className="text-sm md:text-base font-medium">Repeat</span>
+            <span className="text-2xl font-mono ml-2">{'>'}</span>
           </div>
 
-          {/* Hero Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="relative flex justify-center items-center"
-          >
-            <div className="relative w-full max-w-[500px] lg:max-w-full aspect-square lg:aspect-auto lg:h-[70vh] flex justify-center items-center">
-              {/* Decorative Glow */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-accent/20 to-pink/20 rounded-full blur-3xl animate-pulse -z-10" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
+            <Button
+              onClick={handleDownloadCV}
+              className="btn-gradient hover-scale group"
+              size="lg"
+            >
+              <Download className="w-5 h-5 mr-2 group-hover:animate-bounce" />
+              Download CV
+            </Button>
 
-              <img
-                className="w-full h-full object-contain mix-blend-darken drop-shadow-2xl animate-float"
-                src="/assets/hero-bg.png"
-                alt="Dagmawi Teferi"
-              />
-            </div>
-          </motion.div>
+            <Button
+              onClick={onChatButtonClick}
+              size="lg"
+              className="bg-white/80 text-gray-800 border border-gray-400 hover:bg-white hover:text-primary backdrop-blur-sm transition-all duration-300 hover-scale"
+            >
+              Chat With My Agent
+            </Button>
+          </div>
+
+          <div className="flex justify-center lg:justify-start space-x-6">
+            {socialLinks.map((social, index) => (
+              <a
+                key={index}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-3 rounded-full bg-gray-200/50 backdrop-blur-sm border border-gray-400 text-gray-800 hover:bg-primary hover:border-primary transition-all duration-300 hover-scale"
+                aria-label={social.label}
+              >
+                <social.icon size={24} className="group-hover:scale-110 transition-transform duration-300" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
-    </section>
+
+      <div className="front-child2">
+        <img className="hero hero1" src="/assets/hero-bg.png" alt="/" style={{ width: "80%", height: "900px" }} />
+        <img className="hero hero2" src="/assets/hero-bg.png" alt="/" style={{ width: "900px", height: "200px" }} />
+      </div>
+    </div>
   );
 });
 
