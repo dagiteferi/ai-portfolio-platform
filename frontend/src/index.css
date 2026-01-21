@@ -28,22 +28,26 @@
 .front {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 0.9fr;
   align-items: center;
   position: relative;
   overflow: hidden;
-  padding: 80px 20px;
+  padding: 75px 45px;
 }
 
 .front-child1 {
   grid-column: 1 / 2;
   z-index: 10;
+  margin-left: 8%;
+  /* Adjusted for the wider column */
+  max-width: 700px;
 }
 
 .front-child2 {
   grid-column: 2 / 3;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  /* Move image towards the center/left */
   align-items: center;
 }
 
