@@ -53,7 +53,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
 
   return (
     <div className="front">
-      <img className="back" src="/assets/back_n.png" alt="" />
+      <img className="back" src="/assets/back_n.png" alt="Background decorative element" />
 
       <div className="front-child1">
         <div className="animate-fade-in-up">
@@ -124,8 +124,8 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
       </div>
 
       <div className="front-child2">
-        <img className="hero hero1" src="/assets/hero-bg.png" alt="/" />
-        <img className="hero hero2" src="/assets/hero-bg.png" alt="/" />
+        <img className="hero hero1" src="/assets/hero-bg.png" alt="Dagmawi Teferi - AI/ML Engineer" />
+        <img className="hero hero2" src="/assets/hero-bg.png" alt="Dagmawi Teferi - Fullstack Developer" />
       </div>
     </div>
   );
