@@ -124,8 +124,8 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
       </div>
 
       <div className="front-child2">
-        <img className="hero hero1" src="/assets/hero-bg.png" alt="/" style={{ width: "80%", height: "900px" }} />
-        <img className="hero hero2" src="/assets/hero-bg.png" alt="/" style={{ width: "900px", height: "200px" }} />
+        <img className="hero hero1" src="/assets/hero-bg.png" alt="/" />
+        <img className="hero hero2" src="/assets/hero-bg.png" alt="/" />
       </div>
     </div>
   );

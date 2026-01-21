@@ -11,7 +11,7 @@ import Contact from '../Contact/Contact';
 import Footer from '../Footer';
 import Chatbot, { ChatbotHandle } from '../Chat/Chatbot';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import StatsCounter from '../Stats';
+import StatsCounter from '../Stats/StatsCounter';
 
 function App() {
   const chatbotRef = useRef<ChatbotHandle>(null);
