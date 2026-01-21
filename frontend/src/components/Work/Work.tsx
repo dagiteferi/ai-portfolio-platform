@@ -14,11 +14,11 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
   useEffect(() => {
     if (experienceData && experienceData.length > 0) {
       const mappedExperience = experienceData.map(exp => ({
-        title: exp.position,
+        title: exp.title,
         company: exp.company,
         location: exp.location || '',
         period: `${exp.start_date ? new Date(exp.start_date).getFullYear() : ''} - ${exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}`,
-        type: 'Full-time',
+        type: exp.type || 'Full-time',
         description: exp.description || '',
         achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
         technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []

@@ -143,6 +143,7 @@ def seed_data():
         {
             "title": 'AI Engineer Intern,',
             "company": 'Kifiya Financial Technology',
+            "type": 'Internship',
             "location": 'Addis Ababa, Ethiopia',
             "start_date": date(2025, 3, 1),
             "end_date": None, # Present
@@ -154,6 +155,7 @@ def seed_data():
         {
             "title": 'Youth Advisor ',
             "company": 'Kifiya Financial Technology',
+            "type": 'Part-time',
             "location": 'Addis Ababa, Ethiopia',
             "start_date": date(2023, 12, 1),
             "end_date": date(2025, 4, 1),
@@ -165,6 +167,7 @@ def seed_data():
         {
             "title": 'Computer Networking Engineer',
             "company": 'GABI Technology PLC',
+            "type": 'Full-time',
             "location": 'Adama, Oromia Region, Ethiopia',
             "start_date": date(2024, 7, 1),
             "end_date": date(2024, 12, 1),
@@ -176,6 +179,7 @@ def seed_data():
         {
             "title": 'Software Engineering Intern',
             "company": 'Forage',
+            "type": 'Internship',
             "location": 'Remote',
             "start_date": date(2023, 11, 1),
             "end_date": date(2023, 11, 1),
@@ -187,6 +191,7 @@ def seed_data():
         {
             "title": 'Frontend Web Developer',
             "company": 'PURPOSE BLACK ETH',
+            "type": 'Contract',
             "location": 'Remote',
             "start_date": date(2023, 3, 1),
             "end_date": date(2023, 6, 1),

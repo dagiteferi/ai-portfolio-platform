@@ -111,7 +111,7 @@ const ExperienceManagement = () => {
                         <Calendar className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                        <p className="font-medium text-sm">{item.position}</p>
+                        <p className="font-medium text-sm">{item.title}</p>
                         <p className="text-[11px] text-muted-foreground">{item.company}</p>
                     </div>
                 </div>
@@ -121,6 +121,14 @@ const ExperienceManagement = () => {
             header: 'Location',
             accessor: (item: WorkExperience) => (
                 <span className="text-xs text-muted-foreground">{item.location || 'Remote'}</span>
+            )
+        },
+        {
+            header: 'Type',
+            accessor: (item: WorkExperience) => (
+                <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">
+                    {item.type || 'Full-time'}
+                </Badge>
             )
         },
         {
