@@ -69,11 +69,14 @@
 
 .hero {
   width: 100%;
-  max-height: 80vh;
+  max-height: 85vh;
   object-fit: contain;
   mix-blend-mode: darken;
   z-index: -1;
   position: relative;
+  transform: scale(1.1);
+  /* Slightly increase size */
+  transform-origin: center;
 }
 
 .order {
