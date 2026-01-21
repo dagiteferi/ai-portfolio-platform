@@ -57,7 +57,7 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
 
       <div className="front-child1">
         <div className="animate-fade-in-up">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6">
             <span className="block text-gray-900">Dagmawi Teferi</span>
             <AnimatePresence mode='wait'>
               <motion.span
@@ -66,25 +66,25 @@ const Hero: React.FC<HeroProps> = memo(({ onChatButtonClick, cvData }) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="block text-gradient text-3xl md:text-4xl lg:text-5xl mt-2"
+                className="block text-gradient text-2xl sm:text-3xl md:text-4xl lg:text-5xl mt-2"
               >
                 {roles[currentRoleIndex]}
               </motion.span>
             </AnimatePresence>
           </h1>
 
-          <div className="flex items-center justify-center lg:justify-start flex-wrap gap-y-2 mb-8 text-black">
-            <span className="text-2xl font-mono mr-2">{'</'}</span>
-            <span className="text-sm md:text-base font-medium">Believe</span>
-            <span className="text-cyan-500 text-base mx-2">→</span>
-            <span className="text-sm md:text-base font-medium">Learn</span>
-            <span className="text-cyan-500 text-base mx-2">→</span>
-            <span className="text-sm md:text-base font-medium">Write</span>
-            <span className="text-cyan-500 text-base mx-2">→</span>
-            <span className="text-sm md:text-base font-medium">Solve</span>
-            <span className="text-cyan-500 text-base mx-2">→</span>
-            <span className="text-sm md:text-base font-medium">Repeat</span>
-            <span className="text-2xl font-mono ml-2">{'>'}</span>
+          <div className="flex items-center justify-center lg:justify-start flex-wrap gap-y-2 mb-6 sm:mb-8 text-black">
+            <span className="text-xl sm:text-2xl font-mono mr-2">{'</'}</span>
+            <span className="text-xs sm:text-sm md:text-base font-medium">Believe</span>
+            <span className="text-cyan-500 text-sm sm:text-base mx-2">→</span>
+            <span className="text-xs sm:text-sm md:text-base font-medium">Learn</span>
+            <span className="text-cyan-500 text-sm sm:text-base mx-2">→</span>
+            <span className="text-xs sm:text-sm md:text-base font-medium">Write</span>
+            <span className="text-cyan-500 text-sm sm:text-base mx-2">→</span>
+            <span className="text-xs sm:text-sm md:text-base font-medium">Solve</span>
+            <span className="text-cyan-500 text-sm sm:text-base mx-2">→</span>
+            <span className="text-xs sm:text-sm md:text-base font-medium">Repeat</span>
+            <span className="text-xl sm:text-2xl font-mono ml-2">{'>'}</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">

@@ -215,10 +215,13 @@
 
   .front {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     text-align: center;
-    padding: 100px 20px 40px;
-    gap: 2rem;
+    padding: 80px 20px 0px;
+    gap: 1.5rem;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .front-child1 {
@@ -465,7 +468,10 @@
     }
 
     .front {
-      grid-template: 2fr 1fr 1fr 1fr 1fr / 1fr;
+      grid-template: auto / 1fr;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 0;
     }
   }
 
@@ -494,11 +500,12 @@
         }
 
         .front {
-          grid-template: 0.5fr 1fr 1fr 1fr 1fr / 1fr;
+          grid-template: auto / 1fr;
+          padding: 70px 15px 0px;
         }
 
         .front-child1 {
-          margin-top: -5rem;
+          margin-top: -3rem;
         }
 
         .order {
@@ -769,7 +776,7 @@
 
   /* Section padding */
   .section-padding {
-    @apply px-4 sm:px-6 lg:px-8 py-16 lg:py-24;
+    @apply px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24;
   }
 
   /* Text animations */
