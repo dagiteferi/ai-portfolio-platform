@@ -11,6 +11,7 @@ import Contact from '../Contact/Contact';
 import Footer from '../Footer';
 import Chatbot, { ChatbotHandle } from '../Chat/Chatbot';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
+import StatsCounter from '../Stats/StatsCounter';
 
 function App() {
   const chatbotRef = useRef<ChatbotHandle>(null);
@@ -31,6 +32,7 @@ function App() {
       />
       <Gallery momentsData={data.moments} />
       <Work experienceData={data.experience} />
+      <StatsCounter />
       <Projects projectsData={data.projects} />
       <Contact />
       <Footer />

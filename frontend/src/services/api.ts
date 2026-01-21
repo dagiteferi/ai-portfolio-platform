@@ -400,5 +400,16 @@ export const getLogContent = async (filename: string, limit = 100, offset = 0): 
   });
 };
 
+export interface Stats {
+  totalProjects: number;
+  totalSkills: number;
+  aiMlProjects: number;
+  dataSolutions: number;
+}
+
+export const getStats = async (): Promise<Stats> => {
+  return apiClient.get('/stats');
+};
+
 export { };
 
