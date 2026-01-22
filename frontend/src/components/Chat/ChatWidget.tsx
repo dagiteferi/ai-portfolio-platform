@@ -54,12 +54,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
-        
+
         {isLoading && (
           <div className="flex justify-start">
             <div className="flex items-start space-x-2">
               <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                <img src="/assets/profile-photo.jpg" alt="Bot" className="w-4 h-4 rounded-full" />
+                <img src="/assets/profile-photo.png" alt="Bot" className="w-full h-full rounded-full object-cover" />
               </div>
               <TypingIndicator />
             </div>
