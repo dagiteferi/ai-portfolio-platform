@@ -16,7 +16,18 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
 
   useEffect(() => {
     if (projectsData && projectsData.length > 0) {
-      const mappedProjects = projectsData.map(proj => ({
+      // Sort projects: AI/ML first, then by ID descending (newest first)
+      const sortedProjects = [...projectsData].sort((a, b) => {
+        const isA_AI = a.category === 'AI/ML';
+        const isB_AI = b.category === 'AI/ML';
+
+        if (isA_AI && !isB_AI) return -1;
+        if (!isA_AI && isB_AI) return 1;
+
+        return b.id - a.id;
+      });
+
+      const mappedProjects = sortedProjects.map(proj => ({
         title: proj.title,
         category: proj.category || 'Uncategorized',
         description: proj.description || '',
