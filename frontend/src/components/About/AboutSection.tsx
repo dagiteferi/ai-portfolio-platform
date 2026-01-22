@@ -29,37 +29,37 @@ const AboutSection: React.FC = memo(() => {
         if (entry.isIntersecting) {
           setIsVisible(true);
 
-        skills.forEach((_, index) => {
+          skills.forEach((_, index) => {
             setTimeout(() => {
               setAnimatedSkills(prev => {
                 const newState = [...prev];
                 newState[index] = true;
                 return newState;
               });
-            }, index * 200); 
+            }, index * 200);
           });
         }
       },
-      { threshold: 0.3 } 
+      { threshold: 0.1 }
     );
 
- 
+
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
     }
 
     return () => observer.disconnect();
-  }, [skills]); 
+  }, [skills]);
 
- 
+
   const handleViewLinkedIn = useCallback(() => {
     window.open('https://www.linkedin.com/in/dagmawi-teferi', '_blank');
-  }, []); 
+  }, []);
 
   return (
     <section ref={sectionRef} id="about" className="section-padding bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        
+
         <div className={`text-center mb-8 sm:mb-12 lg:mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
             About <span className="text-gradient">Me</span>
@@ -72,18 +72,18 @@ const AboutSection: React.FC = memo(() => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* Profile Image Section */}
           <div className={`${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
-            onMouseEnter={() => setIsHovered(true)} 
-            onMouseLeave={() => setIsHovered(false)} 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <div className="relative max-w-xl mx-auto">
               <div className="aspect-square rounded-2xl overflow-hidden card-elegant">
                 <img
-                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'} 
+                  src={isHovered ? '/assets/aboutprofile.jpg' : '/assets/profile-photo.png'}
                   alt="Dagmawi Teferi - AI/ML Engineer and Fullstack Developer Profile"
-                  className="w-full h-full object-cover object-top" 
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
-             
+
               <div className="absolute -inset-6 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl -z-10 blur-2xl"></div>
             </div>
           </div>
@@ -111,7 +111,7 @@ const AboutSection: React.FC = memo(() => {
             </div>
 
             <Button
-              onClick={handleViewLinkedIn} 
+              onClick={handleViewLinkedIn}
               className="btn-gradient hover-scale group"
             >
               <ExternalLink className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
