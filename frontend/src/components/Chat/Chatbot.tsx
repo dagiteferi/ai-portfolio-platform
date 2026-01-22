@@ -12,7 +12,7 @@ export interface ChatbotHandle {
 const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const {
     conversations,
     activeConversation,
@@ -40,8 +40,8 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
           setIsFullScreen(false);
         }}
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen
-            ? 'bg-muted hover:bg-muted/80 border border-border'
-            : 'bg-gradient-to-r from-primary to-accent hover:shadow-glow'
+          ? 'bg-muted hover:bg-muted/80 border border-border'
+          : 'bg-gradient-to-r from-primary to-accent hover:shadow-glow'
           }`}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
         title={isOpen ? 'Close chat' : 'Chat with Dagi'}
