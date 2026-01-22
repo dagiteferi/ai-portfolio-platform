@@ -729,12 +729,14 @@
   body {
     @apply bg-background text-foreground;
     margin: 0;
+    overflow-x: hidden;
   }
 
   html {
     scroll-behavior: smooth;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
   }
 }
 
