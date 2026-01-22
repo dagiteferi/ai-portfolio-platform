@@ -39,11 +39,10 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
           setIsOpen(!isOpen);
           setIsFullScreen(false);
         }}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${
-          isOpen
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen
             ? 'bg-muted hover:bg-muted/80 border border-border'
             : 'bg-gradient-to-r from-primary to-accent hover:shadow-glow'
-        }`}
+          }`}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
         title={isOpen ? 'Close chat' : 'Chat with Dagi'}
       >
@@ -53,9 +52,8 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed z-50 bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in flex ${
-            isFullScreen ? 'inset-0 w-full h-full rounded-none' : 'bottom-24 right-6 w-[700px] h-[600px] max-w-[calc(100vw-3rem)]'
-          }`}
+          className={`fixed z-50 bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in flex ${isFullScreen ? 'inset-0 w-full h-full rounded-none' : 'bottom-24 right-6 w-[700px] h-[600px] max-w-[calc(100vw-3rem)]'
+            }`}
         >
           <ChatHistory
             isHistoryOpen={isHistoryOpen}
@@ -63,6 +61,7 @@ const Chatbot = forwardRef<ChatbotHandle>((props, ref) => {
             activeConversationId={activeConversation?.id || null}
             setActiveConversation={setActiveConversation}
             startNewConversation={startNewConversation}
+            onClose={() => setIsHistoryOpen(false)}
           />
           <div className="flex flex-col flex-grow min-w-0">
             {/* Header */}
