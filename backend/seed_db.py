@@ -11,13 +11,15 @@ from backend.models import sql_models as models
 def seed_data():
     db = SessionLocal()
     
-    # Reset database schema
-    print("Resetting database schema...")
-    models.Base.metadata.drop_all(bind=engine)
-    models.Base.metadata.create_all(bind=engine)
-    
-    # Re-create session after schema reset
+    # Re-create session
     db = SessionLocal()
+
+    print("Checking for existing data before seeding...")
+    # Add a check to see if data already exists to avoid duplicates
+    if db.query(models.Education).first():
+        print("Database already contains data. Skipping seed to prevent duplicates.")
+        return
+
 
     print("Seeding Education...")
     education_data = [

@@ -2,6 +2,7 @@ from langchain_community.vectorstores import FAISS
 from ..ai_core.knowledge.embeddings import get_embeddings
 from ..ai_core.knowledge.dynamic_loader import load_github_data, load_csv_data
 from ..ai_core.knowledge.static_loader import load_static_content
+from ..ai_core.knowledge.database_loader import load_database_content
 import logging
 import os
 from backend.config import FAISS_DOCUMENT_COUNT, FAISS_SEARCH_K
@@ -42,7 +43,10 @@ class FAISSManager:
         static_docs, profile_data = load_static_content()
         self.profile_data = profile_data
 
-        all_docs = csv_docs + static_docs
+        # Load all data from the database
+        db_docs = load_database_content()
+
+        all_docs = csv_docs + static_docs + db_docs
         self.initialize(all_docs)
         logger.info("Vector store updated.")
 
