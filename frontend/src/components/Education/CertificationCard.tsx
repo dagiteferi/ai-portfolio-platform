@@ -25,8 +25,14 @@ const CertificationCard: React.FC<CertificationCardProps> = ({
       style={{ animationDelay, willChange: 'transform, opacity' }}
       onClick={() => onClick(image)}
     >
-      <div className="w-full h-48 bg-gradient-to-r from-primary to-accent rounded-t-lg flex items-center justify-center mx-auto mb-4">
-        <img src={image} alt={name} className="w-full h-full object-cover rounded-t-lg" loading="lazy" />
+      <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20 rounded-t-lg flex items-center justify-center mx-auto mb-4 relative overflow-hidden">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover rounded-t-lg transition-opacity duration-500 opacity-0"
+          loading="lazy"
+          onLoad={(e) => (e.currentTarget.style.opacity = '1')}
+        />
       </div>
       <h4 className="text-lg font-bold text-foreground mb-2">{name}</h4>
       <p className="text-primary font-semibold mb-2">{issuer}</p>

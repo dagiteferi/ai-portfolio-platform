@@ -10,47 +10,40 @@ interface EducationContentProps {
 }
 
 const EducationContent: React.FC<EducationContentProps> = memo(({ educationData, certificatesData }) => {
-  const [education, setEducation] = useState<any[]>([]);
-  const [certifications, setCertifications] = useState<any[]>([]);
+  const education = React.useMemo(() => {
+    if (!educationData || educationData.length === 0) return [];
 
-  useEffect(() => {
-    if (educationData && educationData.length > 0) {
-      const mappedEdu = educationData.map(edu => ({
-        degree: edu.degree,
-        institution: edu.institution,
-        period: `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
-        description: edu.description || '',
-        gpa: edu.gpa || '',
-        highlights: edu.highlights ? edu.highlights.split(';').map(h => h.trim()) : [],
-        courses: edu.courses ? edu.courses.split(',').map(c => c.trim()) : []
-      }));
+    const mapped = educationData.map(edu => ({
+      degree: edu.degree,
+      institution: edu.institution,
+      period: `${edu.start_date ? new Date(edu.start_date).getFullYear() : ''} - ${edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}`,
+      description: edu.description || '',
+      gpa: edu.gpa || '',
+      highlights: edu.highlights ? edu.highlights.split(';').map(h => h.trim()) : [],
+      courses: edu.courses ? edu.courses.split(',').map(c => c.trim()) : []
+    }));
 
-      // Filter duplicates based on degree
-      const uniqueEdu = mappedEdu.filter((item, index, self) =>
-        index === self.findIndex((t) => t.degree === item.degree)
-      );
-
-      setEducation(uniqueEdu);
-    }
+    // Filter duplicates based on degree
+    return mapped.filter((item, index, self) =>
+      index === self.findIndex((t) => t.degree === item.degree)
+    );
   }, [educationData]);
 
-  useEffect(() => {
-    if (certificatesData && certificatesData.length > 0) {
-      const mappedCerts = certificatesData.map(cert => ({
-        name: cert.title,
-        issuer: cert.issuer,
-        date: cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : '',
-        image: cert.url || '',
-        skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
-      }));
+  const certifications = React.useMemo(() => {
+    if (!certificatesData || certificatesData.length === 0) return [];
 
-      // Filter duplicates based on name
-      const uniqueCerts = mappedCerts.filter((item, index, self) =>
-        index === self.findIndex((t) => t.name === item.name)
-      );
+    const mapped = certificatesData.map(cert => ({
+      name: cert.title,
+      issuer: cert.issuer,
+      date: cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : '',
+      image: cert.url || '',
+      skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
+    }));
 
-      setCertifications(uniqueCerts);
-    }
+    // Filter duplicates based on name
+    return mapped.filter((item, index, self) =>
+      index === self.findIndex((t) => t.name === item.name)
+    );
   }, [certificatesData]);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -64,7 +57,7 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0 }
     );
 
     if (sectionRef.current) {
@@ -114,7 +107,7 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
               <CertificationCard
                 key={index}
                 {...cert}
-                animationDelay={isVisible ? `${index * 0.1 + 0.5}s` : '0s'}
+                animationDelay={isVisible ? `${index * 0.05}s` : '0s'}
                 onClick={handleCertificateClick}
               />
             ))}
