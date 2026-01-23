@@ -24,12 +24,18 @@ const isTransientError = (error: AxiosError): boolean => {
   );
 };
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_API_URL;
+
+if (process.env.NODE_ENV !== 'production') {
+  console.log('Backend API URL from .env:', BACKEND_URL);
+}
+
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_API_URL || 'http://localhost:8000/api',
+  baseURL: BACKEND_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Increased timeout to 30 seconds
+  timeout: 30000,
 });
 
 apiClient.interceptors.request.use(

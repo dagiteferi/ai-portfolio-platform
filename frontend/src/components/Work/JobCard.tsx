@@ -106,4 +106,4 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
   );
 };
 
-export default JobCard;
+export default React.memo(JobCard);

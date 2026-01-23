@@ -1,9 +1,6 @@
-
 import axios from 'axios';
-// Import the type, not the implementation, to avoid premature loading.
 import type { ChatRequestPayload, ChatResponseData, sendMessageToBackend } from './api';
 
-// Mock the entire axios module.
 jest.mock('axios');
 
 // Cast axios to its mocked type for type-safe mocking.

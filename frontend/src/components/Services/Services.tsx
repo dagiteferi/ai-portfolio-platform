@@ -24,7 +24,7 @@ const Services = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} id="services" className="section-padding bg-background" style={{ backgroundImage: 'url(/assets/service_background.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <section ref={sectionRef} id="services" className="section-padding bg-background bg-services-pattern" style={{ backgroundImage: 'url(/assets/service_background.png)' }}>
       <div className="max-w-7xl mx-auto">
         <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">

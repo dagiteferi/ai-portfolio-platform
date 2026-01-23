@@ -14,9 +14,8 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ icon: Icon, title, description, color, isVisible, index }) => {
   return (
     <div
-      className={`card-elegant hover-scale group cursor-pointer ${
-        isVisible ? 'animate-bounce-in' : 'opacity-0'
-      }`}
+      className={`card-elegant hover-scale group cursor-pointer ${isVisible ? 'animate-bounce-in' : 'opacity-0'
+        }`}
       style={{
         animationDelay: isVisible ? `${index * 0.1}s` : '0s'
       }}
@@ -25,11 +24,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon: Icon, title, descriptio
         <div className="w-16 h-16 rounded-xl p-4 group-hover:scale-110 transition-transform duration-300" style={{ background: colorGradients[color as keyof typeof colorGradients] }}>
           <Icon className="w-full h-full text-white" strokeWidth={1.5} />
         </div>
-        
+
         <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
           {title}
         </h3>
-        
+
         <p className="text-lg text-gray-900 leading-relaxed">
           {description}
         </p>
@@ -42,4 +41,4 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon: Icon, title, descriptio
   );
 };
 
-export default ServiceCard;
+export default React.memo(ServiceCard);

@@ -22,7 +22,7 @@ const CertificationCard: React.FC<CertificationCardProps> = ({
   return (
     <div
       className="card-elegant hover-scale transition-all duration-300 text-center animate-scale-in"
-      style={{ animationDelay }}
+      style={{ animationDelay, willChange: 'transform, opacity' }}
       onClick={() => onClick(image)}
     >
       <div className="w-full h-48 bg-gradient-to-r from-primary to-accent rounded-t-lg flex items-center justify-center mx-auto mb-4">
@@ -47,4 +47,4 @@ const CertificationCard: React.FC<CertificationCardProps> = ({
   );
 };
 
-export default CertificationCard;
+export default React.memo(CertificationCard);

@@ -875,6 +875,32 @@
 
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes scaleIn {
@@ -891,6 +917,7 @@
 
 .animate-scale-in {
   animation: scaleIn 0.5s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes slideInRight {
@@ -907,9 +934,32 @@
 
 .animate-slide-in-right {
   animation: slideInRight 0.6s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 
+
+.bg-services-pattern {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.bg-work-pattern {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 768px) {
+
+  .bg-services-pattern,
+  .bg-work-pattern {
+    background-attachment: scroll;
+    /* Optional: use a lighter background or none on mobile if still laggy */
+    /* background-image: none; */
+  }
+}
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {

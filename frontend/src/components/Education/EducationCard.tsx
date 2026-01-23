@@ -71,4 +71,4 @@ const EducationCard: React.FC<EducationCardProps> = ({
   );
 };
 
-export default EducationCard;
+export default React.memo(EducationCard);

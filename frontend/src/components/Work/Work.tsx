@@ -48,7 +48,7 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
   }, []);
 
   return (
-    <section ref={sectionRef} id="work" className="section-padding bg-background" style={{ backgroundImage: 'url(/assets/back_n.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <section ref={sectionRef} id="work" className="section-padding bg-background bg-work-pattern" style={{ backgroundImage: 'url(/assets/back_n.png)' }}>
       <div className="max-w-4xl mx-auto">
         <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
