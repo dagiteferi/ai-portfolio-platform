@@ -58,6 +58,11 @@ class GeminiClient:
             generation_config=genai.GenerationConfig(temperature=self.temperature)
         )
 
+        # Token Optimization: Only keep the last 10 messages of history
+        max_history = 10
+        if len(history) > max_history:
+            history = history[-max_history:]
+
         formatted_history = []
         for turn in history:
             formatted_history.append({"role": "user", "parts": [turn["user"]]})

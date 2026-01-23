@@ -194,7 +194,7 @@ ai-portfolio-platform/
 | :--- | :--- |
 | **Frontend** | React 18, TypeScript, Tailwind CSS, Vite |
 | **Backend** | FastAPI, Python 3.12, SQLAlchemy, Pydantic |
-| **AI/ML** | LangChain, LangGraph, Google Gemini 2.5 Flash, FAISS, HuggingFace |
+| **AI/ML** | LangChain, LangGraph, Google Gemini, FAISS, HuggingFace |
 | **Database** | PostgreSQL, Redis |
 | **Infrastructure** | Docker, Nginx, Supabase, Sentry |
 

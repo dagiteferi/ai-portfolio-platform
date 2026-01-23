@@ -13,7 +13,15 @@ logger = structlog.get_logger(__name__)
 def generate_sub_queries(query: str) -> List[str]:
     """
     Uses the LLM to decompose a complex query into a list of simpler sub-queries.
+    Skips LLM call for simple greetings to save tokens.
     """
+    # Token Optimization: Skip LLM for simple greetings or very short queries
+    query_lower = query.lower().strip()
+    greetings = {"hi", "hello", "hey", "greetings", "yo", "hola"}
+    if query_lower in greetings or len(query_lower) < 4:
+        logger.info(f"Simple query detected: '{query}'. Skipping LLM decomposition.")
+        return [query]
+
     prompt = f"""
     You are an expert at query decomposition. Your task is to break down a complex user question about a person named Dagmawi Teferi into 1 to 3 simple, self-contained search queries. These queries will be used to retrieve relevant documents from a vector database containing his professional and personal information, including details about his friends, family, and personal interests. The output MUST be a JSON-formatted list of strings.
 
