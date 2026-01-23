@@ -21,10 +21,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
   return (
     <div
       key={project.title}
-      className={`group transition-all duration-300 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
+      className={`group transition-all duration-300 w-full max-w-2xl mx-auto ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
         }`}
       style={{
-        animationDelay: isVisible ? `${index * 0.2}s` : '0s'
+        animationDelay: isVisible ? `${index * 0.1}s` : '0s'
       }}
     >
       <div className="card-elegant hover-scale h-full">
@@ -42,8 +42,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
               No Image Available
             </div>
           )}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4 text-left">
               <div>
                 <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                   {project.title}
@@ -51,7 +51,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
                 <p className="text-sm text-gray-900">{project.category}</p>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 w-full sm:w-auto justify-start sm:justify-end">
               {project.github && (
                 <Button
                   variant="outline"
@@ -93,11 +93,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
           </div>
 
           <div className="pt-4 border-t border-border">
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               {project.demo && (
                 <Button
                   onClick={() => window.open(project.demo, '_blank')}
-                  className="btn-gradient flex-1 group/btn"
+                  className="btn-gradient w-full sm:flex-1 group/btn"
                 >
                   <ExternalLink className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform duration-300" />
                   View Live Project
@@ -107,7 +107,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isVisible, index }) 
                 <Button
                   variant="outline"
                   onClick={() => window.open(project.github, '_blank')}
-                  className="flex-1 hover:bg-muted"
+                  className="w-full sm:flex-1 hover:bg-muted"
                 >
                   <Github className="w-4 h-4 mr-2" />
                   Source Code

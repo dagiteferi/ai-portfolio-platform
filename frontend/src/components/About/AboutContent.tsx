@@ -37,7 +37,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0 }
     );
 
     if (sectionRef.current) {
@@ -54,7 +54,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
   return (
     <section ref={sectionRef} id="about" className="section-padding bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             About <span className="text-gradient">Me</span>
           </h2>
@@ -64,7 +64,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className={`${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
+          <div className={`${isVisible ? 'animate-scale-in' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -80,7 +80,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
             </div>
           </div>
 
-          <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : 'opacity-0'}`}>
+          <div className={`space-y-8 ${isVisible ? 'animate-slide-in-right' : ''}`}>
             <div className="space-y-6">
               <p className="text-lg text-gray-900 leading-relaxed">
                 I am a passionate AI and machine learning engineer, full stack developer,
@@ -113,7 +113,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
         </div>
 
         <div className="mt-20">
-          <div className={`text-center mb-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <div className={`text-center mb-12 ${isVisible ? 'animate-fade-in-up' : ''}`}>
             <h3 className="text-3xl font-bold text-foreground mb-4">
               Technical <span className="text-gradient">Skills</span>
             </h3>

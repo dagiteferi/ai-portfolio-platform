@@ -13,7 +13,7 @@ const Services = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0 }
     );
 
     if (sectionRef.current) {
@@ -26,7 +26,7 @@ const Services = () => {
   return (
     <section ref={sectionRef} id="services" className="section-padding bg-background bg-services-pattern" style={{ backgroundImage: 'url(/assets/service_background.png)' }}>
       <div className="max-w-7xl mx-auto">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             My <span className="text-gradient">Services</span>
           </h2>
@@ -42,7 +42,7 @@ const Services = () => {
         </div>
 
         {/* Call to Action */}
-        <div className={`text-center mt-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mt-16 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <div className="card-elegant max-w-2xl mx-auto bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
             <h3 className="text-2xl font-bold text-foreground mb-4">
               Ready to Start Your Project?

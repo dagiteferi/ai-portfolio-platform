@@ -86,9 +86,9 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
 
         {activeFilter === 'All' && featuredProject ? (
           <div className="mb-16">
-            <div className="card-elegant bg-gradient-to-br from-primary/5 via-accent/5 to-pink/5 border-primary/20">
-              <div className="grid lg:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
+            <div className="card-elegant bg-gradient-to-br from-primary/5 via-accent/5 to-pink/5 border-primary/20 overflow-hidden">
+              <div className="grid lg:grid-cols-2 gap-8 items-center justify-items-center lg:justify-items-start">
+                <div className="space-y-6 text-center lg:text-left w-full">
                   <div className="flex items-center space-x-2">
                     <span className="px-3 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground text-sm font-medium rounded-full">
                       Featured Project
@@ -106,7 +106,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
                     {featuredProject.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                     {featuredProject.technologies.map((tech: string) => (
                       <span key={tech} className="px-3 py-1 bg-background text-foreground text-sm rounded-full border border-border">
                         {tech}
@@ -114,7 +114,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
                     ))}
                   </div>
 
-                  <div className="flex space-x-4">
+                  <div className="flex space-x-4 justify-center lg:justify-start">
                     {featuredProject.github && (
                       <Button className="btn-gradient hover-scale group" onClick={() => window.open(featuredProject.github, '_blank')}>
                         <Github className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
@@ -160,7 +160,7 @@ const Projects: React.FC<ProjectsProps> = memo(({ projectsData }) => {
           </div>
         ) : null}
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 justify-items-center">
           {filteredProjects.filter(p => !p.featured).map((project, index) => (
             <ProjectCard key={project.title} project={project} isVisible={true} index={index} />
           ))}
