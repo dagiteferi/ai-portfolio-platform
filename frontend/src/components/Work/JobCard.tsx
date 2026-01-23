@@ -26,10 +26,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, index, isVisible }) => {
 
   return (
     <div
-      className={`relative transition-all duration-300 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
-        }`}
+      className={`relative transition-all duration-300 ${isVisible ? 'animate-fade-in-up' : ''}`}
       style={{
-        animationDelay: isVisible ? `${index * 0.2}s` : '0s'
+        animationDelay: isVisible ? `${index * 0.1}s` : '0s'
       }}
     >
       <div className="absolute left-6 w-4 h-4 bg-primary rounded-full border-4 border-background z-10"></div>

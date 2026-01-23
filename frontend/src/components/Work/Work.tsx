@@ -9,22 +9,18 @@ interface WorkProps {
 }
 
 const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
-  const [workExperience, setWorkExperience] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (experienceData && experienceData.length > 0) {
-      const mappedExperience = experienceData.map(exp => ({
-        title: exp.title,
-        company: exp.company,
-        location: exp.location || '',
-        period: `${exp.start_date ? new Date(exp.start_date).getFullYear() : ''} - ${exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}`,
-        type: exp.type || 'Full-time',
-        description: exp.description || '',
-        achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
-        technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []
-      }));
-      setWorkExperience(mappedExperience);
-    }
+  const workExperience = React.useMemo(() => {
+    if (!experienceData || experienceData.length === 0) return [];
+    return experienceData.map(exp => ({
+      title: exp.title,
+      company: exp.company,
+      location: exp.location || '',
+      period: `${exp.start_date ? new Date(exp.start_date).getFullYear() : ''} - ${exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}`,
+      type: exp.type || 'Full-time',
+      description: exp.description || '',
+      achievements: exp.achievements ? exp.achievements.split(';').map(a => a.trim()) : [],
+      technologies: exp.technologies ? exp.technologies.split(',').map(t => t.trim()) : []
+    }));
   }, [experienceData]);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -37,7 +33,7 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0 }
     );
 
     if (sectionRef.current) {
@@ -50,7 +46,7 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
   return (
     <section ref={sectionRef} id="work" className="section-padding bg-background bg-work-pattern" style={{ backgroundImage: 'url(/assets/back_n.png)' }}>
       <div className="max-w-4xl mx-auto">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Work <span className="text-gradient">Experience</span>
           </h2>
@@ -69,7 +65,7 @@ const Work: React.FC<WorkProps> = memo(({ experienceData }) => {
           </div>
         </div>
 
-        <div className={`text-center mt-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mt-12 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <Button
             onClick={() => window.open('https://www.linkedin.com/in/dagmawi-teferi', '_blank')}
             className="btn-gradient hover-scale group"

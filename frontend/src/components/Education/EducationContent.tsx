@@ -78,7 +78,7 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
   return (
     <section ref={sectionRef} id="education" className="section-padding bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Education & <span className="text-gradient">Certifications</span>
           </h2>
@@ -98,7 +98,7 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
         </div>
 
         <div>
-          <h3 className={`text-3xl font-bold text-foreground text-center mb-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <h3 className={`text-3xl font-bold text-foreground text-center mb-12 ${isVisible ? 'animate-fade-in-up' : ''}`}>
             Professional <span className="text-gradient">Certifications</span>
           </h3>
 
