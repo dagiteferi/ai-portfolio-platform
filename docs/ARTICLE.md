@@ -68,19 +68,19 @@ Simply returning the raw retrieved chunks would be unhelpful. The final step is 
 
 ### Frontend Design Decisions
 
-For the user interface, my goal was a clean, modern, and intuitive experience. I chose a stack I'm very comfortable with:
+My objectives in terms of the End-User Interface were to create an easy-to-use, simple, contemporary look. I selected:
 
-*   **React & TypeScript:** For building a robust, type-safe, and component-based UI. TypeScript was non-negotiable for me to maintain code quality as the project grew.
-*   **Tailwind CSS:** For rapid, utility-first styling. This lets me build and iterate on UIs quickly without getting bogged down in separate CSS files.
+*   **React & TypeScript:** React with TypeScript to provide a solid, type-safe, component-driven UI.
+*   **Tailwind CSS:** Tailwind CSS to allow me to style in an extremely fast and flexible manner (utility-first). This enables me to create UIs quickly and iterate on UIs without being distracted by managing separate CSS files.
 
 The frontend is organized into two main areas:
 
-1.  **The Public Portfolio:** This includes standard sections like a hero, about me, projects, and work experience. The data is fetched from the backend API and rendered into components found in `frontend/src/components/`.
+1.  **The Public Portfolio:** This area contains the main sections that are typically found in a portfolio: Hero Section, About Me Page, Projects Section, Work Experience Section. Data comes from backend API endpoints and is then processed and rendered to components located within `frontend/src/components/`.
 2.  **The AI Chat & Admin Dashboard:**
     *   The `Chat` component is the primary interface for interacting with the AI agent. It manages the conversation state using a custom hook (`useChat.ts`) and communicates with the backend's `/chat` endpoint.
     *   The `AdminDashboardPage.tsx` provides a secure area where I can log in to manage my portfolio content, upload new documents to the AI's knowledge base, and view system statistics.
 
-This separation makes the public-facing site fast and lightweight, while providing powerful management tools for myself behind an authentication layer.
+By separating out the Public Portfolios from the AI Chat & Admin Dashboard, I can create a public-facing website that is fast and lightweight, while providing powerful management tools behind an authentication layer for myself as the administrator.
 
 ### Backend & API Design
 
