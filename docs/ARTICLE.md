@@ -1,10 +1,14 @@
 # Building My AI Portfolio: A Deep Dive into the Architecture of an Open-Source RAG Agent
 
-As a software engineer who builds AI systems, I’ve always found that a standard portfolio website feels inadequate. A static list of projects and skills tells you *what* I’ve done, but it fails to show you *how* I think and solve problems. I wanted to create a living, interactive experience where someone could not only see my work but also engage with an AI that genuinely understands it.
+As an engineer working with AI technologies to build software systems, I have consistently felt that traditional portfolio websites do not offer the level of engagement I require as a professional. A simple list of my skills and past projects provides insight into what I have accomplished but does not adequately outline how I solve problems or think creatively. Therefore, I was looking for a way to create a more engaging experience for users while also allowing them to interact with an AI solution that truly understands my work.
 
-This led me to build a new kind of portfolio: an open-source, AI-powered web application that uses Retrieval-Augmented Generation (RAG) to answer detailed questions about my career. It’s a system I designed and built from the ground up, and in this article, I’ll walk you through its architecture, the design choices I made, and the lessons I learned along the way.
 
-The real problem I ran into was that a simple webpage couldn't capture the context behind my work. I chose a RAG-based architecture because it allows an AI to provide factual, grounded answers by retrieving information directly from a dedicated knowledge base—in this case, my resume, project documentation, and professional history.
+
+In order to address this need, I developed a new type of portfolio that combines open-source technology with Artificial Intelligence to create an interactive experience. This solution uses Retrieval-Augmented Generation (RAG) technology to provide detailed answers to complex questions relating to my career. In this article I will detail the design of the solution including the architectural design choices I made throughout the process, as well as the lessons learned while building the application and exploring the resulting architecture.
+
+
+
+Ultimately my problem stemmed from a lack of context when evaluating simple webpages related to my work. I chose to use a RAG based architecture since it allows for artificial intelligence solutions to generate factually accurate truths by retrieving specific information from a dedicated knowledge-base - in this scenario, I used my own resume, project documentation, and historical background as the source data for building the knowledge-base.
 
 ### Project Overview
 
