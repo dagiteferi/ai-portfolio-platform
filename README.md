@@ -43,6 +43,10 @@ An enterprise-grade, open-source platform designed to showcase professional achi
 
 The AI Portfolio Platform is a full-stack solution I developed for developers and AI engineers to demonstrate their expertise. Unlike static portfolios, this platform features a dynamic AI agent that "knows" my professional history, projects, and skills, providing recruiters and collaborators with an interactive, data-driven experience.
 
+For a complete architectural breakdown and a discussion of the design decisions I made, you can read my detailed article on Medium.
+
+**📖 [Read the Deep-Dive Article on Medium](https://medium.com/@dagiteferi2011/building-my-ai-portfolio-a-deep-dive-into-the-architecture-of-an-open-source-rag-agent-c26aa485fa08)**
+
 ---
 
 ## Key Features
