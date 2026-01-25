@@ -84,7 +84,7 @@ const AboutContent: React.FC<AboutContentProps> = memo(({ skillsData }) => {
             <div className="space-y-6">
               <p className="text-lg text-gray-900 leading-relaxed">
                 I am a passionate AI and machine learning engineer, full stack developer,
-                enthusiast with a strong computer science background, holding a 3.93 GPA, dedicated to
+                enthusiast with a strong computer science background, holding a 3.94 GPA, dedicated to
                 creating intelligent systems and scalable applications.
               </p>
 
