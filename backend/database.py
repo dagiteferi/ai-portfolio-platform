@@ -41,7 +41,17 @@ except Exception as e:
     print(f"Warning: Failed to parse/fix DATABASE_URL: {e}")
     DATABASE_URL = raw_db_url
 
-engine = create_engine(DATABASE_URL)
+# Configure connection pooling
+# Supabase Session Mode has a limit on clients, so we need to be conservative
+pool_size = int(os.getenv("DB_POOL_SIZE", "5"))
+max_overflow = int(os.getenv("DB_MAX_OVERFLOW", "10"))
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=pool_size,
+    max_overflow=max_overflow,
+    pool_pre_ping=True  # Verify connections before usage
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
