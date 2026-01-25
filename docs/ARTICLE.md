@@ -42,7 +42,7 @@ The AI's ability to answer questions accurately is the heart of this project. Th
 
 The first step in any RAG system is building the knowledge base. I created a flexible data ingestion pipeline that can process information from various sources.
 
-*   **Knowledge Sources:** The system can load data from local files, scrape Git repositories (`gitScraper.py`), or pull from other dynamic sources. This is managed by the services in the `backend/ai_core/knowledge/` directory.
+*   **Knowledge Sources:** The system can load data from a variety of places. I've configured it to process local files, scrape Git repositories (using `gitScraper.py`), and even pull from dynamic sources like my exported Instagram and Telegram data. This is all managed by the services in the `backend/ai_core/knowledge/` directory.
 *   **Chunking:** Documents are broken down into smaller, semantically meaningful chunks using my `chunker.py` module. This is critical for retrieval accuracy; I found that if chunks are too large, the context is diluted, and if they're too small, it’s fragmented.
 *   **Embedding Generation:** Each chunk is then converted into a numerical representation (a vector embedding). I opted for Google's `text-embedding-005` model due to its performance. The `embeddings.py` service handles this conversion.
 
