@@ -22,9 +22,10 @@ The AI doesn’t just guess; it retrieves relevant documents from a specialized 
 
 ### System Architecture
 
-I designed the system with a clear separation of concerns, ensuring that the frontend, backend, and AI core could be developed and scaled independently. This was a critical decision for me as a solo developer to keep the complexity manageable.
+I architectured a solution where all functional components of the application (UI, API, and AI Server) can be designed and deployed as independent entities. This was an important decision I made as the only developer; it allows me to break down the system into smaller pieces that are easier to understand and maintain.
 
-Here’s a high-level look at the end-to-end data flow:
+
+The following is the high-level overview of how the data moves through the entire system.
 
 1.  A user interacts with the **React** frontend and sends a message to the chatbot.
 2.  An **NGINX** reverse proxy routes the API request to the backend.
@@ -40,11 +41,11 @@ This modular architecture makes the system robust and maintainable. Let's dive i
 
 ### RAG Pipeline Deep Dive
 
-The AI's ability to answer questions accurately is the heart of this project. This is handled by the `ai_core` module in the backend, which I designed to be a self-contained RAG engine.
+This Project centers around having the AI respond correctly to questions; this is provided through the ai_core module of the Backend and is built as an independent RAG Engine.
 
 **1. Data Ingestion and Embeddings**
 
-The first step in any RAG system is building the knowledge base. I created a flexible data ingestion pipeline that can process information from various sources.
+Data ingestion and embeddings are used to populate the Knowledge Base in RAG Systems. A versatile Data Ingestion pipeline has been built for processing Information from multiple different sources.
 
 *   **Knowledge Sources:** The system can load data from a variety of places. I've configured it to process local files, scrape Git repositories (using `gitScraper.py`), and even pull from dynamic sources like my exported Instagram and Telegram data. This is all managed by the services in the `backend/ai_core/knowledge/` directory.
 *   **Chunking:** Documents are broken down into smaller, semantically meaningful chunks using my `chunker.py` module. This is critical for retrieval accuracy; I found that if chunks are too large, the context is diluted, and if they're too small, it’s fragmented.
