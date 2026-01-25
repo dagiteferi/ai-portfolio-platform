@@ -97,11 +97,15 @@ A project like this requires a hybrid storage strategy. I realized early on that
 
 ### Infrastructure & Deployment
 
-From day one, I wanted this project to be easy for anyone to run locally and robust enough for a production deployment.
+For local development, I wanted a simple, one-command setup. For the public-facing deployment, my goal was to leverage the best free-tier platforms available to keep costs at zero.
 
-*   **Dockerization:** The entire application is containerized. The `docker-compose.yml` file in the root directory is the key to the local development setup. With a single command (`docker-compose up`), anyone can spin up the entire stack: the React frontend, the FastAPI backend, the PostgreSQL database, and NGINX.
-*   **Environment Configuration:** All configuration is managed through environment variables, following the 12-factor app methodology. The `.env.example` file serves as a template, listing all the necessary keys for database connections, AI model APIs, and other services.
-*   **Production Deployment:** For production, the `infrastructure/nginx/` directory contains a configuration file for using NGINX as a reverse proxy. It directs traffic to the appropriate service (frontend or backend) and is essential for handling SSL and caching in a real-world scenario.
+*   **Local Development (Docker):** The entire application is containerized. The `docker-compose.yml` file in the root directory is the key to the local setup. With a single command (`docker-compose up`), anyone can spin up the entire stack: the React frontend, the FastAPI backend, and the PostgreSQL database.
+*   **Production Deployment (The Free-Tier Stack):**
+    *   **Frontend:** I deployed the React application on **Vercel**. Its seamless Git integration and global CDN are perfect for a fast user experience.
+    *   **Backend & AI:** The FastAPI backend, which includes the AI agent, is deployed on **Hugging Face Spaces**. This was a natural choice, as it keeps the AI models and the API that serves them in the same ecosystem.
+    *   **Database:** The PostgreSQL database is a managed instance from **Supabase**. Supabase also handles file storage for the RAG knowledge base, which was a nice bonus.
+*   **The Trade-offs of "Free":** One trade-off I accepted with this approach is the limitations of free tiers. These services can "go to sleep" after periods of inactivity, which might cause a delay on the first visit. Resource allocations are also limited, but for a personal portfolio project, this was a perfectly acceptable compromise to avoid infrastructure costs.
+*   **Environment Configuration:** All configuration is managed through environment variables, following the 12-factor app methodology. The `.env.example` file serves as a template for both local and production setups.
 
 ### Open-Source Design Philosophy
 
