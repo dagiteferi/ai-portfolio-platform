@@ -114,8 +114,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask me about Dagi..."
-            className="w-full px-4 pr-16 py-3 rounded-xl text-sm bg-muted/50 border border-border/30 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 resize-none"
+            placeholder="Type your message here..."
+            className="w-full px-4 pr-16 py-4 rounded-xl text-base bg-primary/5 border-2 border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/30 transition-all duration-300 resize-none shadow-md placeholder:text-muted-foreground/70 font-medium"
             disabled={isLoading}
             rows={1}
           />
