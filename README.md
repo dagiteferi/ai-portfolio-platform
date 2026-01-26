@@ -254,7 +254,7 @@ Sole Developer & Architect of the project
 
 - **Email:** [dagiteferi2011@gmail.com](mailto:dagiteferi2011@gmail.com)
 - **LinkedIn:** [dagmawi-teferi](https://www.linkedin.com/in/dagmawi-teferi)
-- **Telegram:** [@dagiteferi](https://t.me/dagiteferi)
+- **Telegram:** [@dagiteferi](@Pro_dagiiiEal)
 - **GitHub:** [@dagiteferi](https://github.com/dagiteferi)
 
 ---
