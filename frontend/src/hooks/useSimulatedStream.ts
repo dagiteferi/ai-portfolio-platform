@@ -11,6 +11,12 @@ export const useSimulatedStream = (fullText: string, streamSpeed: number = 50) =
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const start = useCallback(() => {
+    if (!fullText) {
+      setDisplayedText('');
+      setIsStreaming(false);
+      return;
+    }
+
     // Stop any existing stream
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -24,7 +30,10 @@ export const useSimulatedStream = (fullText: string, streamSpeed: number = 50) =
 
     intervalRef.current = setInterval(() => {
       if (currentIndex < words.length) {
-        setDisplayedText((prev) => prev + (currentIndex > 0 ? ' ' : '') + words[currentIndex]);
+        const word = words[currentIndex];
+        if (word !== undefined) {
+          setDisplayedText((prev) => prev + (currentIndex > 0 ? ' ' : '') + word);
+        }
         currentIndex++;
       } else {
         // When done, clear the interval

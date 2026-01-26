@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Bot, Sparkles } from 'lucide-react';
 import { Button } from '../ui/button';
 import MessageBubble from './MessageBubble';
 import { Message } from '../../services/api';
@@ -17,6 +17,13 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const sampleQuestions = [
+    "Tell me about your professional background.",
+    "What are your core technical skills?",
+    "Show me some of your featured projects.",
+    "How can I contact Dagmawi?"
+  ];
+
   useEffect(() => {
     // Use a timeout to ensure the scroll happens after the DOM update.
     setTimeout(() => {
@@ -24,9 +31,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
     }, 100);
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    await sendMessage(inputValue);
+  const handleSendMessage = async (text?: string) => {
+    const messageToSend = text || inputValue;
+    if (!messageToSend.trim()) return;
+    await sendMessage(messageToSend);
     setInputValue('');
   };
 
@@ -51,19 +59,48 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
     <div className="flex flex-col h-full bg-background">
       {/* Message List: This will grow and scroll */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="flex items-start space-x-2">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                <img src="/assets/profile-photo.png" alt="Bot" className="w-full h-full rounded-full object-cover" />
-              </div>
-              <TypingIndicator />
+        {messages.length === 0 && !isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full text-center p-6 animate-in fade-in zoom-in duration-500">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center mb-6 shadow-inner">
+              <Bot className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Hello! I'm Dagi's AI Assistant
+            </h2>
+            <p className="text-muted-foreground max-w-md mb-8 leading-relaxed">
+              I'm here to help you explore Dagmawi's portfolio, skills, and experience.
+              Feel free to ask me anything or try one of the suggestions below!
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+              {sampleQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSendMessage(question)}
+                  className="flex items-center p-3 text-sm text-left bg-muted/50 hover:bg-primary/10 border border-border/50 hover:border-primary/30 rounded-xl transition-all duration-300 group"
+                >
+                  <Sparkles className="w-4 h-4 mr-3 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                  <span>{question}</span>
+                </button>
+              ))}
             </div>
           </div>
+        ) : (
+          <>
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex items-start space-x-2">
+                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                    <img src="/assets/profile-photo.png" alt="Bot" className="w-full h-full rounded-full object-cover" />
+                  </div>
+                  <TypingIndicator />
+                </div>
+              </div>
+            )}
+          </>
         )}
         {error && <p className="text-red-500 text-center mt-2">{error}</p>}
         {/* This empty div is the target for scrolling */}
@@ -77,31 +114,33 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isFullScreen, messages, isLoadi
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Chat with me..."
-            className="w-full px-4 pr-16 py-2 rounded-lg text-sm bg-muted/50 border border-border/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 resize-none"
+            placeholder="Ask me about Dagi..."
+            className="w-full px-4 pr-16 py-3 rounded-xl text-sm bg-muted/50 border border-border/30 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 resize-none"
             disabled={isLoading}
             rows={1}
           />
           <Button
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={isLoading || !inputValue.trim()}
             size="sm"
-            className="absolute right-2 btn-gradient px-3 h-8"
+            className="absolute right-2 btn-gradient px-3 h-9 rounded-lg"
           >
             <Send className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex flex-wrap gap-1 pt-2 justify-center">
-          {['Experience', 'Skills', 'Projects', 'Contact'].map((topic) => (
-            <button
-              key={topic}
-              onClick={() => setInputValue(`Tell me about your ${topic}.`)}
-              className="text-xs px-2 py-1 bg-muted hover:bg-primary hover:text-primary-foreground rounded transition-colors duration-300"
-            >
-              {topic}
-            </button>
-          ))}
-        </div>
+        {messages.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-3 justify-center">
+            {['Experience', 'Skills', 'Projects', 'Contact'].map((topic) => (
+              <button
+                key={topic}
+                onClick={() => handleSendMessage(`Tell me about your ${topic}.`)}
+                className="text-xs px-3 py-1.5 bg-muted hover:bg-primary/10 hover:text-primary border border-border/50 rounded-full transition-all duration-300"
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
