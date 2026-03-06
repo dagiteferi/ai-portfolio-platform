@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dagmawiteferi.com/sitemap.xml
+Sitemap: https://dagmawi-teferi.vercel.app//sitemap.xml
