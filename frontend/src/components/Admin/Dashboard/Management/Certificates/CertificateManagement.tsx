@@ -98,11 +98,16 @@ const CertificateManagement = () => {
             });
             return { previousCerts };
         },
-        onError: (_err, _certId, context) => {
+        onError: (err: Error, _certId, context) => {
             if (context?.previousCerts) {
                 queryClient.setQueryData(['admin-certificates'], context.previousCerts);
             }
-            showToast('Failed to delete certificate', 'error');
+            showToast(err.message || 'Failed to delete certificate', 'error');
+            if (/invalid or expired token|not authenticated|unauthorized/i.test(err.message || '')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminAuthenticated');
+                window.location.assign('/admin/login');
+            }
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });

@@ -193,7 +193,10 @@ apiClient.interceptors.response.use(
         if (parts.length) message = parts.join(', ');
       }
 
-      if (error.response.status === 401 && typeof window !== 'undefined') {
+      if (
+        (error.response.status === 401 || error.response.status === 403) &&
+        typeof window !== 'undefined'
+      ) {
         const path = window.location.pathname;
         if (path.startsWith('/admin') && !path.includes('/login')) {
           localStorage.removeItem('adminToken');
