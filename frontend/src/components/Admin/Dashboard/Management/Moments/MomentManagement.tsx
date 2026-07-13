@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ManagementTable } from '../../Shared';
-import { getAdminMoments, deleteMoment, createMoment, updateMoment, MemorableMoment } from '../../../../../services/api';
+import { getAdminMoments, deleteMoment, createMoment, updateMoment, dedupeMoments, MemorableMoment } from '../../../../../services/api';
 import { useToast } from '../../../../../hooks/use-toast';
+import { Button } from '../../../Button';
 import { Camera } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Modal from '../../../Modal';
@@ -79,6 +80,24 @@ const MomentManagement = () => {
         }
     });
 
+    const dedupeMutation = useMutation({
+        mutationFn: dedupeMoments,
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ['admin-moments'] });
+            queryClient.invalidateQueries({ queryKey: ['moments'] });
+            showToast(result.message || `Removed ${result.removed_count} duplicate(s)`, "success");
+        },
+        onError: (error: any) => {
+            showToast(error.message || "Failed to remove duplicates", "error");
+        },
+    });
+
+    const handleDedupe = () => {
+        if (window.confirm('Remove duplicate moments with the same title? The best copy (with image) is kept.')) {
+            dedupeMutation.mutate();
+        }
+    };
+
     const handleAdd = () => {
         setEditingMoment(undefined);
         setIsModalOpen(true);
@@ -132,6 +151,16 @@ const MomentManagement = () => {
 
     return (
         <>
+            <div className="flex justify-end mb-2">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDedupe}
+                    disabled={dedupeMutation.isPending || isLoading || !(moments?.length)}
+                >
+                    {dedupeMutation.isPending ? 'Removing duplicates...' : 'Remove duplicates'}
+                </Button>
+            </div>
             <ManagementTable
                 title="Memorable Moments"
                 data={moments || []}

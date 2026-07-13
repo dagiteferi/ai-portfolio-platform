@@ -30,7 +30,7 @@ dist/
 
 # --- Node.js ---
 # Dependencies
-frontend/node_modules/
+frontend
 
 # Build output
 frontend/build/
@@ -75,5 +75,4 @@ coverage/
 # User-specific/temp
 description.md
 run backend.txt
-/assets/
-.pytest_cache
+assets/

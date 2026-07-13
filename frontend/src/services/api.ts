@@ -453,6 +453,15 @@ export const deleteMoment = async (id: number): Promise<void> => {
   return apiClient.delete(`/admin/moments/${id}`);
 };
 
+export const dedupeMoments = async (): Promise<{
+  message: string;
+  removed_count: number;
+  removed_ids: number[];
+  remaining_count: number;
+}> => {
+  return apiClient.post('/admin/moments/dedupe', {});
+};
+
 export const getAdminCVs = async (): Promise<CV[]> => {
   return apiClient.get('/admin/cv');
 };

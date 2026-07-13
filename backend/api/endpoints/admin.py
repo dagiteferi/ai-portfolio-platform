@@ -597,6 +597,56 @@ async def delete_moment(
     db.commit()
     return {"message": "Moment deleted successfully"}
 
+
+@router.post("/admin/moments/dedupe", tags=["Memorable Moments"])
+async def dedupe_moments(
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(require_admin)
+):
+    """
+    Remove duplicate memorable moments (same normalized title).
+    Keeps the best row per title: prefers one with an image, then lowest id.
+    """
+    moments = (
+        db.query(models.MemorableMoment)
+        .order_by(models.MemorableMoment.id.asc())
+        .all()
+    )
+
+    keepers: dict[str, models.MemorableMoment] = {}
+    removed_ids: list[int] = []
+
+    for moment in moments:
+        key = (moment.title or "").strip().lower()
+        if not key:
+            continue
+
+        existing = keepers.get(key)
+        if existing is None:
+            keepers[key] = moment
+            continue
+
+        # Prefer the row that has an image URL
+        if not existing.image_url and moment.image_url:
+            db.delete(existing)
+            removed_ids.append(existing.id)
+            keepers[key] = moment
+        else:
+            db.delete(moment)
+            removed_ids.append(moment.id)
+
+    if removed_ids:
+        db.commit()
+    else:
+        db.rollback()
+
+    return {
+        "message": f"Removed {len(removed_ids)} duplicate moment(s)",
+        "removed_count": len(removed_ids),
+        "removed_ids": removed_ids,
+        "remaining_count": len(keepers),
+    }
+
 @router.post("/admin/experience", response_model=schemas.WorkExperienceResponse, tags=["Work Experience"])
 async def create_experience(
     experience: schemas.WorkExperienceCreate,
