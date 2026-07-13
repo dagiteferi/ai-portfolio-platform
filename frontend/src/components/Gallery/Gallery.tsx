@@ -12,13 +12,23 @@ const Gallery: React.FC<GalleryProps> = memo(({ momentsData }) => {
 
   useEffect(() => {
     if (momentsData && momentsData.length > 0) {
-      const mappedMoments = momentsData.map(moment => ({
-        src: moment.image_url || '',
-        alt: moment.title,
-        linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/',
-        title: moment.title
-      }));
-      setGalleryItems(mappedMoments);
+      // DB has many duplicate uploads of the same event; keep first per title.
+      const seen = new Set<string>();
+      const uniqueMoments = momentsData.filter((moment) => {
+        const key = (moment.title || '').trim().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      setGalleryItems(
+        uniqueMoments.map((moment) => ({
+          src: moment.image_url || '',
+          alt: moment.title,
+          linkedinUrl: 'https://www.linkedin.com/in/dagmawi-teferi/',
+          title: moment.title.trim(),
+        }))
+      );
     }
   }, [momentsData]);
 

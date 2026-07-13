@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
-from datetime import date, datetime
+from datetime import date as Date, datetime
 
 #CV Schemas
 
@@ -76,8 +76,8 @@ class TechnicalSkillResponse(TechnicalSkillBase):
 class EducationBase(BaseModel):
     degree: str
     institution: str
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    start_date: Optional[Date] = None
+    end_date: Optional[Date] = None
     description: Optional[str] = None
     gpa: Optional[str] = None
     highlights: Optional[str] = None
@@ -90,8 +90,8 @@ class EducationUpdate(BaseModel):
     """All fields optional for partial updates"""
     degree: Optional[str] = None
     institution: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    start_date: Optional[Date] = None
+    end_date: Optional[Date] = None
     description: Optional[str] = None
     gpa: Optional[str] = None
     highlights: Optional[str] = None
@@ -109,7 +109,7 @@ class EducationResponse(EducationBase):
 class CertificateBase(BaseModel):
     title: str
     issuer: str
-    date_issued: Optional[date] = None
+    date_issued: Optional[Date] = None
     url: Optional[str] = None
     description: Optional[str] = None
     is_professional: bool = False
@@ -121,7 +121,7 @@ class CertificateUpdate(BaseModel):
     """All fields optional for partial updates"""
     title: Optional[str] = None
     issuer: Optional[str] = None
-    date_issued: Optional[date] = None
+    date_issued: Optional[Date] = None
     url: Optional[str] = None
     description: Optional[str] = None
     is_professional: Optional[bool] = None
@@ -138,7 +138,8 @@ class CertificateResponse(CertificateBase):
 class MemorableMomentBase(BaseModel):
     title: str
     description: Optional[str] = None
-    date: Optional[date] = None
+    # Avoid `date: Optional[date]` — field name shadows datetime.date and breaks validation.
+    date: Optional[Date] = None
     image_url: Optional[str] = None
 
 class MemorableMomentCreate(MemorableMomentBase):
@@ -148,7 +149,7 @@ class MemorableMomentUpdate(BaseModel):
     """All fields optional for partial updates"""
     title: Optional[str] = None
     description: Optional[str] = None
-    date: Optional[date] = None
+    date: Optional[Date] = None
     image_url: Optional[str] = None
 
 class MemorableMomentResponse(MemorableMomentBase):
@@ -164,8 +165,8 @@ class WorkExperienceBase(BaseModel):
     title: str
     company: str
     type: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    start_date: Optional[Date] = None
+    end_date: Optional[Date] = None
     is_current: bool = False
     description: Optional[str] = None
     location: Optional[str] = None
@@ -180,8 +181,8 @@ class WorkExperienceUpdate(BaseModel):
     title: Optional[str] = None
     company: Optional[str] = None
     type: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    start_date: Optional[Date] = None
+    end_date: Optional[Date] = None
     is_current: Optional[bool] = None
     description: Optional[str] = None
     location: Optional[str] = None
