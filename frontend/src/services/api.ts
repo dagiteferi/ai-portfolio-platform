@@ -9,7 +9,7 @@ export interface Message {
 }
 
 interface ErrorResponse {
-  detail: string;
+  detail?: string | Array<{ msg?: string } | string>;
 }
 
 const MAX_RETRIES = 3;
@@ -174,12 +174,15 @@ apiClient.interceptors.response.use(
     }
     if (error.response) {
       const detail = error.response.data?.detail;
-      const message =
-        typeof detail === 'string'
-          ? detail
-          : Array.isArray(detail)
-            ? detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(', ') || 'An unexpected API error occurred.'
-            : 'An unexpected API error occurred.';
+      let message = 'An unexpected API error occurred.';
+      if (typeof detail === 'string') {
+        message = detail;
+      } else if (Array.isArray(detail)) {
+        const parts = detail
+          .map((d) => (typeof d === 'string' ? d : d?.msg))
+          .filter((m): m is string => Boolean(m));
+        if (parts.length) message = parts.join(', ');
+      }
 
       if (error.response.status === 401 && typeof window !== 'undefined') {
         const path = window.location.pathname;
