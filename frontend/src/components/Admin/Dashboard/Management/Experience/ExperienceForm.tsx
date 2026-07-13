@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { WorkExperience } from '../../../../../services/api';
 import { Button } from '../../../Button';
 import { Input } from '../../../Input';
@@ -9,6 +10,12 @@ interface ExperienceFormProps {
     onCancel: () => void;
     isSubmitting: boolean;
 }
+
+const parseAchievements = (value?: string) =>
+    value ? value.split(';').map((a) => a.trim()).filter(Boolean) : [''];
+
+const parseTechnologies = (value?: string) =>
+    value ? value.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, onCancel, isSubmitting }) => {
     const [formData, setFormData] = useState({
@@ -21,15 +28,50 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
         is_current: experience?.is_current || false,
         description: experience?.description || '',
     });
+    const [achievements, setAchievements] = useState<string[]>(parseAchievements(experience?.achievements));
+    const [technologies, setTechnologies] = useState<string[]>(parseTechnologies(experience?.technologies));
+    const [skillInput, setSkillInput] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const nextValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: nextValue,
             ...(name === 'is_current' && nextValue === true ? { end_date: '' } : {}),
         }));
+    };
+
+    const updateAchievement = (index: number, value: string) => {
+        setAchievements((prev) => prev.map((item, i) => (i === index ? value : item)));
+    };
+
+    const addAchievement = () => {
+        setAchievements((prev) => [...prev, '']);
+    };
+
+    const removeAchievement = (index: number) => {
+        setAchievements((prev) => (prev.length === 1 ? [''] : prev.filter((_, i) => i !== index)));
+    };
+
+    const addSkill = () => {
+        const skill = skillInput.trim();
+        if (!skill) return;
+        if (!technologies.some((t) => t.toLowerCase() === skill.toLowerCase())) {
+            setTechnologies((prev) => [...prev, skill]);
+        }
+        setSkillInput('');
+    };
+
+    const removeSkill = (index: number) => {
+        setTechnologies((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addSkill();
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -38,12 +80,14 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
             ...formData,
             start_date: formData.start_date || null,
             end_date: formData.is_current ? null : (formData.end_date || null),
+            achievements: achievements.map((a) => a.trim()).filter(Boolean).join('; ') || null,
+            technologies: technologies.map((t) => t.trim()).filter(Boolean).join(', ') || null,
         };
         await onSubmit(payload);
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="text-sm font-medium mb-1.5 block">Job Title</label>
@@ -51,7 +95,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="e.g. Senior AI Engineer"
+                        placeholder="e.g. Frontend Web Developer"
                         required
                     />
                 </div>
@@ -61,7 +105,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                         name="company"
                         value={formData.company}
                         onChange={handleChange}
-                        placeholder="e.g. Google"
+                        placeholder="e.g. PURPOSE BLACK ETH"
                         required
                     />
                 </div>
@@ -78,11 +122,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                     >
                         <option value="Full-time">Full-time</option>
                         <option value="Part-time">Part-time</option>
-                        <option value="Remote">Remote</option>
-                        <option value="Hybrid">Hybrid</option>
                         <option value="Contract">Contract</option>
                         <option value="Freelance">Freelance</option>
                         <option value="Internship">Internship</option>
+                        <option value="Hybrid">Hybrid</option>
                     </select>
                 </div>
                 <div>
@@ -91,7 +134,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        placeholder="e.g. San Francisco, CA or Remote"
+                        placeholder="e.g. Remote or Addis Ababa"
                     />
                 </div>
             </div>
@@ -141,12 +184,89 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
                     value={formData.description}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="Describe your responsibilities and achievements..."
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="Short summary shown on the experience card..."
                 />
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                    <div>
+                        <label className="text-sm font-medium block">Key Achievements</label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                            Each item becomes a bullet under “Show More” on the site.
+                        </p>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={addAchievement}>
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        Add
+                    </Button>
+                </div>
+                <div className="space-y-2">
+                    {achievements.map((achievement, index) => (
+                        <div key={index} className="flex gap-2">
+                            <Input
+                                value={achievement}
+                                onChange={(e) => updateAchievement(index, e.target.value)}
+                                placeholder={`Achievement ${index + 1}`}
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="px-2 shrink-0"
+                                onClick={() => removeAchievement(index)}
+                                aria-label="Remove achievement"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <div>
+                    <label className="text-sm font-medium block">Skills Used</label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        Press Enter or comma to add. Shown as tags on the experience card.
+                    </p>
+                </div>
+                <div className="flex gap-2">
+                    <Input
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onKeyDown={handleSkillKeyDown}
+                        placeholder="e.g. React.js"
+                    />
+                    <Button type="button" variant="outline" onClick={addSkill}>
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        Add
+                    </Button>
+                </div>
+                {technologies.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {technologies.map((tech, index) => (
+                            <span
+                                key={`${tech}-${index}`}
+                                className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm"
+                            >
+                                {tech}
+                                <button
+                                    type="button"
+                                    onClick={() => removeSkill(index)}
+                                    className="text-muted-foreground hover:text-foreground"
+                                    aria-label={`Remove ${tech}`}
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-background">
                 <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
                     Cancel
                 </Button>
