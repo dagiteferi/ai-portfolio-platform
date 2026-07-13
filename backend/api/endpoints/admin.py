@@ -370,7 +370,36 @@ def get_certificates(db: Session = Depends(get_db)):
 @router.put("/admin/certificates/{certificate_id}", response_model=schemas.CertificateResponse, tags=["Certificates"])
 async def update_certificate(
     certificate_id: int,
-    file: Union[UploadFile, str, None] = File(None),
+    certificate: schemas.CertificateUpdate,
+    db: Session = Depends(get_db),
+    authenticated: bool = Depends(require_admin)
+):
+    """Update certificate metadata via JSON (no file required)."""
+    db_certificate = get_object_or_404(db, models.Certificate, certificate_id)
+
+    def should_update(value):
+        if value is None:
+            return False
+        if isinstance(value, str) and (value == "" or value.lower() == "string"):
+            return False
+        return True
+
+    update_data = certificate.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        if isinstance(value, str):
+            if should_update(value):
+                setattr(db_certificate, key, value)
+        else:
+            setattr(db_certificate, key, value)
+
+    db.commit()
+    db.refresh(db_certificate)
+    return db_certificate
+
+@router.put("/admin/certificates/{certificate_id}/upload", response_model=schemas.CertificateResponse, tags=["Certificates"])
+async def update_certificate_with_file(
+    certificate_id: int,
+    file: Optional[UploadFile] = File(None),
     title: Optional[str] = Form(None),
     issuer: Optional[str] = Form(None),
     date_issued_str: Optional[str] = Form(None, alias="date_issued"),
@@ -379,15 +408,16 @@ async def update_certificate(
     db: Session = Depends(get_db),
     authenticated: bool = Depends(require_admin)
 ):
+    """Update certificate fields and optionally replace the certificate file."""
     db_certificate = get_object_or_404(db, models.Certificate, certificate_id)
-    
+
     def should_update(value):
         if value is None:
             return False
         if isinstance(value, str) and (value == "" or value.lower() == "string"):
             return False
         return True
-    
+
     if file and hasattr(file, 'filename') and file.filename and file.filename.strip():
         try:
             logger.info(f"Uploading new certificate for ID {certificate_id}: {file.filename}")
@@ -397,7 +427,7 @@ async def update_certificate(
         except Exception as e:
             logger.error(f"Failed to upload certificate for ID {certificate_id}: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to upload certificate: {str(e)}")
-    
+
     if should_update(title):
         db_certificate.title = title
     if should_update(issuer):
@@ -411,7 +441,7 @@ async def update_certificate(
             db_certificate.date_issued = datetime.strptime(date_issued_str, "%Y-%m-%d").date()
         except ValueError:
             pass
-    
+
     db.commit()
     db.refresh(db_certificate)
     return db_certificate

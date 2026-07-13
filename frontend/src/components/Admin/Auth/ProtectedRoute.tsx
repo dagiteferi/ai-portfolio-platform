@@ -6,11 +6,14 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+    const token = localStorage.getItem('adminToken');
+    const isAuthenticated =
+        localStorage.getItem('adminAuthenticated') === 'true' && Boolean(token);
     const location = useLocation();
 
     if (!isAuthenticated) {
-        // Redirect to login but save the current location they were trying to access
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminAuthenticated');
         return <Navigate to="/admin/login" state={{ from: location }} replace />;
     }
 

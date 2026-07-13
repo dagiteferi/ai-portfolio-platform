@@ -42,6 +42,11 @@ const CertificateManagement = () => {
         },
         onError: (error: Error) => {
             showToast(error.message || 'Failed to create certificate', 'error');
+            if (/invalid or expired token|not authenticated|unauthorized/i.test(error.message || '')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminAuthenticated');
+                window.location.assign('/admin/login');
+            }
         },
     });
 
@@ -64,6 +69,11 @@ const CertificateManagement = () => {
         },
         onError: (error: Error) => {
             showToast(error.message || 'Failed to update certificate', 'error');
+            if (/invalid or expired token|not authenticated|unauthorized/i.test(error.message || '')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminAuthenticated');
+                window.location.assign('/admin/login');
+            }
         },
     });
 

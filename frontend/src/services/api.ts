@@ -57,12 +57,20 @@ apiClient.interceptors.request.use(
 
     const token = localStorage.getItem('adminToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     // If sending FormData, remove Content-Type to let axios set it with boundary
     if (config.data instanceof FormData) {
-      delete config.headers['Content-Type'];
+      if (typeof config.headers.delete === 'function') {
+        config.headers.delete('Content-Type');
+      } else {
+        delete config.headers['Content-Type'];
+      }
     }
 
     return config;
@@ -188,6 +196,8 @@ apiClient.interceptors.response.use(
         const path = window.location.pathname;
         if (path.startsWith('/admin') && !path.includes('/login')) {
           localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminAuthenticated');
+          window.location.assign('/admin/login');
         }
       }
 
@@ -380,7 +390,30 @@ export const createCertificate = async (formData: FormData): Promise<Certificate
 };
 
 export const updateCertificate = async (id: number, formData: FormData): Promise<Certificate> => {
-  return apiClient.put(`/admin/certificates/${id}`, formData);
+  const file = formData.get('file');
+  const hasFile = file instanceof File && file.size > 0;
+
+  const payload = {
+    title: String(formData.get('title') || ''),
+    issuer: String(formData.get('issuer') || ''),
+    date_issued: formData.get('date_issued') ? String(formData.get('date_issued')) : undefined,
+    description: formData.get('description') ? String(formData.get('description')) : undefined,
+    is_professional: String(formData.get('is_professional')) === 'true',
+  };
+
+  // Metadata updates use JSON (reliable). File replacement uses multipart.
+  if (!hasFile) {
+    return apiClient.put(`/admin/certificates/${id}`, payload);
+  }
+
+  const uploadData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined) {
+      uploadData.append(key, String(value));
+    }
+  });
+  uploadData.append('file', file as File);
+  return apiClient.put(`/admin/certificates/${id}/upload`, uploadData);
 };
 
 export const deleteCertificate = async (id: number): Promise<void> => {
