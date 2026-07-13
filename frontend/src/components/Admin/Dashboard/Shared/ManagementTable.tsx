@@ -70,7 +70,7 @@ const ManagementTable = <T extends { id: string | number }>({
                 </div>
 
                 <ScrollArea className="h-[calc(100vh-350px)]">
-                    <div className="min-w-full inline-block align-middle">
+                    <div className="min-w-full inline-block align-middle overflow-x-auto">
                         <table className="min-w-full divide-y divide-border">
                             <thead className="bg-muted/50 sticky top-0 z-10">
                                 <tr>
@@ -85,7 +85,7 @@ const ManagementTable = <T extends { id: string | number }>({
                                             {col.header}
                                         </th>
                                     ))}
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider sticky right-0 bg-muted/95 backdrop-blur-sm z-10 border-l border-border min-w-[160px]">
                                         Actions
                                     </th>
                                 </tr>
@@ -118,25 +118,27 @@ const ManagementTable = <T extends { id: string | number }>({
                                                     {col.accessor(item)}
                                                 </td>
                                             ))}
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex justify-end gap-2">
+                                            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-card/95 backdrop-blur-sm border-l border-border z-[1]">
+                                                <div className="flex justify-end items-center gap-2 min-w-[160px]">
                                                     <Button
-                                                        variant="ghost"
-                                                        size="icon"
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
                                                         onClick={() => onEdit(item)}
-                                                        title="Edit"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                                        className="h-8 px-3"
                                                     >
-                                                        <Edit2 className="h-4 w-4" />
+                                                        <Edit2 className="h-3.5 w-3.5" />
+                                                        Edit
                                                     </Button>
                                                     <Button
-                                                        variant="ghost"
-                                                        size="icon"
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
                                                         onClick={() => onDelete(item)}
-                                                        title="Delete"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                        className="h-8 px-3 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        Delete
                                                     </Button>
                                                 </div>
                                             </td>
