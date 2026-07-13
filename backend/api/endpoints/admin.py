@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
-from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, UploadFile, File, Form
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -370,12 +370,13 @@ def get_certificates(db: Session = Depends(get_db)):
 @router.put("/admin/certificates/{certificate_id}", response_model=schemas.CertificateResponse, tags=["Certificates"])
 async def update_certificate(
     certificate_id: int,
-    certificate: schemas.CertificateUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     authenticated: bool = Depends(require_admin)
 ):
-    """Update certificate metadata via JSON (no file required)."""
+    """Update a certificate via JSON body or multipart form (with optional file)."""
     db_certificate = get_object_or_404(db, models.Certificate, certificate_id)
+    content_type = (request.headers.get("content-type") or "").lower()
 
     def should_update(value):
         if value is None:
@@ -384,13 +385,50 @@ async def update_certificate(
             return False
         return True
 
-    update_data = certificate.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        if isinstance(value, str):
-            if should_update(value):
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+        certificate = schemas.CertificateUpdate(**(body or {}))
+        update_data = certificate.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            if isinstance(value, str):
+                if should_update(value):
+                    setattr(db_certificate, key, value)
+            else:
                 setattr(db_certificate, key, value)
-        else:
-            setattr(db_certificate, key, value)
+    else:
+        form = await request.form()
+        title = form.get("title")
+        issuer = form.get("issuer")
+        description = form.get("description")
+        date_issued_str = form.get("date_issued")
+        is_professional_raw = form.get("is_professional")
+        file = form.get("file")
+
+        if file is not None and hasattr(file, "filename") and file.filename and str(file.filename).strip():
+            try:
+                new_url = await FileUploadService.upload_certificate(file)
+                db_certificate.url = new_url
+            except Exception as e:
+                logger.error(f"Failed to upload certificate for ID {certificate_id}: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Failed to upload certificate: {str(e)}")
+
+        if should_update(title):
+            db_certificate.title = title
+        if should_update(issuer):
+            db_certificate.issuer = issuer
+        if should_update(description):
+            db_certificate.description = description
+        if is_professional_raw is not None and str(is_professional_raw) != "":
+            db_certificate.is_professional = str(is_professional_raw).lower() in ("true", "1", "yes", "on")
+        if should_update(date_issued_str):
+            try:
+                db_certificate.date_issued = datetime.strptime(str(date_issued_str), "%Y-%m-%d").date()
+            except ValueError:
+                pass
 
     db.commit()
     db.refresh(db_certificate)

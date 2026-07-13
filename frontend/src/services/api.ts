@@ -55,21 +55,22 @@ apiClient.interceptors.request.use(
       );
     }
 
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      if (typeof config.headers.set === 'function') {
-        config.headers.set('Authorization', `Bearer ${token}`);
-      } else {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-
     // If sending FormData, remove Content-Type to let axios set it with boundary
     if (config.data instanceof FormData) {
       if (typeof config.headers.delete === 'function') {
         config.headers.delete('Content-Type');
       } else {
         delete config.headers['Content-Type'];
+      }
+    }
+
+    // Set Authorization after FormData header tweaks so it is never dropped
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      if (typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     }
 
@@ -393,27 +394,40 @@ export const updateCertificate = async (id: number, formData: FormData): Promise
   const file = formData.get('file');
   const hasFile = file instanceof File && file.size > 0;
 
-  const payload = {
-    title: String(formData.get('title') || ''),
-    issuer: String(formData.get('issuer') || ''),
-    date_issued: formData.get('date_issued') ? String(formData.get('date_issued')) : undefined,
-    description: formData.get('description') ? String(formData.get('description')) : undefined,
-    is_professional: String(formData.get('is_professional')) === 'true',
-  };
+  // Prefer multipart for all updates so auth + form parsing stay consistent with create/upload.
+  // Also works when replacing the certificate file.
+  const uploadData = new FormData();
+  const title = formData.get('title');
+  const issuer = formData.get('issuer');
+  const dateIssued = formData.get('date_issued');
+  const description = formData.get('description');
+  const isProfessional = formData.get('is_professional');
 
-  // Metadata updates use JSON (reliable). File replacement uses multipart.
-  if (!hasFile) {
-    return apiClient.put(`/admin/certificates/${id}`, payload);
+  if (title != null) uploadData.append('title', String(title));
+  if (issuer != null) uploadData.append('issuer', String(issuer));
+  if (dateIssued) uploadData.append('date_issued', String(dateIssued));
+  if (description != null) uploadData.append('description', String(description));
+  if (isProfessional != null) uploadData.append('is_professional', String(isProfessional));
+  if (hasFile) {
+    uploadData.append('file', file as File);
   }
 
-  const uploadData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value !== undefined) {
-      uploadData.append(key, String(value));
+  try {
+    return await apiClient.put(`/admin/certificates/${id}`, uploadData);
+  } catch (err) {
+    // Fallback for backends that only accept JSON metadata updates
+    if (!hasFile) {
+      const payload = {
+        title: title != null ? String(title) : undefined,
+        issuer: issuer != null ? String(issuer) : undefined,
+        date_issued: dateIssued ? String(dateIssued) : undefined,
+        description: description != null ? String(description) : undefined,
+        is_professional: String(isProfessional) === 'true',
+      };
+      return apiClient.put(`/admin/certificates/${id}`, payload);
     }
-  });
-  uploadData.append('file', file as File);
-  return apiClient.put(`/admin/certificates/${id}/upload`, uploadData);
+    throw err;
+  }
 };
 
 export const deleteCertificate = async (id: number): Promise<void> => {

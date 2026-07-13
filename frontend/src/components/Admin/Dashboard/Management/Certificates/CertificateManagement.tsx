@@ -14,6 +14,17 @@ const CertificateManagement = () => {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
+    const requireAuth = () => {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            localStorage.removeItem('adminAuthenticated');
+            showToast('Your admin session expired. Please log in again.', 'error');
+            window.location.assign('/admin/login');
+            return false;
+        }
+        return true;
+    };
+
     const { data: certificates, isLoading } = useQuery({
         queryKey: ['admin-certificates'],
         queryFn: getAdminCertificates,
@@ -108,17 +119,20 @@ const CertificateManagement = () => {
     };
 
     const handleEdit = (cert: Certificate) => {
+        if (!requireAuth()) return;
         setEditingCertificate(cert);
         setIsModalOpen(true);
     };
 
     const handleDelete = (cert: Certificate) => {
+        if (!requireAuth()) return;
         if (window.confirm(`Are you sure you want to delete "${cert.title}"?`)) {
             deleteMutation.mutate(cert.id);
         }
     };
 
     const handleSubmit = async (formData: FormData) => {
+        if (!requireAuth()) return;
         if (editingCertificate) {
             updateMutation.mutate({ id: editingCertificate.id, formData });
         } else {
