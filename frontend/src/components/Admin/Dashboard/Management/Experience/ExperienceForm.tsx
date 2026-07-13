@@ -16,23 +16,30 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ experience, onSubmit, o
         title: experience?.title || '',
         type: experience?.type || 'Full-time',
         location: experience?.location || '',
-        start_date: experience?.start_date || '',
-        end_date: experience?.end_date || '',
+        start_date: experience?.start_date ? String(experience.start_date).slice(0, 10) : '',
+        end_date: experience?.end_date ? String(experience.end_date).slice(0, 10) : '',
         is_current: experience?.is_current || false,
         description: experience?.description || '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
+        const nextValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+            [name]: nextValue,
+            ...(name === 'is_current' && nextValue === true ? { end_date: '' } : {}),
         }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await onSubmit(formData);
+        const payload = {
+            ...formData,
+            start_date: formData.start_date || null,
+            end_date: formData.is_current ? null : (formData.end_date || null),
+        };
+        await onSubmit(payload);
     };
 
     return (

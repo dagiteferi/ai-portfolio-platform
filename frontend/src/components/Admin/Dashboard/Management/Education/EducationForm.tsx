@@ -15,8 +15,8 @@ const EducationForm: React.FC<EducationFormProps> = ({ education, onSubmit, onCa
         institution: education?.institution || '',
         degree: education?.degree || '',
         field_of_study: education?.field_of_study || '',
-        start_date: education?.start_date || '',
-        end_date: education?.end_date || '',
+        start_date: education?.start_date ? String(education.start_date).slice(0, 10) : '',
+        end_date: education?.end_date ? String(education.end_date).slice(0, 10) : '',
         description: education?.description || '',
     });
 
@@ -30,7 +30,12 @@ const EducationForm: React.FC<EducationFormProps> = ({ education, onSubmit, onCa
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await onSubmit(formData);
+        const payload = {
+            ...formData,
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+        };
+        await onSubmit(payload);
     };
 
     return (

@@ -83,6 +83,15 @@ class EducationBase(BaseModel):
     highlights: Optional[str] = None
     courses: Optional[str] = None
 
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def empty_date_to_none(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str) and v.strip() == '':
+            return None
+        return v
+
 class EducationCreate(EducationBase):
     pass
 
@@ -97,6 +106,14 @@ class EducationUpdate(BaseModel):
     highlights: Optional[str] = None
     courses: Optional[str] = None
 
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def empty_date_to_none(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str) and v.strip() == '':
+            return None
+        return v
 class EducationResponse(EducationBase):
     id: int
 
@@ -173,6 +190,15 @@ class WorkExperienceBase(BaseModel):
     achievements: Optional[str] = None
     technologies: Optional[str] = None
 
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def empty_date_to_none(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str) and v.strip() == '':
+            return None
+        return v
+
 class WorkExperienceCreate(WorkExperienceBase):
     pass
 
@@ -188,6 +214,15 @@ class WorkExperienceUpdate(BaseModel):
     location: Optional[str] = None
     achievements: Optional[str] = None
     technologies: Optional[str] = None
+
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def empty_date_to_none(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str) and v.strip() == '':
+            return None
+        return v
 
 class WorkExperienceResponse(WorkExperienceBase):
     id: int
