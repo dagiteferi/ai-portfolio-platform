@@ -30,16 +30,20 @@ def update_conversation_memory(state: Dict) -> Dict:
         if not isinstance(state.get("history"), list):
             state["history"] = []
         state["history"].append({"user": user_input, "assistant": response})
-        state["history"] = state["history"][-5:] # Keep history concise
+        state["history"] = state["history"][-4:]
         logger.info("In-memory conversation history updated.")
 
-        # Log the turn to a persistent file for admin review
+        # Persist off the hot path so the client is not blocked on disk I/O
         log_entry = {
             "timestamp": datetime.utcnow().isoformat(),
             "user_name": user_name,
             "user_input": user_input,
             "ai_response": response
         }
-        _log_chat_history(log_entry)
+        try:
+            import threading
+            threading.Thread(target=_log_chat_history, args=(log_entry,), daemon=True).start()
+        except Exception:
+            _log_chat_history(log_entry)
 
     return state

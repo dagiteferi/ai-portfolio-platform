@@ -1,20 +1,18 @@
 import os
-import logging
 import time
 from dotenv import load_dotenv
 import google.generativeai as genai
-from google.generativeai.types import content_types
 from google.api_core import exceptions as google_exceptions
-from backend.config import LLM_MODEL_NAME, LLM_TEMPERATURE
-import structlog
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+from backend.config import (
+    LLM_MODEL_NAME,
+    LLM_TEMPERATURE,
+    MAX_HISTORY_TURNS,
+    MAX_OUTPUT_TOKENS,
+)
 import structlog
 
 logger = structlog.get_logger(__name__)
 
-# Load environment variables and configure the API key
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
@@ -22,76 +20,93 @@ if not api_key:
     raise ValueError("GOOGLE_API_KEY is not set.")
 genai.configure(api_key=api_key)
 
+
 class GeminiClient:
     """
-    A robust client for interacting with the Google Gemini API, 
-    featuring retry logic and token usage logging.
+    Fast Gemini client: one generate_content call per turn (no count_tokens round-trips).
     """
-    def __init__(self, temperature: float = LLM_TEMPERATURE, retries: int = 3, delay: int = 5):
-        """
-        Initializes the Gemini client.
-        Args:
-            temperature (float): The temperature for the generation config.
-            retries (int): The number of times to retry on failure.
-            delay (int): The delay in seconds between retries.
-        """
+
+    def __init__(
+        self,
+        temperature: float = LLM_TEMPERATURE,
+        retries: int = 2,
+        delay: int = 1,
+    ):
         self.temperature = temperature
         self.retries = retries
         self.delay = delay
-        logger.info(f"Gemini client initialized for model: {LLM_MODEL_NAME}")
+        self._model_cache = {}
+
+    def _get_model(self, system_prompt: str):
+        # Cache by prompt hash so we do not rebuild the model object every time for identical prompts
+        key = (LLM_MODEL_NAME, self.temperature, hash(system_prompt))
+        model = self._model_cache.get(key)
+        if model is None:
+            model = genai.GenerativeModel(
+                model_name=LLM_MODEL_NAME,
+                system_instruction=system_prompt,
+                generation_config=genai.GenerationConfig(
+                    temperature=self.temperature,
+                    max_output_tokens=MAX_OUTPUT_TOKENS,
+                ),
+            )
+            self._model_cache[key] = model
+            # Keep cache small
+            if len(self._model_cache) > 8:
+                self._model_cache.pop(next(iter(self._model_cache)))
+        return model
 
     def generate_response(self, system_prompt: str, history: list, user_input: str) -> str:
-        """
-        Generates a response from the Gemini model with retry logic.
-        Args:
-            system_prompt (str): The system prompt to guide the model.
-            history (list): The conversation history.
-            user_input (str): The user's current input.
-        Returns:
-            str: The generated response text.
-        """
-        # CRITICAL FIX: Initialize the model WITH the system_prompt on every call.
-        # This ensures the AI always has the correct persona and instructions.
-        model = genai.GenerativeModel(
-            model_name=LLM_MODEL_NAME,
-            system_instruction=system_prompt,
-            generation_config=genai.GenerationConfig(temperature=self.temperature)
-        )
+        model = self._get_model(system_prompt)
 
-        # Token Optimization: Only keep the last 10 messages of history
-        max_history = 10
-        if len(history) > max_history:
-            history = history[-max_history:]
+        if len(history) > MAX_HISTORY_TURNS:
+            history = history[-MAX_HISTORY_TURNS:]
 
         formatted_history = []
         for turn in history:
-            formatted_history.append({"role": "user", "parts": [turn["user"]]})
-            formatted_history.append({"role": "model", "parts": [turn["assistant"]]})
+            user_part = (turn.get("user") or "").strip()
+            assistant_part = (turn.get("assistant") or "").strip()
+            if user_part:
+                formatted_history.append({"role": "user", "parts": [user_part]})
+            if assistant_part:
+                formatted_history.append({"role": "model", "parts": [assistant_part]})
 
         messages = formatted_history + [{"role": "user", "parts": [user_input]}]
 
         for attempt in range(self.retries):
             try:
-                # Log token count before making the API call
-                input_token_count = model.count_tokens(messages).total_tokens
-                logger.info(f"Attempt {attempt + 1}/{self.retries} - Input tokens: {input_token_count}")
-
                 response = model.generate_content(contents=messages)
 
                 if response and response.text:
-                    output_token_count = model.count_tokens(response.text).total_tokens
-                    logger.info(f"Successfully generated response from Gemini. Output tokens: {output_token_count}")
+                    usage = getattr(response, "usage_metadata", None)
+                    if usage:
+                        logger.info(
+                            "Gemini response ready",
+                            prompt_tokens=getattr(usage, "prompt_token_count", None),
+                            output_tokens=getattr(usage, "candidates_token_count", None),
+                        )
                     return response.text.strip()
-                else:
-                    logger.warning("Received an empty or invalid response from Gemini.")
-                    return "I'm sorry, I couldn't generate a response at the moment. Please try again later."
 
-            except (google_exceptions.ResourceExhausted, google_exceptions.ServiceUnavailable, google_exceptions.InternalServerError) as e:
-                logger.warning(f"Gemini API error (attempt {attempt + 1}/{self.retries}): {e}. Retrying in {self.delay} seconds...")
+                logger.warning("Received an empty or invalid response from Gemini.")
+                return "I'm sorry, I couldn't generate a response at the moment. Please try again later."
+
+            except (
+                google_exceptions.ResourceExhausted,
+                google_exceptions.ServiceUnavailable,
+                google_exceptions.InternalServerError,
+            ) as e:
+                logger.warning(
+                    f"Gemini API error (attempt {attempt + 1}/{self.retries}): {e}. "
+                    f"Retrying in {self.delay} seconds..."
+                )
                 time.sleep(self.delay)
             except Exception as e:
                 logger.error(f"An unexpected exception occurred in generate_response: {e}", exc_info=True)
                 break
-        
+
         logger.error(f"Failed to generate response after {self.retries} attempts.")
         return "I'm facing a technical issue and can't respond right now. Please try again in a few moments."
+
+
+# Shared client — avoids re-init overhead on every chat turn
+gemini_client = GeminiClient()

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Dict
 from backend.ai_core.components.input_processor import process_user_input
@@ -18,8 +19,9 @@ def infer_user_role(state: Dict) -> Dict:
 async def call_retrieve_rag_context(state: Dict) -> Dict:
     return await retrieve_rag_context(state)
 
-def generate_response(state: Dict) -> Dict:
-    return generate_ai_response(state)
+async def generate_response(state: Dict) -> Dict:
+    # Keep the event loop free while waiting on Gemini
+    return await asyncio.to_thread(generate_ai_response, state)
 
 def update_memory(state: Dict) -> Dict:
     return update_conversation_memory(state)

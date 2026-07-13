@@ -1,9 +1,8 @@
 import re
 import logging
 from typing import Dict
-from backend.ai_core.models.gemini import GeminiClient
+from backend.ai_core.models.gemini import gemini_client
 from backend.ai_core.utils.prompt_templates import get_system_prompt
-from backend.config import LLM_TEMPERATURE
 
 logger = logging.getLogger(__name__)
 
@@ -11,14 +10,12 @@ def format_links(text: str) -> str:
     """
     Finds URLs and email addresses in a string and formats them as Markdown links.
     """
-    # Format URLs that are not already linked
     url_pattern = re.compile(r'(?<!\]\()https?://[\S]+')
     text = url_pattern.sub(r'[\g<0>](\g<0>)', text)
 
-    # Format email addresses that are not already linked
     email_pattern = re.compile(r'(?<!\]\()[\w\.-]+@[\w\.-]+')
     text = email_pattern.sub(r'[\g<0>](mailto:\g<0>)', text)
-    
+
     return text
 
 def generate_ai_response(state: Dict) -> Dict:
@@ -33,25 +30,23 @@ def generate_ai_response(state: Dict) -> Dict:
 
     try:
         role = "recruiter" if is_recruiter else "visitor"
-        
-        # The improved system prompt now handles all cases, so no special logic is needed here.
-        system_prompt = get_system_prompt(role, user_name, retrieved_docs)
-        
-        gemini = GeminiClient(temperature=LLM_TEMPERATURE)
 
-        response_text = gemini.generate_response(system_prompt, history, user_input)
-        
+        system_prompt = get_system_prompt(role, user_name, retrieved_docs)
+        response_text = gemini_client.generate_response(system_prompt, history, user_input)
+
         if "[SEND_CV]" in response_text:
             response_text = response_text.replace("[SEND_CV]", "").strip()
             state["file_url"] = "/assets/Dagmawi Teferi's cv.pdf"
-            logger.info(f"CV request detected via token. Attaching CV url to response.")
+            logger.info("CV request detected via token. Attaching CV url to response.")
 
         state["response"] = format_links(response_text)
-        
         logger.info(f"Generated response for {user_name}: {response_text[:100]}...")
 
     except Exception as e:
         logger.error(f"Error during response generation: {e}", exc_info=True)
-        state["response"] = "I'm sorry, but I encountered an error while trying to generate a response. Could you please try asking again?"
+        state["response"] = (
+            "I'm sorry, but I encountered an error while trying to generate a response. "
+            "Could you please try asking again?"
+        )
 
     return state
