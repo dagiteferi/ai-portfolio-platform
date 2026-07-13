@@ -32,22 +32,21 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
   const certifications = React.useMemo(() => {
     if (!certificatesData || certificatesData.length === 0) return [];
 
-    const mapped = certificatesData.map(cert => ({
+    return certificatesData.map(cert => ({
+      id: cert.id,
       name: cert.title,
       issuer: cert.issuer,
       date: cert.date_issued ? new Date(cert.date_issued).getFullYear().toString() : '',
       image: cert.url || '',
-      skills: cert.description ? cert.description.split(',').map(s => s.trim()) : []
+      skills: cert.description ? cert.description.split(',').map(s => s.trim()).filter(Boolean) : []
     }));
-
-    // Filter duplicates based on name
-    return mapped.filter((item, index, self) =>
-      index === self.findIndex((t) => t.name === item.name)
-    );
   }, [certificatesData]);
 
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
+  const [selectedCertificate, setSelectedCertificate] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -67,8 +66,9 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
     return () => observer.disconnect();
   }, []);
 
-  const handleCertificateClick = (certificateUrl: string) => {
-    setSelectedCertificate(certificateUrl);
+  const handleCertificateClick = (certificateUrl: string, name?: string) => {
+    if (!certificateUrl) return;
+    setSelectedCertificate({ url: certificateUrl, name: name || 'Certificate' });
   };
 
   const closeCertificateModal = () => {
@@ -105,10 +105,14 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {certifications.map((cert, index) => (
               <CertificationCard
-                key={index}
-                {...cert}
+                key={cert.id}
+                name={cert.name}
+                issuer={cert.issuer}
+                date={cert.date}
+                image={cert.image}
+                skills={cert.skills}
                 animationDelay={isVisible ? `${index * 0.05}s` : '0s'}
-                onClick={handleCertificateClick}
+                onClick={(url) => handleCertificateClick(url, cert.name)}
               />
             ))}
           </div>
@@ -119,7 +123,7 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
             <div className="bg-background rounded-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-foreground">Certificate Preview</h3>
+                  <h3 className="text-xl font-bold text-foreground">{selectedCertificate.name}</h3>
                   <button
                     onClick={closeCertificateModal}
                     className="p-2 hover:bg-muted rounded-lg transition-colors duration-300"
@@ -127,8 +131,27 @@ const EducationContent: React.FC<EducationContentProps> = memo(({ educationData,
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-8 text-center border-2 border-dashed border-primary/30">
-                  <img src={selectedCertificate} alt="Certificate Preview" className="w-full h-auto object-contain" loading="lazy" />
+                <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-4 text-center border-2 border-dashed border-primary/30">
+                  {selectedCertificate.url.match(/\.pdf($|\?)/i) ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">This certificate is a PDF.</p>
+                      <a
+                        href={selectedCertificate.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                      >
+                        Open PDF
+                      </a>
+                    </div>
+                  ) : (
+                    <img
+                      src={selectedCertificate.url}
+                      alt={selectedCertificate.name}
+                      className="w-full h-auto object-contain"
+                      loading="lazy"
+                    />
+                  )}
                 </div>
               </div>
             </div>

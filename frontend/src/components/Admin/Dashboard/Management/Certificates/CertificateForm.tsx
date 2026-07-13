@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Certificate } from '../../../../../services/api';
 import { Button } from '../../../Button';
 import { Input } from '../../../Input';
@@ -6,22 +6,41 @@ import { FileText, Upload, X } from 'lucide-react';
 
 interface CertificateFormProps {
     certificate?: Certificate;
-    onSubmit: (formData: FormData) => Promise<void>;
+    onSubmit: (formData: FormData) => Promise<void> | void;
     onCancel: () => void;
     isSubmitting: boolean;
 }
+
+const toDateInputValue = (value?: string) => {
+    if (!value) return '';
+    // API may return YYYY-MM-DD or full ISO datetime
+    return value.slice(0, 10);
+};
 
 const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit, onCancel, isSubmitting }) => {
     const [formData, setFormData] = useState({
         title: certificate?.title || '',
         issuer: certificate?.issuer || '',
-        date_issued: certificate?.date_issued || '',
+        date_issued: toDateInputValue(certificate?.date_issued),
         description: certificate?.description || '',
         is_professional: certificate?.is_professional || false,
-        url: certificate?.url || '',
     });
     const [file, setFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
+    const [existingUrl, setExistingUrl] = useState<string | null>(certificate?.url || null);
+
+    useEffect(() => {
+        setFormData({
+            title: certificate?.title || '',
+            issuer: certificate?.issuer || '',
+            date_issued: toDateInputValue(certificate?.date_issued),
+            description: certificate?.description || '',
+            is_professional: certificate?.is_professional || false,
+        });
+        setFile(null);
+        setFileName(null);
+        setExistingUrl(certificate?.url || null);
+    }, [certificate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -39,17 +58,36 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
         }
     };
 
+    const clearFile = () => {
+        setFile(null);
+        setFileName(null);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!certificate && !file) {
+            return;
+        }
+
         const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            data.append(key, String(value));
-        });
+        data.append('title', formData.title);
+        data.append('issuer', formData.issuer);
+        if (formData.date_issued) {
+            data.append('date_issued', formData.date_issued);
+        }
+        if (formData.description) {
+            data.append('description', formData.description);
+        }
+        data.append('is_professional', String(formData.is_professional));
         if (file) {
             data.append('file', file);
         }
         await onSubmit(data);
     };
+
+    const isImageUrl = existingUrl?.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+    const showExistingPreview = !file && !!existingUrl;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,7 +142,14 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
             </div>
 
             <div>
-                <label className="text-sm font-medium mb-1.5 block">Certificate File / PDF</label>
+                <label className="text-sm font-medium mb-1.5 block">
+                    Certificate File / PDF
+                    {certificate ? (
+                        <span className="text-muted-foreground font-normal"> (optional — leave empty to keep current)</span>
+                    ) : (
+                        <span className="text-destructive font-normal"> *</span>
+                    )}
+                </label>
                 <div className="relative group rounded-xl border-2 border-dashed border-muted-foreground/25 p-6 flex flex-col items-center justify-center hover:border-primary/50 transition-colors bg-muted/5 overflow-hidden">
                     {file && file.type.startsWith('image/') ? (
                         <div className="relative w-full aspect-video">
@@ -115,18 +160,18 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
                             />
                             <button
                                 type="button"
-                                onClick={() => { setFile(null); setFileName(null); }}
+                                onClick={clearFile}
                                 className="absolute top-2 right-2 bg-black/50 p-1.5 rounded-full hover:bg-black/70 transition-colors text-white"
                             >
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
-                    ) : (fileName || (formData.url && formData.url.match(/\.(jpeg|jpg|gif|png|webp)$/i))) ? (
+                    ) : (fileName || showExistingPreview) ? (
                         <div className="flex flex-col items-center gap-3 w-full">
-                            {formData.url && formData.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) && !file && (
+                            {isImageUrl && (
                                 <div className="relative w-full aspect-video mb-2">
                                     <img
-                                        src={formData.url}
+                                        src={existingUrl!}
                                         alt="Current Certificate"
                                         className="w-full h-full object-contain rounded-lg"
                                     />
@@ -137,37 +182,47 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
                                     <FileText className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{fileName || 'Current Certificate File'}</p>
-                                    <p className="text-xs text-muted-foreground">Click to change file</p>
+                                    <p className="text-sm font-medium truncate">
+                                        {fileName || 'Current certificate file'}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {certificate ? 'Click to replace file' : 'Click to change file'}
+                                    </p>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => { setFile(null); setFileName(null); }}
-                                    className="p-1 hover:bg-muted rounded-full transition-colors"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
+                                {fileName && (
+                                    <button
+                                        type="button"
+                                        onClick={clearFile}
+                                        className="p-1 hover:bg-muted rounded-full transition-colors"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
-                            <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,image/*" />
+                            <input
+                                type="file"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={handleFileChange}
+                                accept=".pdf,image/*"
+                            />
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                             <Upload className="h-8 w-8 stroke-1" />
                             <span className="text-xs font-medium">Upload PDF or Image</span>
-                            <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,image/*" />
+                            <input
+                                type="file"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={handleFileChange}
+                                accept=".pdf,image/*"
+                                required={!certificate}
+                            />
                         </div>
                     )}
                 </div>
-            </div>
-
-            <div>
-                <label className="text-sm font-medium mb-1.5 block">Verification URL (Optional)</label>
-                <Input
-                    name="url"
-                    value={formData.url}
-                    onChange={handleChange}
-                    placeholder="https://aws.amazon.com/verification/..."
-                />
+                {!certificate && !file && (
+                    <p className="text-xs text-muted-foreground mt-1.5">A certificate file is required when creating.</p>
+                )}
             </div>
 
             <div>
@@ -186,7 +241,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ certificate, onSubmit
                 <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
                     Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || (!certificate && !file)}>
                     {isSubmitting ? 'Saving...' : (certificate ? 'Update Certificate' : 'Create Certificate')}
                 </Button>
             </div>

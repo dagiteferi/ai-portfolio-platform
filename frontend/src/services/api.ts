@@ -173,7 +173,22 @@ apiClient.interceptors.response.use(
       }
     }
     if (error.response) {
-      return Promise.reject(new Error(error.response.data.detail || 'An unexpected API error occurred.'));
+      const detail = error.response.data?.detail;
+      const message =
+        typeof detail === 'string'
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(', ') || 'An unexpected API error occurred.'
+            : 'An unexpected API error occurred.';
+
+      if (error.response.status === 401 && typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        if (path.startsWith('/admin') && !path.includes('/login')) {
+          localStorage.removeItem('adminToken');
+        }
+      }
+
+      return Promise.reject(new Error(message));
     }
     else if (error.request) {
       return Promise.reject(new Error('Network error: Please check your connection.'));

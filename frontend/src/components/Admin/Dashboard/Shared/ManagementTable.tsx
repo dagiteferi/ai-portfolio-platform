@@ -4,7 +4,7 @@ import { Card, CardContent } from '../../Card';
 import { Input } from '../../Input';
 import { ScrollArea } from '../../ScrollArea';
 import { Skeleton } from '../../Skeleton';
-import { Plus, Search, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
 interface Column<T> {
@@ -119,11 +119,12 @@ const ManagementTable = <T extends { id: string | number }>({
                                                 </td>
                                             ))}
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex justify-end gap-2">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => onEdit(item)}
+                                                        title="Edit"
                                                         className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
                                                     >
                                                         <Edit2 className="h-4 w-4" />
@@ -132,13 +133,11 @@ const ManagementTable = <T extends { id: string | number }>({
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => onDelete(item)}
+                                                        title="Delete"
                                                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
-                                                </div>
-                                                <div className="group-hover:hidden">
-                                                    <MoreVertical className="h-4 w-4 text-muted-foreground ml-auto" />
                                                 </div>
                                             </td>
                                         </tr>

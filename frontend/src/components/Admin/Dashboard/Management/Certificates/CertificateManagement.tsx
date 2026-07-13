@@ -20,41 +20,51 @@ const CertificateManagement = () => {
         staleTime: 1000 * 60 * 5,
     });
 
+    const syncPublicCertificates = (updater: (old: Certificate[] | undefined) => Certificate[]) => {
+        queryClient.setQueryData(['certificates'], updater);
+        queryClient.invalidateQueries({ queryKey: ['certificates'] });
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingCertificate(undefined);
+    };
+
     const createMutation = useMutation({
-        mutationFn: (formData: FormData) => {
-            return createCertificate(formData);
-        },
+        mutationFn: (formData: FormData) => createCertificate(formData),
         onSuccess: (newCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
                 return old ? [newCert, ...old] : [newCert];
             });
-            // Invalidate public certificates cache to refresh main frontend
-            queryClient.invalidateQueries({ queryKey: ['certificates'] });
-            showToast("Certificate created successfully", "success");
-            setIsModalOpen(false);
+            syncPublicCertificates((old) => (old ? [newCert, ...old] : [newCert]));
+            showToast('Certificate created successfully', 'success');
+            closeModal();
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to create certificate", "error");
-        }
+        onError: (error: Error) => {
+            showToast(error.message || 'Failed to create certificate', 'error');
+        },
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number, formData: FormData }) => {
-            return updateCertificate(id, formData);
-        },
+        mutationFn: ({ id, formData }: { id: number; formData: FormData }) =>
+            updateCertificate(id, formData),
         onSuccess: (updatedCert) => {
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
-                return old ? old.map(c => c.id === updatedCert.id ? updatedCert : c) : [updatedCert];
+                return old
+                    ? old.map((c) => (c.id === updatedCert.id ? updatedCert : c))
+                    : [updatedCert];
             });
-            // Invalidate public certificates cache to refresh main frontend
-            queryClient.invalidateQueries({ queryKey: ['certificates'] });
-            showToast("Certificate updated successfully", "success");
-            setIsModalOpen(false);
-            setEditingCertificate(undefined);
+            syncPublicCertificates((old) =>
+                old
+                    ? old.map((c) => (c.id === updatedCert.id ? updatedCert : c))
+                    : [updatedCert]
+            );
+            showToast('Certificate updated successfully', 'success');
+            closeModal();
         },
-        onError: (error: any) => {
-            showToast(error.message || "Failed to update certificate", "error");
-        }
+        onError: (error: Error) => {
+            showToast(error.message || 'Failed to update certificate', 'error');
+        },
     });
 
     const deleteMutation = useMutation({
@@ -63,24 +73,23 @@ const CertificateManagement = () => {
             await queryClient.cancelQueries({ queryKey: ['admin-certificates'] });
             const previousCerts = queryClient.getQueryData(['admin-certificates']);
             queryClient.setQueryData(['admin-certificates'], (old: Certificate[] | undefined) => {
-                return old ? old.filter(c => c.id !== certId) : [];
+                return old ? old.filter((c) => c.id !== certId) : [];
             });
             return { previousCerts };
         },
-        onError: (err, certId, context) => {
+        onError: (_err, _certId, context) => {
             if (context?.previousCerts) {
                 queryClient.setQueryData(['admin-certificates'], context.previousCerts);
             }
-            showToast("Failed to delete certificate", "error");
+            showToast('Failed to delete certificate', 'error');
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-certificates'] });
         },
-        onSuccess: () => {
-            // Invalidate public certificates cache to refresh main frontend
-            queryClient.invalidateQueries({ queryKey: ['certificates'] });
-            showToast("Certificate deleted successfully", "success");
-        }
+        onSuccess: (_data, certId) => {
+            syncPublicCertificates((old) => (old ? old.filter((c) => c.id !== certId) : []));
+            showToast('Certificate deleted successfully', 'success');
+        },
     });
 
     const handleAdd = () => {
@@ -93,7 +102,7 @@ const CertificateManagement = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (cert: Certificate) => {
+    const handleDelete = (cert: Certificate) => {
         if (window.confirm(`Are you sure you want to delete "${cert.title}"?`)) {
             deleteMutation.mutate(cert.id);
         }
@@ -120,47 +129,62 @@ const CertificateManagement = () => {
                         <p className="text-[11px] text-muted-foreground">{item.issuer}</p>
                     </div>
                 </div>
-            )
+            ),
         },
         {
             header: 'Type',
-            accessor: (item: Certificate) => (
+            accessor: (item: Certificate) =>
                 item.is_professional ? (
-                    <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 text-[10px] px-2 py-0 h-5">Professional</Badge>
+                    <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 text-[10px] px-2 py-0 h-5">
+                        Professional
+                    </Badge>
                 ) : (
-                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">Course</Badge>
-                )
-            )
+                    <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">
+                        Course
+                    </Badge>
+                ),
         },
         {
             header: 'Issued',
             accessor: (item: Certificate) => (
-                <span className="text-xs text-muted-foreground">{item.date_issued}</span>
-            )
+                <span className="text-xs text-muted-foreground">
+                    {item.date_issued ? item.date_issued.slice(0, 10) : '—'}
+                </span>
+            ),
         },
         {
             header: 'Preview',
             accessor: (item: Certificate) => {
-                if (!item.url) return null;
+                if (!item.url) return <span className="text-xs text-muted-foreground">—</span>;
 
                 const isImage = item.url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
 
                 if (isImage) {
                     return (
-                        <a href={item.url} target="_blank" rel="noreferrer" className="block h-8 w-12 rounded overflow-hidden border hover:opacity-80 transition-opacity">
+                        <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block h-8 w-12 rounded overflow-hidden border hover:opacity-80 transition-opacity"
+                        >
                             <img src={item.url} alt={item.title} className="h-full w-full object-cover" />
                         </a>
                     );
                 }
 
                 return (
-                    <a href={item.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline">
+                    <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
                         <ExternalLink className="h-3.5 w-3.5" />
                         View
                     </a>
                 );
-            }
-        }
+            },
+        },
     ];
 
     return (
@@ -177,13 +201,14 @@ const CertificateManagement = () => {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 title={editingCertificate ? 'Edit Certificate' : 'Add New Certificate'}
             >
                 <CertificateForm
+                    key={editingCertificate?.id ?? 'new-certificate'}
                     certificate={editingCertificate}
                     onSubmit={handleSubmit}
-                    onCancel={() => setIsModalOpen(false)}
+                    onCancel={closeModal}
                     isSubmitting={createMutation.isPending || updateMutation.isPending}
                 />
             </Modal>
