@@ -80,3 +80,11 @@ class Project(Base):
     github_url = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
     is_featured = Column(Boolean, default=False)
+
+class KnowledgeRevision(Base):
+    """Monotonic version bumped whenever portfolio content changes, so all workers can refresh RAG."""
+    __tablename__ = "knowledge_revisions"
+
+    id = Column(Integer, primary_key=True)  # always row id=1
+    version = Column(Integer, nullable=False, default=1)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

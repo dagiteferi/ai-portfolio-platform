@@ -64,6 +64,10 @@ def get_metadata_filter(query: str) -> Optional[Dict]:
         return {"type": "skills"}
     if "experience" in query_lower or "job" in query_lower or "work" in query_lower or "role" in query_lower:
         return {"type": "experience"}
+    if "certificate" in query_lower or "certification" in query_lower or "certified" in query_lower:
+        return {"type": "certificate"}
+    if "moment" in query_lower or "gallery" in query_lower or "memorable" in query_lower:
+        return {"type": "moment"}
     if "friend" in query_lower or "best friend" in query_lower or "friends" in query_lower or "relationship" in query_lower:
         return {"type": "friend"}
     if "education" in query_lower or "degree" in query_lower or "university" in query_lower:

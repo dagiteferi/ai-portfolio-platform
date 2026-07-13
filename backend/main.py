@@ -10,6 +10,8 @@ from slowapi.errors import RateLimitExceeded
 
 from backend.config import API_PORT
 from backend.vector_db.faiss_manager import faiss_manager
+from backend.services import knowledge_refresh  # noqa: F401 — register CDC listeners
+from backend.services.knowledge_refresh import start_change_listener
 from backend.ai_core.agent.graph import create_chatbot_graph
 from backend.api.endpoints.chat import router as chat_router
 from backend.api.endpoints.admin import router as admin_router
@@ -93,7 +95,9 @@ app.add_middleware(
 def startup_event():
     try:
         faiss_manager.update_vector_store()
-        logger.info("FAISS vector store updated at startup.")
+        logger.info("FAISS vector store built at startup from DB + static sources.")
+        start_change_listener()
+        logger.info("Knowledge change listener started (LISTEN knowledge_changed).")
         app.state.profile = faiss_manager.profile_data
         logger.info("Profile data loaded at startup.")
         app.state.graph = create_chatbot_graph()
