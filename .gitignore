@@ -75,5 +75,5 @@ coverage/
 # User-specific/temp
 description.md
 run backend.txt
-/assets/
+assets/
 .pytest_cache
