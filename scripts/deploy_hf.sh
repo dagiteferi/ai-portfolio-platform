@@ -19,7 +19,7 @@ if [[ -z "${HF_TOKEN:-}" ]]; then
 fi
 
 HF_SPACE="dagiteferi2011/AI_Portfolio_Platform"
-HF_URL="https://dagiteferi2011:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}"
+HF_URL="https://__token__:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}"
 WORK="${HF_DEPLOY_WORKDIR:-/tmp/hf-space-deploy}"
 HF_BRANCH="${HF_BRANCH:-main}"
 SHORT_SHA="$(git rev-parse --short HEAD)"
