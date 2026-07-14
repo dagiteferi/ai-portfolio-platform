@@ -47,9 +47,9 @@ RUN mkdir -p /app/logs
 RUN chown -R appuser:appuser /app
 USER appuser
 
-# Expose the port the FastAPI application will run on
+# Default local/docker port; HF Spaces override via PORT=7860
+ENV PORT=8001
 EXPOSE 8001
 
 # Command to run the FastAPI application using Gunicorn with Uvicorn workers
-# We specify the module path for gunicorn, and run from /app
 CMD ["gunicorn", "-c", "/app/gunicorn_config.py", "backend.main:app"]

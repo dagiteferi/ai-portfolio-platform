@@ -1,16 +1,20 @@
 import os
 
-workers = int(os.environ.get('GUNICORN_PROCESSES', '2'))
-threads = int(os.environ.get('GUNICORN_THREADS', '4'))
-bind = os.environ.get('GUNICORN_BIND', '0.0.0.0:8001')
-workers = 4
-worker_class = 'uvicorn.workers.UvicornWorker'
-timeout = 120
+# Hugging Face Spaces expect the app on $PORT (usually 7860).
+port = os.environ.get("PORT") or os.environ.get("GUNICORN_PORT") or "7860"
+bind = os.environ.get("GUNICORN_BIND", f"0.0.0.0:{port}")
+
+# One worker avoids 4x embedding/FAISS cold starts on CPU Spaces.
+workers = int(os.environ.get("GUNICORN_PROCESSES", "1"))
+threads = int(os.environ.get("GUNICORN_THREADS", "4"))
+worker_class = "uvicorn.workers.UvicornWorker"
+
+# Embedding + first chat can be slow on CPU.
+timeout = int(os.environ.get("GUNICORN_TIMEOUT", "180"))
 keepalive = 5
+graceful_timeout = 30
 
-# Set a cache directory for pip to speed up dependency resolution
-# This will store downloaded packages and reuse them on subsequent runs
-# You can change this path if you prefer a different location
-import os
-os.environ["PIP_CACHE_DIR"] = "/tmp/pip_cache"
-
+os.environ.setdefault("PIP_CACHE_DIR", "/tmp/pip_cache")
+os.environ.setdefault("HF_HOME", "/tmp/.cache/huggingface")
+os.environ.setdefault("TRANSFORMERS_CACHE", "/tmp/.cache/huggingface")
+os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", "/tmp/.cache/sentence_transformers")

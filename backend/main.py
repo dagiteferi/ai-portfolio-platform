@@ -91,17 +91,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def _warm_rag_in_background():
+    """Build FAISS off the critical path so the HTTP server can bind quickly on HF Spaces."""
+    import threading
+
+    def _run():
+        try:
+            faiss_manager.update_vector_store()
+            app.state.profile = getattr(faiss_manager, "profile_data", {}) or {}
+            logger.info("FAISS vector store built in background from DB + static sources.")
+            try:
+                start_change_listener()
+                logger.info("Knowledge change listener started (LISTEN knowledge_changed).")
+            except Exception as listen_err:
+                logger.warning("Knowledge listener failed to start", error=str(listen_err))
+        except Exception as e:
+            logger.error("Background RAG warm-up failed", error=str(e))
+
+    threading.Thread(target=_run, daemon=True, name="rag-warmup").start()
+
+
 @app.on_event("startup")
 def startup_event():
     try:
-        faiss_manager.update_vector_store()
-        logger.info("FAISS vector store built at startup from DB + static sources.")
-        start_change_listener()
-        logger.info("Knowledge change listener started (LISTEN knowledge_changed).")
-        app.state.profile = faiss_manager.profile_data
-        logger.info("Profile data loaded at startup.")
+        # Build the chatbot graph first so /api/chat can accept traffic ASAP.
         app.state.graph = create_chatbot_graph()
+        app.state.profile = {}
         logger.info("Chatbot graph created and cached at startup.")
+        _warm_rag_in_background()
+        logger.info("RAG warm-up started in background.")
     except Exception as e:
         logger.error("Failed to complete startup tasks", error=str(e))
 

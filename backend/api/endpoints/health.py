@@ -9,37 +9,41 @@ router = APIRouter(tags=["Health"])
 
 
 @router.get("/health")
-async def health_check(db: Session = Depends(get_db)):
+async def health_check():
     """
-    Health check endpoint.
-    
-    Checks:
-    - API is running
-    - Database connection is active
-    
-    Returns:
-        dict: Health status information
+    Lightweight liveness check for Hugging Face / load balancers.
+    Does not wait on DB so the container can become healthy quickly.
+    """
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "api": "running",
+    }
+
+
+@router.get("/health/ready")
+async def readiness_check(db: Session = Depends(get_db)):
+    """
+    Readiness check: API + database connectivity.
     """
     try:
-        # Check database connection
         db.execute(text("SELECT 1"))
-        
         return {
-            "status": "healthy",
+            "status": "ready",
             "timestamp": datetime.utcnow().isoformat(),
             "database": "connected",
-            "api": "running"
+            "api": "running",
         }
     except Exception as e:
         raise HTTPException(
             status_code=503,
             detail={
-                "status": "unhealthy",
+                "status": "not_ready",
                 "timestamp": datetime.utcnow().isoformat(),
                 "database": "disconnected",
                 "api": "running",
-                "error": str(e)
-            }
+                "error": str(e),
+            },
         )
 
 
@@ -47,18 +51,15 @@ async def health_check(db: Session = Depends(get_db)):
 async def database_health(db: Session = Depends(get_db)):
     """
     Detailed database health check.
-    
-    Returns:
-        dict: Database connection status
     """
     try:
         result = db.execute(text("SELECT version()"))
         version = result.scalar()
-        
+
         return {
             "status": "connected",
             "database_version": version,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         raise HTTPException(
@@ -66,6 +67,6 @@ async def database_health(db: Session = Depends(get_db)):
             detail={
                 "status": "disconnected",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
